@@ -1,9 +1,9 @@
-from demo.allocation.allocation import Allocation
-from demo.data.parse_data import parse_data
-from demo.pricing.ip import IP
-from demo.data.market_data import MarketData
-from demo.pricing.price_analysis import PriceAnalysis
-from demo.allocation.dcopf import compute_primal_solution
+from code_snippets.demo.allocation.allocation import Allocation
+from code_snippets.demo.data.parse_data import parse_data
+from code_snippets.demo.pricing.ip import IP
+from code_snippets.demo.data.market_data import MarketData
+from code_snippets.demo.pricing.price_analysis import PriceAnalysis
+from code_snippets.demo.allocation.dcopf import compute_primal_solution
 
 
 def analyze_prices(algorithm, algorithm_name, alloc, data):

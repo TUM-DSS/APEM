@@ -1,9 +1,9 @@
 import gurobipy as gp
 from gurobipy import GRB
 
-from demo.pricing.pricing_algorithm import PricingAlgorithm, PricingSuccess, PricingError
-from demo.data.extraction import *
-from demo.pricing.write_prices import write_prices
+from code_snippets.demo.pricing.pricing_algorithm import PricingAlgorithm, PricingSuccess, PricingError
+from code_snippets.demo.data.extraction import *
+from code_snippets.demo.pricing.write_prices import write_prices
 
 
 class IP(PricingAlgorithm):

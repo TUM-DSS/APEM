@@ -1,4 +1,4 @@
-from demo.data.parse_ieee_rts import parse_ieee_rts_data
+from code_snippets.demo.data.parse_ieee_rts import parse_ieee_rts_data
 
 
 def parse_data(dataset):

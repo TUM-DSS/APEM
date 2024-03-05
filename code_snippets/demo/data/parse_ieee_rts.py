@@ -3,7 +3,7 @@ import csv
 import networkx as nx
 from collections import defaultdict
 
-path = '../data/ieee_rts/'
+path = 'ieee_rts/'
 
 
 def def_value_list():
