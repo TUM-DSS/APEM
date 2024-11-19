@@ -253,7 +253,7 @@ def read_arpa_branches(path) -> nx.Graph:
 
 class ParseARPA(ParseData):
 
-    def parse_data(self) -> Scenario:
+    def parse_data(self, day=None) -> Scenario:
 
         df_sellers = read_arpa_sellers(path)
         df_buyers = read_arpa_buyers(path)
