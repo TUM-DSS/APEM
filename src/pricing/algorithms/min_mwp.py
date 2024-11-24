@@ -1,4 +1,6 @@
 import time
+from typing import Optional, Union
+
 import gurobipy as gp
 from gurobipy import GRB
 
@@ -15,7 +17,8 @@ class MinMWP(PricingAlgorithm):
     """Implementation of Minimum Make-Whole Payments Pricing.
     """
 
-    def compute_prices(self, allocation: Allocation, scenario: Scenario, file_prices=None, fixed_prices=None):
+    def compute_prices(self, allocation: Allocation, scenario: Scenario, file_prices: Optional[str] = None,
+                       fixed_prices: Optional[Pricing] = None) -> Union[Pricing, Error]:
         """
         Formulates and solves a Min-MWP problem similar to the one from https://arxiv.org/pdf/2209.07386.pdf
         (Appendix E). The method can also be used to compute the MWPs for an allocation-prices pair.
@@ -162,7 +165,7 @@ class MinMWP(PricingAlgorithm):
 
         status = model.getAttr('Status')
 
-        if status == 2:  # OPTIMAL
+        if status == GRB.OPTIMAL:
             total_mwps = round(model.getObjective().getValue(), 2)
             mwps_buyers = round(sum(lambda_b[b].X for b in buyers), 2)
             mwps_sellers = round(sum(lambda_s[s].X for s in sellers), 2)
