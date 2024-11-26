@@ -1,8 +1,10 @@
 import networkx as nx
 import pypsa
-from typing import Optional
+from typing import Optional, Union, Tuple
 
+from src.allocation.allocation import Allocation
 from src.allocation.configuration import Configuration
+from src.allocation.error import Error
 from src.allocation.power_flow_model import PowerFlowModel
 from src.allocation.zonal_configuration import *
 from src.allocation.algorithms.dcopf import DCOPF
@@ -10,7 +12,8 @@ from src.data.parsing.scenario import Scenario
 
 
 class Zonal_NTC(PowerFlowModel):
-    """Implementation of the Zonal NTC model. A zonal NTC model includes a simple graph with at most one line
+    """
+    Implementation of the Zonal NTC model. A zonal NTC model includes a simple graph with at most one line
     between any two nodes, where the nodes represent the zones. Works only with PyPSA data.
     """
 
@@ -18,8 +21,10 @@ class Zonal_NTC(PowerFlowModel):
         self.zonal_configuration = zonal_configuration
         self.factor = factor
 
-    def create_zonal_configuration_NTC(self, base_scenario, network, name):
-        # construct a zonal configuration based on a nodal base scenario
+    def create_zonal_scenario_NTC(self, base_scenario: Scenario, network: nx.Graph, name: str) -> Scenario:
+        """
+        Construct a zonal scenario based on a nodal base scenario.
+        """
         df_sellers = base_scenario.df_sellers
         df_buyers = base_scenario.df_buyers
 
@@ -73,13 +78,13 @@ class Zonal_NTC(PowerFlowModel):
                         base_scenario.periods, base_scenario.blocks_buyers, base_scenario.blocks_sellers, r_star)
 
     def solve(self, scenario: Scenario, configuration: Configuration, output_file: Optional[str] = None,
-              u_fixed: Optional[dict] = None):
+              u_fixed: Optional[dict] = None) -> Tuple[Scenario, Union[Allocation, Error]]:
         # load the network
         n = pypsa.Network("src/data/raw_data/pypsa_eur_small/elec_s_40_ec_lv1.5_.nc")
         if scenario.name == 'PyPSA_Eur_Large':
             n = pypsa.Network("src/data/raw_data/pypsa_eur_large/elec_s_334m_ec_lv1.5_.nc")
 
-        zonal_scenario = self.create_zonal_configuration_NTC(base_scenario=scenario, network=n, name=scenario.name)
+        zonal_scenario = self.create_zonal_scenario_NTC(base_scenario=scenario, network=n, name=scenario.name)
 
         dcopf = DCOPF()
         return zonal_scenario, dcopf.solve(zonal_scenario, configuration, output_file)
