@@ -1,4 +1,6 @@
 from collections import defaultdict
+from typing import Tuple
+
 import pandas as pd
 
 from src.data.parsing.scenario import Scenario
@@ -57,18 +59,77 @@ class DataConversion:
                 buyer_info = info[info['buyer'] == b]
 
                 order = {'id': str(b) + str(count),
-                         't': buyer_info['period'].values[0] if not buyer_info.empty else None,
-                         'p': buyer_info[f'val{i}'].values[0] if not buyer_info.empty else None,
-                         'q': buyer_info[f'size{i}'].values[0] if not buyer_info.empty else None
+                         't': buyer_info['period'].values[0],
+                         'p': buyer_info[f'val{i}'].values[0],
+                         'q': buyer_info[f'size{i}'].values[0]
                          }
                 data.append(order)
                 count += 1
 
-        df = pd.DataFrame(data)
-        return df
+        df_step_orders = pd.DataFrame(data)
+        return df_step_orders
 
-    def compute_sellers_bids(self):
-        pass
+    def generate_no_min_uptime_bids(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        """
+        Generate scalable complex orders and associated sub-orders to encode the bids of the sellers that fulfill
+        the following criteria:
+            - minimum uptime = 0
+            - minimum production level >= 0
+            - no-load cost = 0
+        Assume cost1 is the smallest marginal cost.
+        """
+        sellers = self.df_sellers[self.df_sellers['min_uptime'].isin([0, 1])]['seller'].unique().tolist()
+        scalable_orders, scalable_step_orders, step_orders = [], [], []
+        for s in sellers:
+            suborders_ids = []
+            scalable_id = str(s) + 'X' + 'MAR'
+            seller_info = self.df_sellers[self.df_sellers['seller'] == s]
+
+            for t in self.periods:
+                id_step_min = str(s) + 'X' + f'{t}'
+                scalable_step_order_min = {'id': id_step_min,
+                                           'scalable_order_id': scalable_id,
+                                           't': t,
+                                           'p': seller_info['cost1'].values[0],
+                                           'q': seller_info['min_prod'].values[0]
+                                           }
+                suborders_ids.append(id_step_min)
+                scalable_step_orders.append(scalable_step_order_min)
+
+                for block in self.blocks_sellers:
+                    id_step_block = str(s) + 'X' + f'{t}' + 'X' + f'{block}'
+                    q = seller_info[f'size{block}'].values[0]
+
+                    if block == 1:
+                        q = seller_info[f'size{block}'].values[0] - seller_info['min_prod'].values[0]
+
+                    if q == 0:
+                        continue
+
+                    scalable_step_order_block = {'id': id_step_block,
+                                                 'scalable_order_id': str(s) + 'X' + 'MAR',
+                                                 't': t,
+                                                 'p': seller_info[f'cost{block}'].values[0],
+                                                 'q': q
+                                                 }
+
+                    suborders_ids.append(id_step_block)
+                    scalable_step_orders.append(scalable_step_order_block)
+
+            scalable_order = {'id': scalable_id,
+                              'step_orders': suborders_ids,
+                              'fixed_term': 0,
+                              'condition': pd.NA,
+                              'load_gradient': pd.NA,
+                              **{f'MAR{t}': seller_info['min_prod'].values[0] if not seller_info.empty else pd.NA
+                                 for t in self.periods}
+                              }
+            scalable_orders.append(scalable_order)
+
+        df_scalable_orders = pd.DataFrame(scalable_orders)
+        df_scalable_step_orders = pd.DataFrame(scalable_step_orders)
+
+        return df_scalable_orders, df_scalable_step_orders
 
     def set_block_bids(self) -> None:
         pass
