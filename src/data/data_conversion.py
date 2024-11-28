@@ -131,6 +131,53 @@ class DataConversion:
 
         return df_scalable_orders, df_scalable_step_orders
 
+    def generate_min_uptime_bids(self):
+        """
+        Generate TODO to encode the bids of the sellers that fulfill
+        the following criteria:
+            - minimum uptime = 0
+            - minimum production level >= 0
+            - no-load cost = 0
+        Assume cost1 is the smallest marginal cost.
+        """
+        sellers = self.df_sellers['seller'].unique().tolist()
+        bids = []
+        for s in sellers:
+            min_uptime = self.df_sellers[self.df_sellers['seller'] == s]['min_uptime'].values[0]
+            min_cost = self.df_sellers[self.df_sellers['seller'] == s]['cost1'].values[0]
+            min_prod = self.df_sellers[self.df_sellers['seller'] == s]['min_prod'].values[0]
+
+            exclusive_id = str(s)
+            # create block bids
+            # for all possible consecutive periods in which the seller is active
+            for i in range(min_uptime, len(self.periods) + 1):
+                # j denotes the first period in which the seller is active and is the first one in the block bid
+                # that has a positive volume; there are i consecutive positive volumes in this block bid
+                for j in range(1, len(self.periods) - i + 2):
+                    bid_j = {'id': str(s) + 'X' + str(j),
+                             'block_type': 'exclusive',
+                             'code_prm': pd.NA,
+                             'p': min_cost,
+                             **{f'q{k}': min_prod if j <= k <= j + i - 1 else 0 for k in self.periods},
+                             'MAR': 1}
+                    bids.append(bid_j)
+
+                    for t in range(j, self.periods - i + 2):
+                        bids_t = self.df_sellers[(self.df_sellers['seller'] == s) & (self.df_sellers['period'] == t)]
+                        if len(bids_t) == 0:
+                            continue
+
+                        # get all bids for this period
+
+                        bid = {'id': str(s) + str(i) + 'X' + str(j) + 'X' + str(t),
+                               'block_type': 'exclusive',
+                               'code_prm': exclusive_id,
+                               'p': min_cost,
+                               **{f'q{k}': 'todo' if k == t else 0 for k in self.periods},
+                               'MAR': 0}
+                        bids.append(bid)
+                        # create child block bid
+
     def set_block_bids(self) -> None:
         pass
 
