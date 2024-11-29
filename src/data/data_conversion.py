@@ -75,18 +75,19 @@ class DataConversion:
         Generate scalable complex orders and associated sub-orders to encode the bids of the sellers that fulfill
         the following criteria:
             - minimum uptime = 0
-            - minimum production level >= 0
+            - minimum production level > 0
             - no-load cost = 0
-        Assume cost1 is the smallest marginal cost.
+        Assume cost1 is the smallest marginal cost. TODO revise
         """
-        sellers = self.df_sellers[self.df_sellers['min_uptime'].isin([0, 1])]['seller'].unique().tolist()
+        sellers = self.df_sellers[(self.df_sellers['min_uptime'].isin([0, 1])) & (self.df_sellers['min_prod'] > 0)][
+            'seller'].unique().tolist()
         scalable_orders, scalable_step_orders, step_orders = [], [], []
         for s in sellers:
             suborders_ids = []
             scalable_id = str(s) + 'X' + 'MAR'
             seller_info = self.df_sellers[self.df_sellers['seller'] == s]
 
-            for t in self.periods:
+            for t in self.periods: # TODO min_prod depends on the period
                 id_step_min = str(s) + 'X' + f'{t}'
                 scalable_step_order_min = {'id': id_step_min,
                                            'scalable_order_id': scalable_id,
@@ -132,54 +133,115 @@ class DataConversion:
 
         return df_scalable_orders, df_scalable_step_orders
 
-    def generate_min_uptime_bids(self):
+    def generate_min_uptime_bids(self) -> pd.DataFrame:
         """
-        Generate block orders and step orders to encode the bids of the sellers that fulfill the following criteria:
-            - minimum uptime = 0
-            - minimum production level >= 0
+        Generate block orders to encode the bids of the sellers that fulfill the following criteria:
+            - minimum uptime > 1
+            - minimum production level > 0
             - no-load cost = 0
         Assume cost1 is the smallest marginal cost.
-        TODO
         """
-        sellers = self.df_sellers['seller'].unique().tolist()
-        bids = []
+        sellers = self.df_sellers[(~self.df_sellers['min_uptime'].isin([0, 1])) & (self.df_sellers['min_prod'] > 0)][
+            'seller'].unique().tolist()
+        min_uptime_values = self.df_sellers[~self.df_sellers['min_uptime'].isin([0, 1])]['min_uptime'].unique().tolist()
+
+        # retrieve patterns
+        patterns = {}
+        for val in min_uptime_values:
+            file_path = f'./src/data/raw_data/euphemia/patterns/{val}.txt'
+            patterns_val = []
+
+            try:
+                with open(file_path, 'r') as file:
+                    for line in file:
+                        row = list(map(int, line.strip().split()))
+                        patterns_val.append(row)
+                patterns[val] = patterns_val
+            except FileNotFoundError:
+                print(f"Error: The file '{file_path}' does not exist. Call generate_write_patterns().")
+
+        block_bids = []
         for s in sellers:
-            min_uptime = self.df_sellers[self.df_sellers['seller'] == s]['min_uptime'].values[0]
-            min_cost = self.df_sellers[self.df_sellers['seller'] == s]['cost1'].values[0]
-            min_prod = self.df_sellers[self.df_sellers['seller'] == s]['min_prod'].values[0]
+            sellers_general_info = self.df_sellers[self.df_sellers['seller'] == s]
+            min_uptime = sellers_general_info['min_uptime'].values[0]
+            min_cost = sellers_general_info['cost1'].values[0]
+            exclusive_id = f'{s}Xexclusive'
+            count = 1
 
-            exclusive_id = str(s)
-            # create block bids
-            # for all possible consecutive periods in which the seller is active
-            for i in range(min_uptime, len(self.periods) + 1):
-                # j denotes the first period in which the seller is active and is the first one in the block bid
-                # that has a positive volume; there are i consecutive positive volumes in this block bid
-                for j in range(1, len(self.periods) - i + 2):
-                    bid_j = {'id': str(s) + 'X' + str(j),
-                             'block_type': 'exclusive',
-                             'code_prm': pd.NA,
-                             'p': min_cost,
-                             **{f'q{k}': min_prod if j <= k <= j + i - 1 else 0 for k in self.periods},
-                             'MAR': 1}
-                    bids.append(bid_j)
+            for pattern in patterns[min_uptime]:
+                # create a vector in which the value at index i is 1 if the pattern indicates that the seller is
+                # committed in period i + 1 and 0 otherwise
+                time_commitment = []
+                for value in pattern:
+                    if value != 1:
+                        time_commitment.extend([1] * value)
+                    else:
+                        time_commitment.append(0)
 
-                    for t in range(j, self.periods - i + 2):
-                        bids_t = self.df_sellers[(self.df_sellers['seller'] == s) & (self.df_sellers['period'] == t)]
-                        if len(bids_t) == 0:
+                if sum(time_commitment) == 0:
+                    continue
+
+                bid_p = {
+                    'id': f'{s}Xpattern{count}',
+                    'block_type': 'exclusive',
+                    'code_prm': exclusive_id,
+                    'p': min_cost,
+                    **{
+                        f'q{k}': (
+                            self.df_sellers[
+                                (self.df_sellers['seller'] == s) & (self.df_sellers['period'] == k)
+                                ]['min_prod'].iloc[0]
+                            if not self.df_sellers[
+                                (self.df_sellers['seller'] == s) & (self.df_sellers['period'] == k)
+                                ]['min_prod'].empty and time_commitment[k - 1] == 1
+                            else 0
+                        )
+                        for k in self.periods
+                    },
+                    'MAR': 1
+                }
+
+                has_positive_q = any(value > 0 for key, value in bid_p.items() if key.startswith('q'))
+
+                if has_positive_q:
+                    block_bids.append(bid_p)
+                else:
+                    continue
+
+                # add linked block orders for the previously added block order
+                # one linked block order for each active period and step bid
+                for t in self.periods:
+                    if time_commitment[t - 1] == 0:
+                        continue
+
+                    seller_info = self.df_sellers[(self.df_sellers['seller'] == s) & (self.df_sellers['period'] == t)]
+
+                    for block in self.blocks_sellers:
+                        id_block_t = f'{s}Xpattern{count}Xperiod{t}X{block}'
+                        q = seller_info[f'size{block}'].values[0]
+
+                        if block == 1:
+                            q = seller_info[f'size{block}'].values[0] - seller_info['min_prod'].values[0]
+
+                        if q == 0:
                             continue
 
-                        # get all bids for this period
+                        bid_p = {'id': id_block_t,
+                                 'block_type': 'linked',
+                                 'code_prm': f'{s}Xpattern{count}',
+                                 'p': seller_info[f'cost{block}'].values[0],
+                                 **{f'q{k}': q if k == t else 0 for k in self.periods},
+                                 'MAR': 0
+                                 }
 
-                        bid = {'id': str(s) + str(i) + 'X' + str(j) + 'X' + str(t),
-                               'block_type': 'exclusive',
-                               'code_prm': exclusive_id,
-                               'p': min_cost,
-                               **{f'q{k}': 'todo' if k == t else 0 for k in self.periods},
-                               'MAR': 0}
-                        bids.append(bid)
-                        # create child block bid
+                        block_bids.append(bid_p)
 
-    def generate_patterns(self, min_uptime) -> List[List[int]]:
+                count += 1
+
+        df_block_orders = pd.DataFrame(block_bids)
+        return df_block_orders
+
+    def generate_patterns(self, min_uptime: int) -> List[List[int]]:
         """
         Generate all possible patterns that encode in which periods a seller with minimum uptime min_uptime is committed.
         """
@@ -197,7 +259,7 @@ class DataConversion:
 
         return dp[T]
 
-    def generate_write_patterns(self):
+    def generate_write_patterns(self) -> None:
         """
         Generate and write all patterns in .txt files.
         """
