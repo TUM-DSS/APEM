@@ -77,7 +77,7 @@ class DataConversion:
             - minimum uptime = 0
             - minimum production level > 0
             - no-load cost = 0
-        Assume cost1 is the smallest marginal cost. TODO revise
+        Assume cost1 is the smallest marginal cost.
         """
         sellers = self.df_sellers[(self.df_sellers['min_uptime'].isin([0, 1])) & (self.df_sellers['min_prod'] > 0)][
             'seller'].unique().tolist()
@@ -85,15 +85,20 @@ class DataConversion:
         for s in sellers:
             suborders_ids = []
             scalable_id = str(s) + 'X' + 'MAR'
-            seller_info = self.df_sellers[self.df_sellers['seller'] == s]
 
-            for t in self.periods: # TODO min_prod depends on the period
+            for t in self.periods:
                 id_step_min = str(s) + 'X' + f'{t}'
+                seller_info = self.df_sellers[(self.df_sellers['seller'] == s) & (self.df_sellers['period'] == t)]
+
+                min_prod_t = seller_info['min_prod'].values[0] if not seller_info['min_prod'].empty else 0
+                if min_prod_t == 0:
+                    continue
+
                 scalable_step_order_min = {'id': id_step_min,
                                            'scalable_order_id': scalable_id,
                                            't': t,
                                            'p': seller_info['cost1'].values[0],
-                                           'q': seller_info['min_prod'].values[0]
+                                           'q': min_prod_t
                                            }
                 suborders_ids.append(id_step_min)
                 scalable_step_orders.append(scalable_step_order_min)
@@ -103,7 +108,7 @@ class DataConversion:
                     q = seller_info[f'size{block}'].values[0]
 
                     if block == 1:
-                        q = seller_info[f'size{block}'].values[0] - seller_info['min_prod'].values[0]
+                        q = seller_info[f'size{block}'].values[0] - min_prod_t
 
                     if q == 0:
                         continue
@@ -123,7 +128,11 @@ class DataConversion:
                               'fixed_term': 0,
                               'condition': pd.NA,
                               'load_gradient': pd.NA,
-                              **{f'MAR{t}': seller_info['min_prod'].values[0] if not seller_info.empty else pd.NA
+                              **{f'MAR{t}': self.df_sellers[
+                                  (self.df_sellers['seller'] == s) & (self.df_sellers['period'] == t)][
+                                  'min_prod'].values[0] if not
+                              self.df_sellers[(self.df_sellers['seller'] == s) & (self.df_sellers['period'] == t)][
+                                  'min_prod'].empty else 0
                                  for t in self.periods}
                               }
             scalable_orders.append(scalable_order)
