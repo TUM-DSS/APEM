@@ -1,13 +1,14 @@
+from typing import Optional, Union
+
 import gurobipy as gp
 from gurobipy import GRB
-from typing import Optional, Union
 
 from src.allocation.allocation import Allocation
 from src.allocation.configuration import Configuration
-from src.allocation.power_flow_model import PowerFlowModel
 from src.allocation.error import Error
+from src.allocation.power_flow_model import PowerFlowModel
 from src.data.parsing.scenario import Scenario
-from src.utils.extraction import *
+from src.utils.extraction import extract_from_buyers, extract_from_sellers
 
 
 class DCOPF(PowerFlowModel):

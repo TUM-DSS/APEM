@@ -1,13 +1,14 @@
+from typing import Optional, Tuple, Union
+
 import networkx as nx
 import pypsa
-from typing import Optional, Union, Tuple
 
+from src.allocation.algorithms.dcopf import DCOPF
 from src.allocation.allocation import Allocation
 from src.allocation.configuration import Configuration
 from src.allocation.error import Error
 from src.allocation.power_flow_model import PowerFlowModel
-from src.allocation.zonal_configuration import *
-from src.allocation.algorithms.dcopf import DCOPF
+from src.allocation.zonal_configuration import node_zone_mapper
 from src.data.parsing.scenario import Scenario
 
 

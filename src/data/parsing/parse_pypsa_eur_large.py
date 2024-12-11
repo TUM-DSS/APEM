@@ -2,6 +2,9 @@ import pandas as pd
 import networkx as nx
 from collections import defaultdict
 
+import networkx as nx
+import pandas as pd
+
 from src.data.parsing.parse_data import ParseData
 from src.data.parsing.scenario import Scenario
 
