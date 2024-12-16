@@ -109,6 +109,17 @@ def solve_scenario(dataset, power_flow_model, pricing_algorithm):
 
 def solve_and_analyse_scenario(dataset, power_flow_model, pricing_algorithm, file_pypsa_network=""):
     scenario = retrieve_data(dataset)
+
+    from src.data.data_conversion import DataConversion
+
+    data_conversion = DataConversion(scenario)
+    # data_conversion.compute_buyers_inelastic_bids()
+    # data_conversion.compute_buyers_elastic_bids()
+    # data_conversion.generate_min_uptime_bids()
+    # data_conversion.generate_no_min_uptime_bids()
+    data_conversion.generate_write_patterns()
+    exit()
+
     configuration = create_configuration()
     if power_flow_model == PowerFlowModels.DCOPF:
         allocation = solve_allocation_problem(scenario, power_flow_model, configuration)
