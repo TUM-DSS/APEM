@@ -7,10 +7,10 @@ from gurobipy import GRB
 from src.allocation.allocation import Allocation
 from src.allocation.error import Error
 from src.data.parsing.scenario import Scenario
-from src.utils.extraction import *
-from src.pricing.analysis.pricing import Pricing
 from src.pricing.algorithms.pricing_algorithm import PricingAlgorithm
-from src.pricing.analysis.write_prices import write_prices_failure, write_prices
+from src.pricing.analysis.pricing import Pricing
+from src.pricing.analysis.write_prices import write_prices, write_prices_failure
+from src.utils.extraction import extract_from_buyers, extract_from_sellers
 
 
 class Join(PricingAlgorithm):
