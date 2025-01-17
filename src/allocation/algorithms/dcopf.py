@@ -5,6 +5,7 @@ import pandas as pd
 from gurobipy import GRB
 
 from src.allocation.allocation import Allocation
+from src.allocation.analysis.stats import compute_stats
 from src.allocation.configuration import Configuration
 from src.allocation.error import Error
 from src.allocation.power_flow_model import PowerFlowModel
@@ -234,12 +235,6 @@ class DCOPF(PowerFlowModel):
 
         model.optimize()
 
-        runtime = model.Runtime
-        num_vars = model.NumVars
-        num_constrs = model.NumConstrs
-        num_bin_vars = model.NumBinVars
-        num_cont_vars = num_vars - num_bin_vars
-        MIP_gap = model.MIPGap
         status = model.getAttr('Status')
 
         if status == GRB.OPTIMAL:
@@ -262,74 +257,13 @@ class DCOPF(PowerFlowModel):
                 df = pd.DataFrame(results, columns=["variable", "value"])
                 df.to_csv(results_file, index=False)
 
+            allocation = Allocation(welfare, x_bt, y_st, x_btl, y_stl, f_vwt, alpha_vt, u_st, phi_st, self,
+                                    model.Runtime, model.NumVars, model.NumConstrs, model.MIPGap,
+                                    model.NumVars - model.NumBinVars, model.NumBinVars, scenario)
             if stats_file:
-                f = open(stats_file, 'w+')
-                for t in periods:
-                    welfare_per = gp.quicksum(
-                        extract_from_buyers(df_buyers, 'val', b, t, lb) * x_btl[b, t, lb]
-                        for b in buyers
-                        for lb in blocks_buyers
-                    ) - gp.quicksum(
-                        extract_from_sellers(df_sellers, 'cost', s, t, ls) * y_stl[s, t, ls]
-                        for s in sellers
-                        for ls in blocks_sellers
-                    ) - gp.quicksum(
-                        extract_from_sellers(df_sellers, 'no_load_cost', s, t) * u_st[s, t]
-                        for s in sellers
-                    )
-                    f.write(f"Welfare period {t}: {welfare_per}\n")
+                compute_stats(stats_file, scenario, configuration, allocation, model)
 
-                f.write(f"\nTotal welfare: {welfare}\n")
-
-                total_inelastic_demand = df_buyers['inelastic_dem'].sum()
-
-                elastic_bids = ['size' + str(lb) for lb in blocks_buyers]
-                elastic_demand = df_buyers[elastic_bids].sum(axis=1)
-                total_elastic_demand = elastic_demand.sum()
-
-                f.write(f"Total INELASTIC DEMAND: {total_inelastic_demand}\n")
-                f.write(f"Total ELASTIC DEMAND: {total_elastic_demand}\n")
-
-                supply_bids = ['size' + str(ls) for ls in blocks_sellers]
-                supply = df_sellers[supply_bids].sum(axis=1)
-                f.write(f"Total supply: {supply.sum()}\n")
-
-                total_supply = sum(y_st[s, t] for s in sellers for t in periods)
-                total_demand = sum(x_bt[b, t] for b in buyers for t in periods)
-
-                fulfilled_elastic_demand = sum(
-                    x_btl[b, t, lb] for b in buyers for t in periods for lb in blocks_buyers)
-                f.write(f"Fulfilled elastic demand: {fulfilled_elastic_demand}\n")
-
-                f.write(f"Supply = {total_supply}\n")
-                f.write(f"Demand = {total_demand}\n")
-
-                if not configuration.relaxation:
-                    f.write(f"Final MIP gap value: {model.MIPGap}\n")
-                f.write(f"Nodes: {len(nodes)}\n")
-                f.write(f"Branches: {int(len(f_vwt) / (2 * len(periods)))}\n")
-                f.write(f"Buyers: {len(buyers)}\n")
-                f.write(f"Sellers: {len(sellers)}\n")
-                f.write(f"Constraints: {num_constrs}\n")
-                f.write(f"Variables: {num_vars}\n")
-                f.write(f"Runtime in sec: {runtime}\n")
-
-                if configuration.relaxation:
-                    count_frac, count_binary = 0, 0
-                    for i in u_st.keys():
-                        if 0 < u_st[i] < 1:
-                            count_frac += 1
-                        else:
-                            count_binary += 1
-
-                    f.write(f"COUNT FRACTIONAL: {count_frac}\n")
-                    f.write(f"COUNT BINARY: {count_binary}\n")
-
-                f.write("\n")
-                f.close()
-
-            return Allocation(welfare, x_bt, y_st, x_btl, y_stl, f_vwt, alpha_vt, u_st, phi_st, self,
-                              runtime, num_vars, num_constrs, MIP_gap, num_cont_vars, num_bin_vars, scenario)
+            return allocation
 
         else:
             if results_file:
