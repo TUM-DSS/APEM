@@ -252,7 +252,7 @@ class DCOPF(PowerFlowModel):
             alpha_vt = {(v, t): alpha_vt[v, t].X for v in nodes for t in periods}
             phi_st = {(s, t): phi_st[s, t].X for s in sellers for t in periods}
 
-            if output_file is not None:
+            if output_file:
                 f = open(output_file, 'w+')
 
                 for t in periods:
@@ -326,15 +326,13 @@ class DCOPF(PowerFlowModel):
                               runtime, num_vars, num_constrs, MIP_gap, num_cont_vars, num_bin_vars, scenario)
 
         else:
-            if output_file is not None:
+            if output_file:
                 f = open(output_file, 'w+')
                 f.write(f"{self} allocation error with code {status}")
                 f.close()
 
             print(f'{self} allocation error with code {status}')
-
             error = Error(status)
-
             return error
 
     def __str__(self):

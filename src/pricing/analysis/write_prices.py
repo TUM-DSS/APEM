@@ -1,5 +1,8 @@
-def write_prices(file_prices, pricing, scenario):
-    if pricing.status == 1:
+from gurobipy import GRB
+
+
+def write_prices(file_prices, pricing, scenario) -> None:
+    if pricing.status == GRB.OPTIMAL:
         p_vt = pricing.node_prices
         gamma_vwt = pricing.line_congestion_prices
         network = scenario.network
@@ -18,7 +21,7 @@ def write_prices(file_prices, pricing, scenario):
         file.close()
 
 
-def write_prices_failure(file_prices, name, status):
+def write_prices_failure(file_prices, name, status) -> None:
     file = open(file_prices, 'w+')
     file.write(f'{name} pricing error with code {status}')
     file.close()
