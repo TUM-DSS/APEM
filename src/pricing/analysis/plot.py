@@ -9,9 +9,9 @@ def plot_avg_prices(avg_prices, scenario, file_plot="") -> None:
     plt.savefig(file_plot, dpi=300)
 
 
-def pypsa_heatmap(self, file_pypsa_network, file_heatmap, avg_prices=None) -> None:
+def pypsa_heatmap(file_pypsa_network, file_heatmap, avg_prices=None) -> None:
     if avg_prices is None:
-        avg_prices = self.avg_node_prices()
+        avg_prices = PriceAnalysis.avg_node_prices()
 
     n = pypsa.Network(file_pypsa_network)
     n.buses = n.buses[n.buses.index.isin(avg_prices.keys())]
