@@ -45,7 +45,7 @@ def main():
     PLOT_PATH = os.path.join(BASE_PATH, "plots")
 
     # Create directory (if not exists)
-    os.makedirs(os.path.join(BASE_PATH, "plots"), exist_ok=True)
+    os.makedirs(PLOT_PATH, exist_ok=True)
 
     # Load the network
     n = pypsa.Network(os.path.join(BASE_PATH, NETWORK_FILE))
