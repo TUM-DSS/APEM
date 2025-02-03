@@ -114,6 +114,9 @@ def solve_and_analyse_scenario(dataset, power_flow_model, pricing_algorithm, fil
     if power_flow_model == PowerFlowModels.DCOPF:
         allocation = solve_allocation_problem(scenario, power_flow_model, configuration)
     else:
+        if dataset not in [Datasets.PyPSAEurLarge, Datasets.PyPSAEurSmall]:
+            raise ValueError(f"The dataset {dataset.name} cannot be used in combination with the power flow model {power_flow_model.value}. Zonal prices can only be computed for the PyPSA datasets.")
+
         scenario, allocation = solve_allocation_problem(scenario, power_flow_model, configuration)
 
     pricing = solve_pricing_problem(scenario, allocation, pricing_algorithm, power_flow_model)
