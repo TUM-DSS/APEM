@@ -120,6 +120,10 @@ def solve_and_analyse_scenario(dataset, power_flow_model, pricing_algorithm, fil
 
         scenario, allocation = solve_allocation_problem(scenario, power_flow_model, configuration)
 
+    if dataset in [Datasets.PyPSAEurLarge, Datasets.PyPSAEurSmall]:
+        zonal_config = power_flow_model.value.zonal_configuration if power_flow_model == PowerFlowModels.Zonal_NTC else ""
+        scenario.plot_network(zonal_config) # plot PyPSA network
+        
     pricing = solve_pricing_problem(scenario, allocation, pricing_algorithm, power_flow_model)
 
     return analyse_results(scenario, allocation, pricing, power_flow_model, file_pypsa_network=file_pypsa_network)

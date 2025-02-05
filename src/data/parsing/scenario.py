@@ -1,11 +1,13 @@
+from shapely.geometry import Point, LineString
 from typing import Union, Optional
 
+import geopandas as gpd
 import networkx as nx
 import os
 import pandas as pd
 import pypsa
-from matplotlib import pyplot as plt
-
+import matplotlib.patches as mpatches
+import matplotlib.pyplot as plt
 
 class Scenario:
     """
@@ -78,14 +80,91 @@ class Scenario:
         f.close()
 
 
+    def plot_network(self, zonal_configuration:str="") -> None:
         """
-        Plots the network.
-        """
+        Plots the PyPSA network.
+        
+        Args:
+            zonal_configuration (str): If provided, nodes are colored according to their zonal assignments. Otherwise, they are colored black.
+        """     
+        # Define and create results directory, if not exists
+        power_flow_model = "Zonal_NTC" if zonal_configuration else "DCOPF"
+        results_directory = os.path.join("results", f"{self.name}_results", power_flow_model)
+        os.makedirs(results_directory, exist_ok=True)
+            
+        # Load PyPSA network
         n = pypsa.Network(self.network_file)
-        plt.clf()
-        n.plot(boundaries=[6, 15, 47, 55], bus_colors='darkorange', line_colors='darkgreen', color_geomap=True)
-        plt.savefig(f"{dir_plots}/pypsa_eur_small.png", bbox_inches='tight', dpi=300)
+        
+        # Override network with the corresponding nodal PyPSA network, if required
+        if zonal_configuration and self.name == 'PyPSA_Eur_Large':
+            n = pypsa.Network("src/data/raw_data/pypsa_eur_large/elec_s_334m_ec_lv1.5_.nc")
+        elif zonal_configuration and self.name == 'PyPSA_Eur_Small':
+            n = pypsa.Network("src/data/raw_data/pypsa_eur_small/elec_s_40_ec_lv1.5_.nc")
+        
+        # Filter lines and extract longitude (x) & latitude (y)
+        n.lines = n.lines[n.lines["s_nom"] > 0]
+        geometry = [Point(xy) for xy in zip(n.buses["x"], n.buses["y"])]
+        crs = "EPSG:4326"
+        geo_df = gpd.GeoDataFrame(n.buses, crs=crs, geometry=geometry)
+    
+        # Assign colors based on zonal configuration
+        geo_df["color"] = "black" # default color
+        if zonal_configuration:
+            # Load csv file with node-to-zone mapping
+            df_zones = pd.read_csv(os.path.join(results_directory, "node_to_zone_results", f"{zonal_configuration}.csv"), dtype={"bus_id": str, "zone": str})  
+            
+            # Merge geo_df with df_zones on the 'node'
+            df_zones["node"] = df_zones["node"].astype(str)
+            geo_df = geo_df.merge(df_zones[["node", "zone"]], left_index=True, right_on="node", how="inner")
+            
+            # Create colormap for zones
+            unique_zones = geo_df["zone"].dropna().unique()
+            cmap = plt.get_cmap("plasma", len(unique_zones))
+            zone_to_color_mapping = {zone: cmap(i) for i, zone in enumerate(unique_zones)}
 
+            # Assign colors to buses based on zones
+            geo_df["color"] = geo_df["zone"].map(zone_to_color_mapping)  
+           
+        # Extract line geometries
+        line_geometries = [
+            LineString([(n.buses.loc[line["bus0"], "x"], n.buses.loc[line["bus0"], "y"] ),
+                        (n.buses.loc[line["bus1"], "x"], n.buses.loc[line["bus1"], "y"] )])
+            for _, line in n.lines.iterrows()
+        ]
+        line_df = gpd.GeoDataFrame(n.lines, crs=crs, geometry=line_geometries)
+    
+        # Clear previous plot
+        plt.clf()
+        
+        # Create figure and axis
+        fig, ax = plt.subplots(figsize=(15, 15))
+        
+        # Plot GADM map of Germany
+        map_germany = gpd.read_file("src/data/raw_data/gadm41_DEU_shp/gadm41_DEU_4.shp")
+        map_germany.plot(ax=ax, color="lightgray", alpha=0.5)
+        
+        # Plot power lines
+        line_df.plot(ax=ax, color="gray", linewidth=0.8, alpha=0.6)
+
+        # Plot bus nodes
+        geo_df.plot(
+            ax=ax,
+            markersize=50,
+            marker="o",
+            color=geo_df["color"]
+        )
+        
+        if zonal_configuration:
+            # Add legend with zone colors to the plot
+            sorted_zones = sorted(unique_zones, key=str)
+            legend_handles = [mpatches.Patch(color=zone_to_color_mapping[zone], label=f"Zone {zone}") for zone in sorted_zones]
+            ax.legend(handles=legend_handles, loc="upper left", title="Zones")
+
+        # Save figure
+        file_name = f"{self.name}_{zonal_configuration}" if zonal_configuration else self.name
+        plt.savefig(f"{results_directory}/{file_name}_network.png", bbox_inches='tight', dpi=300)
+    
+    
     def get_geo_coordinates(self) -> dict:
         """
         Computes the geographic coordinates of each node.
