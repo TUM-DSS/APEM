@@ -25,7 +25,7 @@ class Zonal_NTC(PowerFlowModel):
         self.factor = factor
 
 
-    def create_zonal_scenario_NTC(self, base_scenario: Scenario, network: pypsa.Network, name: str) -> Scenario:
+    def create_zonal_scenario_NTC(self, base_scenario: Scenario, network: pypsa.Network) -> Scenario:
         """
         Construct a zonal scenario based on a given nodal base scenario.
         """
@@ -51,6 +51,12 @@ class Zonal_NTC(PowerFlowModel):
                     df_buyers.loc[df_buyers['node'] == node, 'node'] = zone
 
                     break
+                
+        # save node_to_zone assignment as .csv file
+        results_path = f"results/{base_scenario.name}_results/Zonal_NTC/node_to_zone_results"
+        os.makedirs(results_path, exist_ok=True)
+        node_to_zone_df = pd.DataFrame(list(node_to_zone.items()), columns=['node', 'zone'])
+        node_to_zone_df.to_csv(os.path.join(results_path, f"{self.zonal_configuration}.csv"), index=False)
 
         # create network with one line between any two zones
         aggregated_network = nx.Graph()
@@ -84,7 +90,7 @@ class Zonal_NTC(PowerFlowModel):
             nodes_agents[z]['sellers'] = df_sellers[df_sellers['node'] == z]['seller'].unique().tolist()
             nodes_agents[z]['buyers'] = df_buyers[df_buyers['node'] == z]['buyer'].unique().tolist()
             
-        return Scenario(f'{name}', df_buyers, df_sellers, aggregated_network, nodes_agents,
+        return Scenario(f'{base_scenario.name}', df_buyers, df_sellers, aggregated_network, nodes_agents,
                         base_scenario.periods, base_scenario.blocks_buyers, base_scenario.blocks_sellers, r_star)
 
 
@@ -99,7 +105,7 @@ class Zonal_NTC(PowerFlowModel):
             n = pypsa.Network("src/data/raw_data/pypsa_eur_small/elec_s_40_ec_lv1.5_.nc")
 
         # create a zonal NTC scenario
-        zonal_scenario = self.create_zonal_scenario_NTC(base_scenario=scenario, network=n, name=scenario.name)
+        zonal_scenario = self.create_zonal_scenario_NTC(base_scenario=scenario, network=n)
 
         # solve a DCOPF problem for the constructed zonal network
         dcopf = DCOPF()
