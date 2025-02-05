@@ -1,6 +1,7 @@
 from typing import Union, Optional
 
 import networkx as nx
+import os
 import pandas as pd
 import pypsa
 from matplotlib import pyplot as plt
@@ -25,12 +26,14 @@ class Scenario:
         self.r_star = r_star
         self.network_file = network_file
 
+
     def __str__(self):
         return self.name
 
-    def analyze_scenario(self, output_file: str) -> None:
+
+    def analyse_scenario(self) -> None:
         """
-        Computes statistics.
+        Computes scenario statistics.
         """
         count_sellers = len(self.df_sellers['seller'].unique())
         count_buyers = len(self.df_buyers['buyer'].unique())
@@ -43,7 +46,14 @@ class Scenario:
         res_proportion = round(len(res_sellers) / len(self.df_sellers), 2)
         demand = self.df_buyers['max_dem'].sum()
         supply = self.df_sellers['max_prod'].sum()
-
+        
+        # Define and create results directory, if not exists
+        results_directory = f"./results/{self.name}_results"
+        if not os.path.exists(results_directory):
+            os.makedirs(results_directory)
+            
+        # Write contents to scenario.txt file
+        output_file = os.path.join(results_directory, f"{self.name}_nodal_scenario.txt")
         f = open(output_file, 'w+')
         f.write(f'Sellers: {count_sellers}\n')
         f.write(f'Buyers: {count_buyers}\n')
@@ -67,7 +77,7 @@ class Scenario:
         f.write('\n')
         f.close()
 
-    def plot_network(self, dir_plots: str) -> None:
+
         """
         Plots the network.
         """

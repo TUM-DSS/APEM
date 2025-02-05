@@ -109,6 +109,7 @@ def solve_scenario(dataset, power_flow_model, pricing_algorithm):
 
 def solve_and_analyse_scenario(dataset, power_flow_model, pricing_algorithm, file_pypsa_network=""):
     scenario = retrieve_data(dataset)
+    scenario.analyse_scenario() # analyse nodal scenario
 
     configuration = create_configuration()
     if power_flow_model == PowerFlowModels.DCOPF:
