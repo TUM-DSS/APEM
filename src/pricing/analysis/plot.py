@@ -36,6 +36,9 @@ def plot_pypsa_heatmap(file_pypsa_network: str, file_heatmap:str, avg_prices:dic
     if avg_prices is None:
         avg_prices = PriceAnalysis.avg_node_prices()
     
+    # Store zonal price information for plotting purposes
+    avg_prices_copy = avg_prices.copy()   
+    
     # Load PyPSA network
     n = pypsa.Network(file_pypsa_network)
     
@@ -117,6 +120,35 @@ def plot_pypsa_heatmap(file_pypsa_network: str, file_heatmap:str, avg_prices:dic
         label="€/MWh"
         )
     cbar.set_ticklabels(['≤0', '20', '40', '60', '80', '≥100'])
+    cbar.ax.tick_params(labelsize=13)
+    cbar.set_label("€/MWh", fontsize=13)
+    
+    # Add text with price information
+    # Note: We compute min, avg, and max based on the nodal prices!
+    min_price = min(avg_prices_copy.values())
+    max_price = max(avg_prices_copy.values())
+    avg_price = sum(avg_prices_copy.values()) / len(avg_prices_copy)
+    
+    ax.text(
+        0.05, 0.95, 
+        f"Min: {min_price:.2f} €/MWh\nAvg: {avg_price:.2f} €/MWh\nMax: {max_price:.2f} €/MWh",
+        transform=ax.transAxes, 
+        fontsize=13, 
+        verticalalignment="top", 
+        bbox=dict(facecolor="white", alpha=0.8, edgecolor="gray", boxstyle="round,pad=0.5"),
+        color="black"
+    )
+        
+    if zonal_config:
+        for zone, price in avg_prices_copy.items():
+            ax.text(
+                x=geo_df.loc[geo_df["zone"] == zone, "geometry"].iloc[0].x, 
+                y=geo_df.loc[geo_df["zone"] == zone, "geometry"].iloc[0].y,
+                s=f"Zone {zone}: {price:.2f} €/MWh",
+                fontsize=13,
+                ha="center",
+                color="black"
+            )       
 
     # Save heatmap
     plt.savefig(file_heatmap, bbox_inches="tight", dpi=300)
