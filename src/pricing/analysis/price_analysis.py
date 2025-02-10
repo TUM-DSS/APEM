@@ -1,4 +1,5 @@
 from typing import Optional, Tuple
+import os
 import pandas as pd
 
 from src.allocation.algorithms.zonal_NTC import Zonal_NTC
@@ -175,16 +176,22 @@ class PriceAnalysis:
 
     def compute_all_stats_and_plot_data(self, dir_stats:str, power_flow_model, file_pypsa_network:str="") -> None:
         plot_supply_demand(dir_stats, self.scenario)
+        
+        pf_model_value = power_flow_model.value
+        zonal_config = pf_model_value.zonal_configuration if isinstance(pf_model_value, Zonal_NTC) else ""
+        zonal_path = zonal_config + "/" if zonal_config else ""
+        
+        path = f"{dir_stats}/{pf_model_value}/{zonal_path}{self.pricing.used_algorithm}_results"
+        os.makedirs(path, exist_ok=True)
 
-        file_stats = f"{dir_stats}/{self.pricing.used_algorithm}_stats.txt"
+        file_stats = f"{path}/{self.pricing.used_algorithm}_stats.txt"
         self.compute_objectives(file_objectives=file_stats)
         self.performance_statistics(file_stats=file_stats, mode="a")
         self.avg_price(file_avg=file_stats, mode="a")
-        self.avg_prices_periods(file_plot=f"{dir_stats}/{self.pricing.used_algorithm}_prices_periods.png",
+        self.avg_prices_periods(file_plot=f"{path}/{self.pricing.used_algorithm}_prices_periods.png",
                                 file_avg=file_stats, mode="a")
         avg_prices = self.avg_node_prices(file_avg=file_stats, mode="a")
 
         if file_pypsa_network:
-            zonal_config = power_flow_model.value.zonal_configuration if isinstance(power_flow_model.value, Zonal_NTC) else ""
-            plot_pypsa_heatmap(file_pypsa_network, f"{dir_stats}/{self.pricing.used_algorithm}_heatmap.png",
+            plot_pypsa_heatmap(file_pypsa_network, f"{path}/{self.pricing.used_algorithm}_heatmap.png",
                           avg_prices, zonal_config, self.scenario.name)

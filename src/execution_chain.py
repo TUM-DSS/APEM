@@ -50,14 +50,13 @@ def create_configuration(MIP_gap=1e-4, optimality_tol=1e-6, time_limit=60 * 60, 
 def solve_allocation_problem(dataset, power_flow_model, configuration, u_fixed=None):
     if isinstance(dataset, Datasets):
         dataset = retrieve_data(dataset)
-
+        
     power_flow_model = power_flow_model.value
 
-    path = f'results/{dataset}_results/{power_flow_model}/allocation_results'
-
-    if os.path.exists(path):
-        shutil.rmtree(path)
-
+    zonal_part = f"{power_flow_model.zonal_configuration}/" if isinstance(power_flow_model, Zonal_NTC) else ""
+    base_path = f"results/{dataset}_results/{power_flow_model}"   
+    path = base_path + "/" + zonal_part + "allocation_results"
+    os.makedirs(base_path, exist_ok=True)
     os.makedirs(path, exist_ok=True)
 
     return power_flow_model.solve(dataset, configuration, results_file=path + f'/{power_flow_model}.csv',
@@ -71,7 +70,8 @@ def solve_pricing_problem(dataset, allocation, pricing_algorithm, power_flow_mod
     pricing_algorithm = pricing_algorithm.value
     power_flow_model = power_flow_model.value
 
-    path = f"results/{dataset}_results/{power_flow_model}/{pricing_algorithm}_results"
+    zonal_part = f"{power_flow_model.zonal_configuration}/" if isinstance(power_flow_model, Zonal_NTC) else ""
+    path = f"results/{dataset}_results/{power_flow_model}/{zonal_part}{pricing_algorithm}_results"
 
     if os.path.exists(path):
         shutil.rmtree(path)
@@ -81,7 +81,6 @@ def solve_pricing_problem(dataset, allocation, pricing_algorithm, power_flow_mod
     pricing = pricing_algorithm.compute_prices(allocation, dataset,
                                                file_prices=path + f"/{pricing_algorithm}_prices.csv",
                                                fixed_prices=prices)
-
     return pricing
 
 
@@ -89,8 +88,7 @@ def analyse_results(dataset, allocation, pricing, power_flow_model, file_pypsa_n
     if isinstance(dataset, Datasets):
         dataset = retrieve_data(dataset)
 
-    path = f"results/{dataset}_results/{power_flow_model.value}/{pricing.used_algorithm}_results"
-
+    path = f"results/{dataset}_results"
     os.makedirs(path, exist_ok=True)
 
     analysis = PriceAnalysis(dataset, allocation, pricing)

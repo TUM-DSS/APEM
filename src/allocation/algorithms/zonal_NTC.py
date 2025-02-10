@@ -55,10 +55,10 @@ class Zonal_NTC(PowerFlowModel):
                     break
                 
         # save node_to_zone assignment as .csv file
-        results_path = f"results/{base_scenario.name}_results/Zonal_NTC/node_to_zone_results"
+        results_path = f"results/{base_scenario.name}_results/Zonal_NTC/{self.zonal_configuration}"
         os.makedirs(results_path, exist_ok=True)
         node_to_zone_df = pd.DataFrame(list(node_to_zone.items()), columns=['node', 'zone'])
-        node_to_zone_df.to_csv(os.path.join(results_path, f"{self.zonal_configuration}.csv"), index=False)
+        node_to_zone_df.to_csv(os.path.join(results_path, "node_to_zone.csv"), index=False)
 
         # create network with one line between any two zones
         aggregated_network = nx.Graph()

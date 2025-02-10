@@ -51,8 +51,7 @@ class Scenario:
         
         # Define and create results directory, if not exists
         results_directory = f"./results/{self.name}_results"
-        if not os.path.exists(results_directory):
-            os.makedirs(results_directory)
+        os.makedirs(results_directory, exist_ok=True)
             
         # Write contents to scenario.txt file
         output_file = os.path.join(results_directory, f"{self.name}_nodal_scenario.txt")
@@ -111,10 +110,9 @@ class Scenario:
         geo_df["color"] = "black" # default color
         if zonal_configuration:
             # Load csv file with node-to-zone mapping
-            df_zones = pd.read_csv(os.path.join(results_directory, "node_to_zone_results", f"{zonal_configuration}.csv"), dtype={"bus_id": str, "zone": str})  
+            df_zones = pd.read_csv(os.path.join(results_directory, zonal_configuration, "node_to_zone.csv"), dtype={"node": str, "zone": str})  
             
             # Merge geo_df with df_zones on the 'node'
-            df_zones["node"] = df_zones["node"].astype(str)
             geo_df = geo_df.merge(df_zones[["node", "zone"]], left_index=True, right_on="node", how="inner")
             
             # Create colormap for zones

@@ -45,7 +45,7 @@ def plot_pypsa_heatmap(file_pypsa_network: str, file_heatmap:str, avg_prices:dic
     # Handle zonal mapping, if applicable
     if zonal_config:
         # Load csv file with node-to-zone mapping
-        df_zones = pd.read_csv(os.path.join(results_directory, "node_to_zone_results", f"{zonal_config}.csv"), dtype={"node": str, "zone": str})
+        df_zones = pd.read_csv(os.path.join(results_directory, zonal_config, "node_to_zone.csv"), dtype={"node": str, "zone": str})
         
         # Ensure bus indices are strings
         n.buses.index = n.buses.index.astype(str)
