@@ -122,9 +122,17 @@ class Scenario:
             geo_df = geo_df.merge(df_zones[["node", "zone"]], left_index=True, right_on="node", how="inner")
             
             # Create colormap for zones
-            unique_zones = geo_df["zone"].dropna().unique()
-            cmap = plt.get_cmap("plasma", len(unique_zones))
-            zone_to_color_mapping = {zone: cmap(i) for i, zone in enumerate(unique_zones)}
+            unique_zones = sorted(geo_df["zone"].dropna().unique())
+            ACER_BZR_colors = ['dodgerblue', 'coral', 'gold', 'darkviolet', 'green']
+            
+            # Determine color mapping based on the number of zones
+            if len(unique_zones) <= 5:
+                zone_to_color_mapping = {zone: color for zone, color in zip(unique_zones, ACER_BZR_colors)}
+            else:
+                cmap = plt.get_cmap("plasma", len(unique_zones) - 5)
+                additional_colors = [cmap(i) for i in range(len(unique_zones) - 5)]
+                zone_to_color_mapping = {zone: color for zone, color in zip(unique_zones[:5], ACER_BZR_colors)}
+                zone_to_color_mapping.update({zone: color for zone, color in zip(unique_zones[5:], additional_colors)})
 
             # Assign colors to buses based on zones
             geo_df["color"] = geo_df["zone"].map(zone_to_color_mapping)  
