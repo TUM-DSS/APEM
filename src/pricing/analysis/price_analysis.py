@@ -1,13 +1,15 @@
 from typing import Optional, Tuple
+import os
 import pandas as pd
 
+from src.allocation.algorithms.zonal_NTC import Zonal_NTC
 from src.allocation.allocation import Allocation
 from src.data.analysis.plot import plot_supply_demand
 from src.data.parsing.scenario import Scenario
 from src.pricing.algorithms.elmp import ELMP
 from src.pricing.algorithms.ip import IP
 from src.pricing.algorithms.min_mwp import MinMWP
-from src.pricing.analysis.plot import plot_avg_prices, pypsa_heatmap
+from src.pricing.analysis.plot import plot_avg_prices, plot_pypsa_heatmap
 from src.pricing.analysis.pricing import Pricing, GLOCS, LLOCS, MWPS
 
 
@@ -143,7 +145,7 @@ class PriceAnalysis:
 
         return avg_prices_dict
 
-    def avg_node_prices(self, file_avg="", mode="w") -> dict:
+    def avg_node_prices(self, file_avg: str = "", mode: str = "w") -> dict:
         avg_prices = pd.DataFrame(columns=['node', 'avg_price'])
         for (v, _), p in self.pricing.node_prices.items():
             avg_prices.loc[len(avg_prices)] = {'node': str(v), 'avg_price': p}
@@ -163,17 +165,25 @@ class PriceAnalysis:
 
         return avg_prices_dict
 
-    def compute_all_statistics(self, dir_stats, file_pypsa_network="") -> None:
-        plot_supply_demand(dir_stats, self.scenario)
+    def compute_all_stats_and_plot_data(self, dir_stats: str, pf_model_value) -> None:
+        if self.scenario.name != "ARPA":
+            plot_supply_demand(dir_stats, self.scenario)
 
-        file_stats = f"{dir_stats}/{self.pricing.used_algorithm}_stats.txt"
+        zonal_config = pf_model_value.zonal_configuration if isinstance(pf_model_value, Zonal_NTC) else ""
+        zonal_path = zonal_config + "/" if zonal_config else ""
+
+        path = f"{dir_stats}/{pf_model_value}/{zonal_path}{self.pricing.used_algorithm}_results"
+        os.makedirs(path, exist_ok=True)
+
+        file_stats = f"{path}/{self.pricing.used_algorithm}_stats.txt"
         self.compute_objectives(file_objectives=file_stats)
         self.performance_statistics(file_stats=file_stats, mode="a")
         self.avg_price(file_avg=file_stats, mode="a")
-        self.avg_prices_periods(file_plot=f"{dir_stats}/{self.pricing.used_algorithm}_prices_periods.png",
-                                file_avg=file_stats, mode="a")
+        if self.scenario.name != "ARPA":
+            self.avg_prices_periods(file_plot=f"{path}/{self.pricing.used_algorithm}_prices_periods.png",
+                                    file_avg=file_stats, mode="a")
         avg_prices = self.avg_node_prices(file_avg=file_stats, mode="a")
 
-        if file_pypsa_network:
-            pypsa_heatmap(file_pypsa_network, f"{dir_stats}/{self.pricing.used_algorithm}_heatmap.png",
-                          avg_prices)
+        if self.scenario.name in ["PyPSA_Eur_Large", "PyPSA_Eur_Small"]:
+            plot_pypsa_heatmap(f"{path}/{self.pricing.used_algorithm}_heatmap.png", self.scenario.name,
+                               avg_prices, zonal_config)

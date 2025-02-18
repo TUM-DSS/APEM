@@ -45,7 +45,7 @@ def main():
     PLOT_PATH = os.path.join(BASE_PATH, "plots")
 
     # Create directory (if not exists)
-    os.makedirs(os.path.join(BASE_PATH, "plots"), exist_ok=True)
+    os.makedirs(PLOT_PATH, exist_ok=True)
 
     # Load the network
     n = pypsa.Network(os.path.join(BASE_PATH, NETWORK_FILE))
@@ -67,7 +67,7 @@ def main():
         print("INFO: Skipping statistics computation. To compute them, please provide the '--compute_stats' flag.")
 
     # Export nodes-agent relationships to a CSV file
-    nodes_agents = n.generators[["seller", "node"]].to_csv(os.path.join(BASE_PATH, "nodes_agents.csv"), index=False)
+    n.generators[["seller", "node"]].to_csv(os.path.join(BASE_PATH, "nodes_agents.csv"), index=False)
 
     # Rename, generate, and drop generator columns
     n.generators = n.generators.rename(columns={
@@ -126,6 +126,7 @@ def main():
     ax.grid(False)
     plt.legend().get_frame().set_facecolor('white')
     plt.savefig(os.path.join(PLOT_PATH, f"{NETWORK_NAME}_p_max_pu.png"), dpi=300)
+    plt.close()
 
     # Calculate maximum production and size1 for generators and drop unused columns
     n.generators.insert(7, "max_prod", n.generators["p_max_pu"] * n.generators["p_nom"])
@@ -189,6 +190,7 @@ def main():
     n.plot(boundaries=[6, 15, 47, 55], bus_colors='darkorange', line_colors='darkgreen', color_geomap=True,
            bus_sizes=1e-2)
     plt.savefig(os.path.join(PLOT_PATH, f"{NETWORK_NAME}.png"), bbox_inches='tight', dpi=300)
+    plt.close()
 
 
 if __name__ == "__main__":

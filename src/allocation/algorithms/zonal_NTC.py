@@ -1,7 +1,9 @@
 from itertools import combinations
+import os.path
 from typing import Optional, Tuple, Union
 
 import networkx as nx
+import pandas as pd
 import pypsa
 
 from src.allocation.algorithms.dcopf import DCOPF
@@ -24,7 +26,7 @@ class Zonal_NTC(PowerFlowModel):
         self.zonal_configuration = zonal_configuration
         self.factor = factor
 
-    def create_zonal_scenario_NTC(self, base_scenario: Scenario, network: pypsa.Network, name: str) -> Scenario:
+    def create_zonal_scenario_NTC(self, base_scenario: Scenario, network: pypsa.Network) -> Scenario:
         """
         Construct a zonal scenario based on a given nodal base scenario.
         """
@@ -51,9 +53,15 @@ class Zonal_NTC(PowerFlowModel):
 
                     break
 
+        # save node_to_zone assignment as .csv file
+        results_path = f"results/{base_scenario.name}_results/Zonal_NTC/{self.zonal_configuration}"
+        os.makedirs(results_path, exist_ok=True)
+        node_to_zone_df = pd.DataFrame(list(node_to_zone.items()), columns=['node', 'zone'])
+        node_to_zone_df.to_csv(os.path.join(results_path, "node_to_zone.csv"), index=False)
+
         # create network with one line between any two zones
         aggregated_network = nx.Graph()
-        lines = {(z1, z2): {'F_max': 0, 'B': float('inf')} for z1, z2 in combinations(zones, 2)}
+        lines = {(z1, z2): {'F_max': 0, 'B': float('inf')} for z1, z2 in combinations(sorted(zones), 2)}
 
         # for each interconnector between two zones set
         # its capacity to the sum of the capacities of the cross-zonal lines multiplied by self.factor and
@@ -65,12 +73,15 @@ class Zonal_NTC(PowerFlowModel):
                     lines[node_to_zone[v], node_to_zone[w]]['B'] = min(lines[node_to_zone[v], node_to_zone[w]]['B'],
                                                                        base_scenario.network[v][w]['B'])
 
-        for z1, z2 in combinations(zones, 2):
-            aggregated_network.add_edge(
-                z1, z2,
-                B=lines[z1, z2]['B'],
-                F_max=lines[z1, z2]['F_max'] * self.factor
-            )
+        # Add edges to the aggregated network, only if B no longer is set to inf (i.e., if at least one line between
+        # the zones existed in the base scenario)
+        for z1, z2 in combinations(sorted(zones), 2):
+            if lines[z1, z2]['B'] != float('inf'):
+                aggregated_network.add_edge(
+                    z1, z2,
+                    B=lines[z1, z2]['B'],
+                    F_max=lines[z1, z2]['F_max'] * self.factor
+                )
 
         r_star = list(aggregated_network.nodes)[0]
 
@@ -81,7 +92,7 @@ class Zonal_NTC(PowerFlowModel):
             nodes_agents[z]['sellers'] = df_sellers[df_sellers['node'] == z]['seller'].unique().tolist()
             nodes_agents[z]['buyers'] = df_buyers[df_buyers['node'] == z]['buyer'].unique().tolist()
 
-        return Scenario(f'{name}', df_buyers, df_sellers, aggregated_network, nodes_agents,
+        return Scenario(f'{base_scenario.name}', df_buyers, df_sellers, aggregated_network, nodes_agents,
                         base_scenario.periods, base_scenario.blocks_buyers, base_scenario.blocks_sellers, r_star)
 
     def solve(self, scenario: Scenario, configuration: Configuration, results_file: Optional[str] = None,
@@ -91,11 +102,11 @@ class Zonal_NTC(PowerFlowModel):
         # load the PyPSA network
         if scenario.name == 'PyPSA_Eur_Large':
             n = pypsa.Network("src/data/raw_data/pypsa_eur_large/elec_s_334m_ec_lv1.5_.nc")
-        else:
+        elif scenario.name == 'PyPSA_Eur_Small':
             n = pypsa.Network("src/data/raw_data/pypsa_eur_small/elec_s_40_ec_lv1.5_.nc")
 
         # create a zonal NTC scenario
-        zonal_scenario = self.create_zonal_scenario_NTC(base_scenario=scenario, network=n, name=scenario.name)
+        zonal_scenario = self.create_zonal_scenario_NTC(base_scenario=scenario, network=n)
 
         # solve a DCOPF problem for the constructed zonal network
         dcopf = DCOPF()
