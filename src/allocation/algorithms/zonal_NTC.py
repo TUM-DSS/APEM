@@ -26,7 +26,6 @@ class Zonal_NTC(PowerFlowModel):
         self.zonal_configuration = zonal_configuration
         self.factor = factor
 
-
     def create_zonal_scenario_NTC(self, base_scenario: Scenario, network: pypsa.Network) -> Scenario:
         """
         Construct a zonal scenario based on a given nodal base scenario.
@@ -53,7 +52,7 @@ class Zonal_NTC(PowerFlowModel):
                     df_buyers.loc[df_buyers['node'] == node, 'node'] = zone
 
                     break
-                
+
         # save node_to_zone assignment as .csv file
         results_path = f"results/{base_scenario.name}_results/Zonal_NTC/{self.zonal_configuration}"
         os.makedirs(results_path, exist_ok=True)
@@ -73,8 +72,9 @@ class Zonal_NTC(PowerFlowModel):
                     lines[node_to_zone[v], node_to_zone[w]]['F_max'] += base_scenario.network[v][w]['F_max']
                     lines[node_to_zone[v], node_to_zone[w]]['B'] = min(lines[node_to_zone[v], node_to_zone[w]]['B'],
                                                                        base_scenario.network[v][w]['B'])
-        
-        # Add edges to the aggregated network, only if B no longer is set to inf (i.e., if at least one line between the zones existed in the base scenario)
+
+        # Add edges to the aggregated network, only if B no longer is set to inf (i.e., if at least one line between
+        # the zones existed in the base scenario)
         for z1, z2 in combinations(sorted(zones), 2):
             if lines[z1, z2]['B'] != float('inf'):
                 aggregated_network.add_edge(
@@ -91,10 +91,9 @@ class Zonal_NTC(PowerFlowModel):
             nodes_agents[z] = {}
             nodes_agents[z]['sellers'] = df_sellers[df_sellers['node'] == z]['seller'].unique().tolist()
             nodes_agents[z]['buyers'] = df_buyers[df_buyers['node'] == z]['buyer'].unique().tolist()
-            
+
         return Scenario(f'{base_scenario.name}', df_buyers, df_sellers, aggregated_network, nodes_agents,
                         base_scenario.periods, base_scenario.blocks_buyers, base_scenario.blocks_sellers, r_star)
-
 
     def solve(self, scenario: Scenario, configuration: Configuration, results_file: Optional[str] = None,
               stats_file: Optional[str] = None, u_fixed: Optional[dict] = None) \
@@ -112,7 +111,6 @@ class Zonal_NTC(PowerFlowModel):
         # solve a DCOPF problem for the constructed zonal network
         dcopf = DCOPF()
         return zonal_scenario, dcopf.solve(zonal_scenario, configuration, results_file)
-
 
     def __str__(self):
         return 'Zonal_NTC'

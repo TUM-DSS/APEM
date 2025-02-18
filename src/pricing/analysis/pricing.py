@@ -13,8 +13,10 @@ class Objective(ABC):
 
 
 class GLOCS(Objective):
-    """Global lost opportunity costs.
     """
+    Global lost opportunity costs.
+    """
+
     def __init__(self, total_glocs, glocs_buyers, glocs_sellers, glocs_network, glocs_per_buyer, glocs_per_seller,
                  glocs_per_line):
         super().__init__(total_glocs, glocs_buyers, glocs_sellers, glocs_network, glocs_per_buyer, glocs_per_seller,
@@ -50,8 +52,10 @@ class GLOCS(Objective):
 
 
 class LLOCS(Objective):
-    """Local lost opportunity costs.
     """
+    Local lost opportunity costs.
+    """
+
     def __init__(self, total_llocs, llocs_buyers, llocs_sellers, llocs_network, llocs_per_buyer, llocs_per_seller,
                  llocs_per_line):
         super().__init__(total_llocs, llocs_buyers, llocs_sellers, llocs_network, llocs_per_buyer, llocs_per_seller,
@@ -87,8 +91,10 @@ class LLOCS(Objective):
 
 
 class MWPS(Objective):
-    """Make-whole payments.
     """
+    Make-whole payments.
+    """
+
     def __init__(self, total_mwps, mwps_buyers, mwps_sellers, mwps_network, mwps_per_buyer, mwps_per_seller,
                  mwps_per_line):
         super().__init__(total_mwps, mwps_buyers, mwps_sellers, mwps_network, mwps_per_buyer, mwps_per_seller,
@@ -124,7 +130,8 @@ class MWPS(Objective):
 
 
 class Pricing:
-    """Pricing result.
+    """
+    Pricing result.
     """
 
     def __init__(self, node_prices, line_congestion_prices, used_algorithm, runtime, num_vars, num_constrs,

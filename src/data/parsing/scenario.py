@@ -9,6 +9,7 @@ import pypsa
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 
+
 class Scenario:
     """
     Buyers, sellers and network data.
@@ -28,10 +29,8 @@ class Scenario:
         self.r_star = r_star
         self.network_file = network_file
 
-
     def __str__(self):
         return self.name
-
 
     def analyse_scenario(self) -> None:
         """
@@ -48,11 +47,11 @@ class Scenario:
         res_proportion = round(len(res_sellers) / len(self.df_sellers), 2)
         demand = self.df_buyers['max_dem'].sum()
         supply = self.df_sellers['max_prod'].sum()
-        
+
         # Define and create results directory, if not exists
         results_directory = f"./results/{self.name}_results"
         os.makedirs(results_directory, exist_ok=True)
-            
+
         # Write contents to scenario.txt file
         output_file = os.path.join(results_directory, f"{self.name}_nodal_scenario.txt")
         f = open(output_file, 'w+')
@@ -78,53 +77,53 @@ class Scenario:
         f.write('\n')
         f.close()
 
-
-    def plot_network(self, zonal_config:str="") -> None:
+    def plot_network(self, zonal_config: str = "") -> None:
         """
         Plots the PyPSA network.
         
         Args:
             zonal_config (str, optional): if provided, nodes are colored according to their zonal assignments. Otherwise, they are colored black.
-        """     
-        
+        """
+
         # Define power flow model and create results directory, if not exists
         power_flow_model = "Zonal_NTC" if zonal_config else "DCOPF"
         results_directory = os.path.join("results", f"{self.name}_results", power_flow_model)
         os.makedirs(results_directory, exist_ok=True)
-            
+
         # Load PyPSA network
         n = pypsa.Network(self.network_file)
-        
+
         # Override network with the corresponding nodal PyPSA network, if required
         if zonal_config and self.name == 'PyPSA_Eur_Large':
             n = pypsa.Network("src/data/raw_data/pypsa_eur_large/elec_s_334m_ec_lv1.5_.nc")
         elif zonal_config and self.name == 'PyPSA_Eur_Small':
             n = pypsa.Network("src/data/raw_data/pypsa_eur_small/elec_s_40_ec_lv1.5_.nc")
-        
+
         # Filter power lines with non-zero capacity 
         n.lines = n.lines[n.lines["s_nom"] > 0]
-        
+
         # Extract longitude (x) & latitude (y) for buses
-        CRS="EPSG:4326"
+        CRS = "EPSG:4326"
         geo_df = gpd.GeoDataFrame(
-            n.buses, 
-            crs=CRS, 
+            n.buses,
+            crs=CRS,
             geometry=[Point(xy) for xy in zip(n.buses["x"], n.buses["y"])]
-        )      
-    
+        )
+
         # Assign colors based on zonal configuration
-        geo_df["color"] = "black" # default color
+        geo_df["color"] = "black"  # default color
         if zonal_config:
             # Load csv file with node-to-zone mapping
-            df_zones = pd.read_csv(os.path.join(results_directory, zonal_config, "node_to_zone.csv"), dtype={"node": str, "zone": str})  
-            
+            df_zones = pd.read_csv(os.path.join(results_directory, zonal_config, "node_to_zone.csv"),
+                                   dtype={"node": str, "zone": str})
+
             # Merge geo_df with df_zones on the 'node'
             geo_df = geo_df.merge(df_zones[["node", "zone"]], left_index=True, right_on="node", how="inner")
-            
+
             # Create colormap for zones
             unique_zones = sorted(geo_df["zone"].dropna().unique())
             ACER_BZR_colors = ['dodgerblue', 'coral', 'gold', 'darkviolet', 'green']
-            
+
             # Determine color mapping based on the number of zones
             if len(unique_zones) <= 5:
                 zone_to_color_mapping = {zone: color for zone, color in zip(unique_zones, ACER_BZR_colors)}
@@ -135,28 +134,28 @@ class Scenario:
                 zone_to_color_mapping.update({zone: color for zone, color in zip(unique_zones[5:], additional_colors)})
 
             # Assign colors to buses based on zones
-            geo_df["color"] = geo_df["zone"].map(zone_to_color_mapping)  
-           
-        # Create GeoDataFrame for lines
+            geo_df["color"] = geo_df["zone"].map(zone_to_color_mapping)
+
+            # Create GeoDataFrame for lines
         line_df = gpd.GeoDataFrame(
-            n.lines, 
-            crs=CRS, 
+            n.lines,
+            crs=CRS,
             geometry=[
-                LineString([(n.buses.loc[line["bus0"], "x"], n.buses.loc[line["bus0"], "y"] ),
-                            (n.buses.loc[line["bus1"], "x"], n.buses.loc[line["bus1"], "y"] )])
+                LineString([(n.buses.loc[line["bus0"], "x"], n.buses.loc[line["bus0"], "y"]),
+                            (n.buses.loc[line["bus1"], "x"], n.buses.loc[line["bus1"], "y"])])
                 for _, line in n.lines.iterrows()
             ]
-        )       
-    
+        )
+
         # Clear previous plot and create figure
         plt.clf()
         fig, ax = plt.subplots(figsize=(15, 15))
-        
+
         # Load and plot GADM map of Germany
         map_germany = gpd.read_file("src/data/raw_data/gadm41_DEU_shp/gadm41_DEU_1.shp")
         map_germany.plot(ax=ax, color="lightgray", alpha=0.5)
         map_germany.boundary.plot(ax=ax, color="lightgray", linewidth=1.0)  # show state borders
-        
+
         # Plot power lines
         line_df.plot(ax=ax, color="gray", linewidth=1.0, alpha=0.7)
 
@@ -167,19 +166,19 @@ class Scenario:
             marker="o",
             color=geo_df["color"]
         )
-        
+
         if zonal_config:
             # Add legend with zone colors to the plot
             sorted_zones = sorted(unique_zones, key=str)
-            legend_handles = [mpatches.Patch(color=zone_to_color_mapping[zone], label=f"Zone {zone}") for zone in sorted_zones]
+            legend_handles = [mpatches.Patch(color=zone_to_color_mapping[zone], label=f"Zone {zone}") for zone in
+                              sorted_zones]
             ax.legend(handles=legend_handles, loc="upper left", title=f"Zones in {zonal_config}")
 
         # Save figure
         file_name = f"{self.name}_{zonal_config}" if zonal_config else self.name
         plt.savefig(f"{results_directory}/{file_name}_network.png", bbox_inches='tight', dpi=300)
         plt.close(fig)
-    
-    
+
     def get_geo_coordinates(self) -> dict:
         """
         Computes the geographic coordinates of each node.

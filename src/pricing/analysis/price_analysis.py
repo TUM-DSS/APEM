@@ -20,7 +20,6 @@ class PriceAnalysis:
         self.allocation = allocation
         self.pricing = pricing
 
-
     def compute_glocs(self, file_glocs="", mode="w") -> Optional[GLOCS]:
         pricing = self.pricing
         if pricing.status == 1:
@@ -44,7 +43,6 @@ class PriceAnalysis:
             return pricing.glocs
 
         return None
-
 
     def compute_llocs(self, file_llocs="", mode="w") -> Optional[LLOCS]:
         pricing = self.pricing
@@ -70,7 +68,6 @@ class PriceAnalysis:
 
         return None
 
-
     def compute_mwps(self, file_mwps="", mode="w") -> Optional[MWPS]:
         pricing = self.pricing
         if pricing.status == 1:
@@ -95,14 +92,12 @@ class PriceAnalysis:
 
         return None
 
-
     def compute_objectives(self, file_objectives="", mode="w") -> Pricing:
         self.compute_glocs(file_glocs=file_objectives, mode=mode)
         self.compute_llocs(file_llocs=file_objectives, mode="a")
         self.compute_mwps(file_mwps=file_objectives, mode="a")
 
         return self.pricing
-
 
     def performance_statistics(self, file_stats="", mode="w") -> Tuple[float, float, float]:
         pricing = self.pricing
@@ -116,7 +111,6 @@ class PriceAnalysis:
 
         return pricing.runtime, pricing.num_vars, pricing.num_constrs
 
-
     def avg_price(self, file_avg="", mode="w") -> float:
         prices = self.pricing.node_prices.values()
         avg = sum(prices) / len(prices) if len(prices) > 0 else 0
@@ -127,7 +121,6 @@ class PriceAnalysis:
             file.close()
 
         return avg
-
 
     def avg_prices_periods(self, file_plot="", file_avg="", mode="w") -> dict:
         avg_prices = pd.DataFrame(columns=['period', 'avg_price'])
@@ -152,8 +145,7 @@ class PriceAnalysis:
 
         return avg_prices_dict
 
-
-    def avg_node_prices(self, file_avg:str="", mode:str="w") -> dict:
+    def avg_node_prices(self, file_avg: str = "", mode: str = "w") -> dict:
         avg_prices = pd.DataFrame(columns=['node', 'avg_price'])
         for (v, _), p in self.pricing.node_prices.items():
             avg_prices.loc[len(avg_prices)] = {'node': str(v), 'avg_price': p}
@@ -173,14 +165,13 @@ class PriceAnalysis:
 
         return avg_prices_dict
 
-
-    def compute_all_stats_and_plot_data(self, dir_stats:str, pf_model_value) -> None:
+    def compute_all_stats_and_plot_data(self, dir_stats: str, pf_model_value) -> None:
         if self.scenario.name != "ARPA":
             plot_supply_demand(dir_stats, self.scenario)
-        
+
         zonal_config = pf_model_value.zonal_configuration if isinstance(pf_model_value, Zonal_NTC) else ""
         zonal_path = zonal_config + "/" if zonal_config else ""
-        
+
         path = f"{dir_stats}/{pf_model_value}/{zonal_path}{self.pricing.used_algorithm}_results"
         os.makedirs(path, exist_ok=True)
 
@@ -195,4 +186,4 @@ class PriceAnalysis:
 
         if self.scenario.name in ["PyPSA_Eur_Large", "PyPSA_Eur_Small"]:
             plot_pypsa_heatmap(f"{path}/{self.pricing.used_algorithm}_heatmap.png", self.scenario.name,
-                          avg_prices, zonal_config)
+                               avg_prices, zonal_config)
