@@ -8,7 +8,7 @@ After cloning the code, the following setup steps need to be performed once befo
 **Note:** The setup instructions assume a Linux-based or Windows OS and require Python 3.10 (or higher). 
 
 ### 1. Virtual environment
-- Create a virtual environment (alternatively, you can use `virtualenv` or whatever you prefer) - you can choose any name (e.g., "apem-venv"):
+- Create a virtual environment (alternatively, you can use `virtualenv` or whatever you prefer) - you may choose any name (e.g., "apem-venv"):
 ```bash
 python -m venv <venv_name>   # Example: python -m venv apem-venv
 ```
@@ -46,7 +46,7 @@ To run the code, a valid academic or commercial Gurobi license is required ([mor
 
 After setting up the repository, you can run the code by executing the [main.py](./main.py) file with different configurations for the
 - **datasets** (currently: ARPA-E, IEEE RTS, PJM, PyPSAEurLarge, and PyPSAEurSmall),
-- **power flow models** (currently: DCOPF and Zonal NTC), and
+- **power flow models** (currently: DCOPF and Zonal_NTC), and
 - **pricing algorithms** (currently: ELMP, IP, Join, and Min_MWP).
 
 It is advised to start working with the tuple (PyPSAEurSmall, DCOPF, IP).
@@ -56,3 +56,5 @@ python main.py
 ```
 
 Once the execution is done, a new `results` folder will be created storing detailed allocation and pricing results.
+
+**Note:** If you ever run into the error "ModuleNotFoundError: No module named 'src'", this can likely be resolved by setting the PYTHONPATH inside your virtual environment. To do this, add the following line to <venv_name>/bin/activate: `export PYTHONPATH=/<path-to-APEM>`.
