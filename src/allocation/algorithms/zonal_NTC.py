@@ -37,8 +37,8 @@ class Zonal_NTC(PowerFlowModel):
         for node in base_scenario.network.nodes:
             for node_index in list(network.buses.index):
                 if str(node) == node_index:
-                    lon = network.buses[network.buses.index == node_index]['x'][0]
-                    lat = network.buses[network.buses.index == node_index]['y'][0]
+                    lon = network.buses.at[node_index, 'x']
+                    lat = network.buses.at[node_index, 'y']
 
                     # map node to zone based on latitude and longitude coordinates
                     zone = node_zone_mapper(self.zonal_configuration, lat=lat, lon=lon)
