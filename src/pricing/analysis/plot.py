@@ -5,10 +5,6 @@ import pandas as pd
 import pypsa
 from matplotlib import pyplot as plt
 from shapely.geometry import Point, LineString
-import warnings
-
-warnings.filterwarnings("ignore", category=UserWarning, module="cartopy")
-warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 
 def plot_avg_prices(avg_prices, scenario, file_plot="") -> None:

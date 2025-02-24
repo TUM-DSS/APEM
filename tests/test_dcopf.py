@@ -1,10 +1,7 @@
 import unittest
 import os
-import warnings
 
 from src.execution_chain import solve_scenario, Datasets, PowerFlowModels, PricingAlgorithms
-
-warnings.simplefilter(action='ignore', category=FutureWarning)
 
 
 class Test_DCOPF_IEEERTS_PricingAlgorithm(unittest.TestCase):
