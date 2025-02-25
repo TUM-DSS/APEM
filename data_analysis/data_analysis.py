@@ -1,0 +1,329 @@
+## Data Analysis
+# Makes the results of the algorithms comparable via Visualizations and Indicators. Results are saved in data_analysis/results_data_analysis
+# Currently only for DCOPF. Should be extended after implementation of Euphemia..
+# Comparison with Real Day Ahead Prices only possible on local computers for data protection reasons
+
+
+import os
+import re
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+#PowerFlowModels: DCOPF, Zonal_NTC
+#Pricing Algorithms: ELMP, IP, MinMWP, Join
+
+Testing_Data_Set = 'PyPSAEurLarge'  #Choose between IEEE_RTS, PJM, PyPSAEurSmall, PyPSAEurLarge, ARPA
+saving = 1 #for 1: All Outputs will be saved at data_analysis/results_data_analysis
+# Real_data = 0
+
+
+def save_results(Testing_Data_Set):
+    # Get the directory of the script and move one level up
+    script_dir = os.path.dirname(os.path.abspath(__file__))  
+    parent_dir = os.path.dirname(script_dir)  # Move one level up
+
+    # Set the working directory to the parent directory
+    os.chdir(parent_dir)
+    
+    # Define the base path for result files
+    modified_string = re.sub(r'(?<!^)(?=[A-Z][a-z])', '_', Testing_Data_Set)  # Convert variable name to corresponding folder name
+    base_path = f"results/{modified_string}_results/DCOPF/"
+
+    # Define result files with corresponding paths
+    result_files = {
+        'ELMP': 'ELMP_results\\ELMP_stats.txt',
+        'IP': 'IP_results\\IP_stats.txt',
+        'Join': 'Join_results\\Join_stats.txt',
+        'Min_MWP': 'Min_MWP_results\\Min_MWP_stats.txt'
+    }
+
+    # Create CSV output directory
+    output_dir = 'results_data_analysis'
+    os.makedirs(output_dir, exist_ok=True)
+    output_file = os.path.join('data_analysis', output_dir, f'Summary_{Testing_Data_Set}.csv')
+
+    # Collect results
+    data_dict = {}  # Dictionary to store labels and values
+
+    for key, rel_path in result_files.items():
+        file_path = os.path.join(base_path, rel_path)
+        file_path = os.path.normpath(file_path)
+
+        if os.path.exists(file_path):
+            with open(file_path, 'r', encoding='utf-8') as file:
+                for line in file:
+                    if ':' in line:
+                        parts = line.split(':', 1)  # Split only at the first colon
+                        label = parts[0].strip()
+                        value = parts[1].strip()
+
+                        try:
+                            value = float(value)  # Convert to float if possible
+                        except ValueError:
+                            pass  # Keep it as a string if conversion fails
+
+                        # Append value if label already exists, otherwise create a new list
+                        if label in data_dict:
+                            data_dict[label].append(value)
+                        else:
+                            data_dict[label] = [value]  # Create a new list with the first value
+        else:
+            print(f'Warning: File {file_path} does not exist and will be skipped.')
+
+    # Convert dictionary into a list of lists for Pandas DataFrame
+    data = [[key] + values for key, values in data_dict.items()]
+
+    # **Adjust column headers**
+    headers = ["Label"] + list(result_files.keys())  # First column is static, others are dynamic
+
+    # Create DataFrame with appropriate column names
+    df = pd.DataFrame(data, columns=headers)
+
+    # Replace decimal points with commas (only for numeric values)
+    df = df.map(lambda x: str(x).replace('.', ',') if isinstance(x, (float, int)) else x)
+
+    # Save CSV with semicolon as column separator
+
+    os.makedirs('data_analysis/results_data_analysis', exist_ok=True)
+    df.to_csv(output_file, index=False, encoding='utf-8', sep=';')
+
+    print(f'CSV file successfully saved at: {output_file}')
+
+    return data
+
+
+
+
+
+def plot_results(all_results, testing_data_set):
+
+    # # Comparison values from EPEX Spot. Only available locally for data protection reasons
+    # csv_file_path = r'C:\Users\SimonKreiml\OneDrive - FIM Forschungsinstitut\Dokumente - Energiedaten\_Rohdaten\EPEX Spot\Daten-sieheWichtigeBenutzungshinweise\01_EPEXDayAhead\DayAheadAuction-2013-03-01.csv'
+    # # Note: The delimiter in pandas is ',' by default; to use ';' as the delimiter, we must specify it explicitly
+    # try:
+    #     # First, try to open the file with the default encoding ('utf-8')
+    #     csv_data = pd.read_csv(csv_file_path, delimiter=';')
+    # except UnicodeDecodeError:
+    #     # If a UnicodeDecodeError occurs, try 'ISO-8859-1'
+    #     csv_data = pd.read_csv(csv_file_path, delimiter=';', encoding='ISO-8859-1')
+
+    # # csv_data = pd.read_csv(csv_file_path, delimiter=';')
+
+    # hourly_costs_real_prices = csv_data['x__MWh']
+    # List of column names
+    # Creating the column names
+    average_price_keys = [f'Average price in period {x}' for x in list(range(1, 7)) + list(range(8, 25))]
+    output_folder = 'results_data_analysis'
+    
+    # Ensure the output folder exists
+    os.makedirs(output_folder, exist_ok=True)
+    
+    # Prepare plot data
+    elmp, ip, join, min_mwp = [], [], [], []
+    
+    for key in average_price_keys:
+        # row = all_results.loc[all_results[0] == key]
+        row = next((item for item in all_results if item[0] == key), None)
+        if row is not None:
+            elmp.append(float(row[1]))
+            ip.append(float(row[2]))
+            join.append(float(row[3]))
+            min_mwp.append(float(row[4]))
+        else:
+            raise ValueError(f'Row with {key} not found.')
+    
+    # Create plots
+    plt.figure()
+    plt.plot(elmp, '-o', label='ELMP')
+    plt.plot(ip, '-o', label='IP')
+    plt.plot(join, '-o', label='Join')
+    plt.plot(min_mwp, '-o', label='Min MWP')
+    # plt.plot(hourly_costs_real_prices, '-x', label='Real Day-Ahead price')  # Adding the €/MWh values
+    plt.title(f'Average Costs per Hour; {testing_data_set}')
+    plt.xlabel('Hour')
+    plt.xticks(ticks=range(24), labels=range(1, 25))
+    plt.ylim([0, 100])
+    plt.ylabel('Costs €/MWh')
+    plt.legend()
+    
+    plt.grid(True)
+    plt.show()
+    
+    # Save the plot as PNG
+    if saving:
+        os.makedirs('data_analysis/results_data_analysis', exist_ok=True)
+        plt.savefig(f'data_analysis/results_data_analysis/Average_Costs_Hour_{testing_data_set}.png')
+    # plt.close()
+    
+    # Boxplot creation
+    data = [elmp, ip, join, min_mwp]  #, hourly_costs_real_prices]
+    variable_names = ['ELMP', 'IP', 'Join', 'Min MWP']  #, 'Real Day-Ahead price']
+    
+    # Initialize plot
+    plt.figure()
+    plt.boxplot(data, tick_labels=variable_names, notch=False, patch_artist=True, boxprops=dict(facecolor='lightgray'))
+    plt.ylim([0, 100])
+    plt.ylabel('Values')
+    plt.title(f'Boxplot of average Costs per zone; {testing_data_set}')
+    plt.grid(True)
+    plt.show()
+    
+    # Save the boxplot as PNG
+    if saving:
+        os.makedirs('data_analysis/results_data_analysis', exist_ok=True)
+        plt.savefig(f'data_analysis/results_data_analysis/Boxplot_Average_Costs_{testing_data_set}.png')
+        
+    # plt.close()
+    
+    # Create column names
+    average_price_keys = [f'Average price at node DE0 {x}' for x in list(range(1, 7)) + list(range(8, 40))]
+    
+    # Prepare plot data
+    ELMP, IP, Join, Min_MWP = [], [], [], []
+    
+    for key in average_price_keys:
+        row = next((row for row in all_results if row[0] == key), None)
+        if row:
+            ELMP.append(float(row[1]))
+            IP.append(float(row[2]))
+            Join.append(float(row[3]))
+            Min_MWP.append(float(row[4]))
+        else:
+            raise ValueError(f'Row with {key} not found.')
+    
+    # Create plots
+    plt.figure()
+    plt.plot(ELMP, '-o', label='ELMP')
+    plt.plot(IP, '-o', label='IP')
+    plt.plot(Join, '-o', label='Join')
+    plt.plot(Min_MWP, '-o', label='Min MWP')
+    plt.title(f'Average Costs per zone; {testing_data_set}')
+    plt.xlabel('Zones')
+    plt.xticks(range(39))
+    plt.ylabel('Costs')
+    plt.legend()
+    plt.show()
+    plt.grid()
+    if saving:
+        os.makedirs('data_analysis/results_data_analysis', exist_ok=True)
+        plt.savefig(f'data_analysis/results_data_analysis/Average_Zone_{testing_data_set}.png')
+    
+    # plt.close()
+    
+    # Create boxplot
+    data = [ELMP, IP, Join, Min_MWP]
+    variable_names = ['ELMP', 'IP', 'Join', 'Min MWP']
+    
+    plt.figure()
+    plt.boxplot(data, tick_labels=variable_names, patch_artist=True)
+    plt.ylabel('Values')
+    plt.title(f'Boxplot of average Costs per zone; {testing_data_set}')
+    plt.grid()
+    plt.show()
+    if saving:
+        plt.savefig(f'data_analysis/results_data_analysis/Boxplot_Average_Zone_{testing_data_set}.png')
+    # plt.close()
+
+
+
+
+    
+
+def indicators(All_Results, Testing_Data_Set):
+    # Create column names
+    average_price_keys = [f'Average price in period {x}' for x in range(1, 25)]
+    
+    # Prepare plot data
+    ELMP, IP, Join, Min_MWP = [], [], [], []
+    All_Results = np.array(All_Results) 
+    key_indicators = All_Results[:16, :]
+    print(key_indicators)
+    
+    for key in average_price_keys:
+        rowIndex = np.where(All_Results[:, 0] == key)[0]
+        if rowIndex.size > 0:
+            rowIndex = rowIndex[0]
+            ELMP.append(float(All_Results[rowIndex, 1]))  # Column 2
+            IP.append(float(All_Results[rowIndex, 2]))    # Column 3
+            Join.append(float(All_Results[rowIndex, 3]))  # Column 4
+            Min_MWP.append(float(All_Results[rowIndex, 4])) # Column 5
+        else:
+            raise ValueError(f'Row with {key} not found.')
+    
+    # Add hourlyCosts as a new time series
+    data = np.array([ELMP, IP, Join, Min_MWP])#, hourlyCosts])
+    
+    # Compute the statistics matrix
+    average = np.mean(data, axis=1)
+    medianValue = np.median(data, axis=1)
+    variance = np.var(data, axis=1)
+    minimum = np.min(data, axis=1)
+    maximum = np.max(data, axis=1)
+    
+    statisticsMatrix = np.vstack((average, medianValue, variance, minimum, maximum)).T
+    
+    # Initialize correlation and distance matrix
+    n = data.shape[0]
+    correlationMatrix = np.corrcoef(data)
+    distanceMatrix = np.linalg.norm(data[:, np.newaxis] - data, axis=2)
+    
+    # Names of time series
+    names = ['ELMP', 'IP', 'Join', 'Min_MWP']#, 'Real Day-Ahead price']
+    statNames = ['Average', 'Median', 'Variance', 'Min', 'Max']
+    
+    # Display statistics matrix
+    print('Statistics Matrix:')
+    print(pd.DataFrame(statisticsMatrix, index=names, columns=statNames))
+    
+    # Display correlation matrix
+    print('Correlation Matrix:')
+    print(pd.DataFrame(correlationMatrix, index=names, columns=names))
+    
+    # Display distance matrix
+    print('Distance Matrix (Euclidean Distance):')
+    print(pd.DataFrame(distanceMatrix, index=names, columns=names))
+    
+    # Ensure output folder exists
+    output_folder = 'data_analysis/results_data_analysis'
+    os.makedirs(output_folder, exist_ok=True)
+    
+    # Excel file name
+    excel_filename = os.path.join(output_folder, f'Indicators_{Testing_Data_Set}.xlsx')
+
+    # Use ExcelWriter to store multiple sheets in one file
+    with pd.ExcelWriter(excel_filename, engine='xlsxwriter') as writer:
+        # Process key_indicators
+        headers = key_indicators[:, 0]
+        nums = np.array(key_indicators[:, 1:5], dtype=float)
+        df_key_indicators = pd.DataFrame(nums, index=headers, columns=names)
+        df_key_indicators.to_excel(writer, sheet_name='Key_Indicators')
+
+        # Save statistics matrix
+        df_statistics = pd.DataFrame(statisticsMatrix, index=names, columns=statNames)
+        df_statistics.to_excel(writer, sheet_name='Statistics')
+
+        # Save correlation matrix
+        df_correlation = pd.DataFrame(correlationMatrix, index=names, columns=names)
+        df_correlation.to_excel(writer, sheet_name='Correlation')
+
+        # Save distance matrix
+        df_distance = pd.DataFrame(distanceMatrix, index=names, columns=names)
+        df_distance.to_excel(writer, sheet_name='Distance')
+
+    print(f'Excel file saved: {excel_filename}')
+
+
+
+
+
+
+#Function Calls
+
+
+All_Results = save_results(Testing_Data_Set)
+plot_results(All_Results,Testing_Data_Set)
+indicators(All_Results, Testing_Data_Set)
+
+
+
