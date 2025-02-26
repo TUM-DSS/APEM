@@ -18,8 +18,11 @@ from src.pricing.analysis.price_analysis import PriceAnalysis
 
 class PowerFlowModels(Enum):
     DCOPF = DCOPF()
-    Zonal_NTC = Zonal_NTC(zonal_configuration='zonal_DE2-k',
-                          factor=0.8)  # the factor (between 0 and 1) describes the conservativeness of the NTC model
+    Zonal_NTC = Zonal_NTC(zonal_configuration='zonal_DE4-refined',
+                          factor=0.8)
+    # set zonal_configuration to one of zonal_DE2-k, zonal_DE2-s, zonal_DE3, zonal_DE4, zonal_DE4-refined, as
+    # described in zonal_configuration.py
+    # the factor (between 0 and 1) describes the conservativeness of the NTC model
 
 
 class PricingAlgorithms(Enum):
@@ -48,9 +51,6 @@ def _create_configuration(MIP_gap=1e-4, optimality_tol=1e-6, time_limit=60 * 60,
 
 
 def _solve_allocation_problem(dataset, power_flow_model, configuration, u_fixed=None):
-    if isinstance(dataset, Datasets):
-        dataset = _retrieve_data(dataset)
-
     power_flow_model = power_flow_model.value
 
     zonal_part = f"{power_flow_model.zonal_configuration}/" if isinstance(power_flow_model, Zonal_NTC) else ""
@@ -64,9 +64,6 @@ def _solve_allocation_problem(dataset, power_flow_model, configuration, u_fixed=
 
 
 def _solve_pricing_problem(dataset, allocation, pricing_algorithm, power_flow_model, prices=None):
-    if isinstance(dataset, Datasets):
-        dataset = _retrieve_data(dataset)
-
     pricing_algorithm = pricing_algorithm.value
     power_flow_model = power_flow_model.value
 
