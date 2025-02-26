@@ -61,27 +61,33 @@ class Zonal_NTC(PowerFlowModel):
 
         # create network with one line between any two zones
         aggregated_network = nx.Graph()
-        lines = {(z1, z2): {'F_max': 0, 'B': float('inf')} for z1, z2 in combinations(sorted(zones), 2)}
+        if len(zones) > 1:
+            lines = {(z1, z2): {'F_max': 0, 'B': float('inf')} for z1, z2 in combinations(sorted(zones), 2)}
 
-        # for each interconnector between two zones set
-        # its capacity to the sum of the capacities of the cross-zonal lines multiplied by self.factor and
-        # its susceptance to the minimum susceptance of any cross-zonal line
-        for v in base_scenario.network.nodes:
-            for w in base_scenario.network.nodes:
-                if node_to_zone[v] < node_to_zone[w] and (v, w) in base_scenario.network.edges():
-                    lines[node_to_zone[v], node_to_zone[w]]['F_max'] += base_scenario.network[v][w]['F_max']
-                    lines[node_to_zone[v], node_to_zone[w]]['B'] = min(lines[node_to_zone[v], node_to_zone[w]]['B'],
-                                                                       base_scenario.network[v][w]['B'])
+            # for each interconnector between two zones set
+            # its capacity to the sum of the capacities of the cross-zonal lines multiplied by self.factor and
+            # its susceptance to the minimum susceptance of any cross-zonal line
+            for v in base_scenario.network.nodes:
+                for w in base_scenario.network.nodes:
+                    if node_to_zone[v] < node_to_zone[w] and (v, w) in base_scenario.network.edges():
+                        lines[node_to_zone[v], node_to_zone[w]]['F_max'] += base_scenario.network[v][w]['F_max']
+                        lines[node_to_zone[v], node_to_zone[w]]['B'] = min(lines[node_to_zone[v], node_to_zone[w]]['B'],
+                                                                        base_scenario.network[v][w]['B'])
 
-        # Add edges to the aggregated network, only if B no longer is set to inf (i.e., if at least one line between
-        # the zones existed in the base scenario)
-        for z1, z2 in combinations(sorted(zones), 2):
-            if lines[z1, z2]['B'] != float('inf'):
-                aggregated_network.add_edge(
-                    z1, z2,
-                    B=lines[z1, z2]['B'],
-                    F_max=lines[z1, z2]['F_max'] * self.factor
-                )
+            # add edges to the aggregated network, only if B no longer is set to inf (i.e., if at least one line between
+            # the zones existed in the base scenario)
+            for z1, z2 in combinations(sorted(zones), 2):
+                if lines[z1, z2]['B'] != float('inf'):
+                    aggregated_network.add_edge(
+                        z1, z2,
+                        B=lines[z1, z2]['B'],
+                        F_max=lines[z1, z2]['F_max'] * self.factor
+                    )
+         
+        # if only a single zone exists: create network without edges  
+        else:
+            national_zone = list(zones.keys())[0]
+            aggregated_network.add_node(national_zone)
 
         r_star = list(aggregated_network.nodes)[0]
 

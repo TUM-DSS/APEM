@@ -20,8 +20,8 @@ class PowerFlowModels(Enum):
     DCOPF = DCOPF()
     Zonal_NTC = Zonal_NTC(zonal_configuration='zonal_DE4-refined',
                           factor=0.8)
-    # set zonal_configuration to one of zonal_DE2-k, zonal_DE2-s, zonal_DE3, zonal_DE4, zonal_DE4-refined, as
-    # described in zonal_configuration.py
+    # set zonal_configuration to one of national, zonal_DE2-k, zonal_DE2-s, zonal_DE3, zonal_DE4, zonal_DE4-refined,
+    # as described in zonal_configuration.py
     # the factor (between 0 and 1) describes the conservativeness of the NTC model
 
 
@@ -78,7 +78,8 @@ def _solve_pricing_problem(dataset, allocation, pricing_algorithm, power_flow_mo
 
 
 def analyse_results(dataset, allocation, pricing, pf_model_value):
-    """
+    """Performs several analyses.
+    
     Args:
         dataset (Datasets): dataset for which the price analysis is to be performed
         allocation (Allocation): precomputed allocation
@@ -88,9 +89,6 @@ def analyse_results(dataset, allocation, pricing, pf_model_value):
     Returns:
         PricingAnalysis object
     """
-    if isinstance(dataset, Datasets):
-        dataset = _retrieve_data(dataset)
-
     path = f"results/{dataset}_results"
     os.makedirs(path, exist_ok=True)
 
@@ -121,7 +119,8 @@ def solve_scenario(dataset, power_flow_model, pricing_algorithm):
     else:
         if dataset not in [Datasets.PyPSAEurLarge, Datasets.PyPSAEurSmall]:
             raise ValueError(
-                f"The dataset {dataset.name} cannot be used in combination with the power flow model {power_flow_model.value}. Zonal prices can only be computed for the PyPSA datasets.")
+                f"The dataset {dataset.name} cannot be used in combination with the power flow model \
+                {power_flow_model.value}. Zonal prices can only be computed for the PyPSA datasets.")
         scenario, allocation = _solve_allocation_problem(scenario, power_flow_model, configuration)
     pricing = _solve_pricing_problem(scenario, allocation, pricing_algorithm, power_flow_model)
     return PriceAnalysis(scenario, allocation, pricing)
@@ -154,7 +153,8 @@ def solve_and_analyse_scenario(dataset, power_flow_model, pricing_algorithm):
 
 
 def apply_all_algorithms(dataset):
-    """Computes allocation and pricing and performs several analyses for all valid combinations of power flow models and pricing algorithms for a defined dataset.
+    """Computes allocation and pricing and performs several analyses for all valid combinations of power flow 
+    models and pricing algorithms for a defined dataset.
 
     Args:
         dataset (Datasets): dataset for which allocation and pricing are computed
@@ -186,7 +186,8 @@ def apply_all_algorithms(dataset):
 
 
 def apply_to_all_datasets(power_flow_model, pricing_algorithm):
-    """Computes allocation and pricing and performs several analyses for all valid datasets for a defined combination of power flow model and pricing algorithm.
+    """Computes allocation and pricing and performs several analyses for all valid datasets for a defined 
+    combination of power flow model and pricing algorithm.
 
     Args:
         power_flow_model (PowerFlowModels): power flow model for which allocation and pricing are computed
