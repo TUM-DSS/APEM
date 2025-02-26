@@ -116,7 +116,7 @@ class Zonal_NTC(PowerFlowModel):
 
         # solve a DCOPF problem for the constructed zonal network
         dcopf = DCOPF()
-        return zonal_scenario, dcopf.solve(zonal_scenario, configuration, results_file)
+        return zonal_scenario, dcopf.solve(zonal_scenario, configuration, results_file, stats_file)
 
     def __str__(self):
         return 'Zonal_NTC'
