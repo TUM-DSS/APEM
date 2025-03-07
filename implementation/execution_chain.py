@@ -20,7 +20,7 @@ def retrieve_data(dataset, day=None):
 #                         relaxation, output_flag)
 
 
-def solve_and_analyse_scenario(dataset, power_flow_model, pricing_algorithm, file_pypsa_network=""):
+def solve_and_analyse_scenario(dataset):
     scenario = retrieve_data(dataset)
     if dataset == Datasets.EU:
         euphemia = Euphemia(scenario)
