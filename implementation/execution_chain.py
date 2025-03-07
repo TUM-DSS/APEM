@@ -1,0 +1,27 @@
+import os.path
+import shutil
+from enum import Enum
+
+from implementation.allocation.algorithms.euphemia import Euphemia
+from implementation.data.parsing.parse_eu import ParseEU
+
+
+class Datasets(Enum):
+    EU = ParseEU()
+
+
+def retrieve_data(dataset, day=None):
+    return dataset.value.parse_data(day)
+
+
+#def create_configuration(MIP_gap=1e-4, optimality_tol=1e-6, time_limit=60 * 60, work_limit=60 * 60, threads=0,
+#                         presparsify=-1, strict_supply_demand_eq=True, relaxation=False, output_flag=0):
+#    return Configuration(MIP_gap, optimality_tol, time_limit, work_limit, threads, presparsify, strict_supply_demand_eq,
+#                         relaxation, output_flag)
+
+
+def solve_and_analyse_scenario(dataset, power_flow_model, pricing_algorithm, file_pypsa_network=""):
+    scenario = retrieve_data(dataset)
+    if dataset == Datasets.EU:
+        euphemia = Euphemia(scenario)
+        euphemia.solve()
