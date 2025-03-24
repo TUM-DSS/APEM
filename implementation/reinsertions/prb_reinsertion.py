@@ -1,4 +1,4 @@
-from implementation.pricing.price_determination_subproblem import solve_price_determination_subproblem
+from implementation.pricing.price_determination_subproblem import Price_Subproblem
 from implementation.utils.extraction import get
 
 def PRB_reinsertion(self):
@@ -15,7 +15,7 @@ def PRB_reinsertion(self):
             if not infeasible:
                 new_obj = self.get_objective()
                 if obj <= new_obj:
-                    solve_price_determination_subproblem(self, reinsertion=True)
+                    #solve_price_determination_subproblem(self, reinsertion=True) TODO later with new price subproblem implementation
                     pab = self.get_block_bids(threshold=False, reinsertion=True)
                     if len(pab) == 0:
                         violated_complex_mic = self.get_MIC_complex_orders(reinsertion=True)

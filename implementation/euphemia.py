@@ -8,7 +8,7 @@ from gurobipy import GRB
 
 from implementation.data.parsing.zonal_scenario import ZonalScenario
 from implementation.model.setup_model import add_objective, add_market_constraints, add_network_constraints
-from implementation.pricing.price_determination_subproblem import solve_price_determination_subproblem
+from implementation.pricing.price_determination_subproblem import Price_Subproblem
 from implementation.reinsertions.prb_reinsertion import PRB_reinsertion
 from implementation.utils.extraction import get
 
@@ -88,106 +88,86 @@ class Euphemia:
         add_market_constraints(self)
         add_network_constraints(self)
 
-        self.iteration = 1
-        success = True
-        while self.iteration < self.max_iterations:
-            print(f"\nIteration {self.iteration}\n")
-            success = True
+        print("Solving master problem...")
+        self.solve_master_problem()
 
-            print("Solving master problem...")
-            self.solve_master_problem()
-            infeasible = self.check_infeasibility(self.model)
-            if infeasible:
-                print(f"Model is infeasible - iteration {self.iteration}")
-                exit()
 
-            print(f"Economic surplus: {self.get_objective()}")
 
-            print("Solving price determination subproblem...")
-            solve_price_determination_subproblem(self)
-
-            print("Computing PAB...")
-            pab = self.get_block_bids(threshold=False)
-            if len(pab) > 0:
-                success = False
-                print(f"There are {len(pab)} PAB. Adding block cut...")
-                cut_added = self.add_block_cut()
-                increase_count = 0
-                while not cut_added and increase_count < 5:
-                    increase_count += 1
-                    self.delta_PAB += 10
-                    print(f"Increasing delta_PAB to {self.delta_PAB}.\n")
-                    cut_added = self.add_block_cut()
-
-                if not cut_added:
-                    print("Reject PAB.")
-                    self.model.addConstrs(self.accept_block[i] == 0 for i in pab)
-
-                self.delta_PAB -= 10 * increase_count
-                self.iteration += 1
-                continue
-
-            print("No PAB.")
-
-            print("Computing complex orders with MIC/MP condition violated...")
-            violated_MIC_MP_complex = self.get_MIC_complex_orders(threshold=False)
-            if len(violated_MIC_MP_complex) > 0:
-                success = False
-                print(f"MIC/MP conditions violated in {len(violated_MIC_MP_complex)} complex orders.")
-                cut_added = self.add_MIC_complex_cut()
-                increase_count = 0
-                while not cut_added and increase_count < 5:
-                    increase_count += 1
-                    self.delta_MIC += 10
-                    print(f"Increasing delta_MIC to {self.delta_MIC}.\n")
-                    cut_added = self.add_MIC_complex_cut()
-
-                if not cut_added:
-                    print("Reject complex orders with MIC condition violated.")
-                    self.model.addConstrs(self.accept_complex[i] == 0 for i in violated_MIC_MP_complex)
-
-                self.delta_MIC -= 10 * increase_count
-                self.iteration += 1
-                continue
-
-            print(f"MIC condition satisfied in complex orders.")
-
-            print("Computing scalable complex orders with MIC/MP condition violated...")
-            violated_MIC_MP_scalable = self.get_MIC_scalable_orders(threshold=False)
-            if len(violated_MIC_MP_scalable) > 0:
-                success = False
-                print(f"MIC/MP conditions violated in {len(violated_MIC_MP_scalable)} scalable complex orders.")
-                cut_added = self.add_MIC_scalable_cut()
-                increase_count = 0
-                while not cut_added and increase_count < 5:
-                    increase_count += 1
-                    self.delta_MIC += 10
-                    print(f"Increasing delta_MIC to {self.delta_MIC}.\n")
-                    cut_added = self.add_MIC_scalable_cut()
-
-                if not cut_added:
-                    print("Reject scalable complex orders with MIC condition violated.")
-                    self.model.addConstrs(self.accept_scalable[i] == 0 for i in violated_MIC_MP_scalable)
-
-                self.delta_MIC -= 10 * increase_count
-                self.iteration += 1
-                continue
-
-            print(f"MIC condition satisfied in scalable complex orders.")
-
-            if success:
-                print("Pricing subproblem solved.")
-                break
-            else:
-                print("Could not find a solution.\n")
-
-        if not success:
-            print("Could not find a solution.\n")
-
-        print("\nPRB reinsertion...\n")
-        PRB_reinsertion(self)
+        #
+        # print("Computing PAB...")
+        # pab = self.get_block_bids(threshold=False)
+        # if len(pab) > 0:
+        #     success = False
+        #     print(f"There are {len(pab)} PAB. Adding block cut...")
+        #     cut_added = self.add_block_cut()
+        #     increase_count = 0
+        #     while not cut_added and increase_count < 5:
+        #         increase_count += 1
+        #         self.delta_PAB += 10
+        #         print(f"Increasing delta_PAB to {self.delta_PAB}.\n")
+        #         cut_added = self.add_block_cut()
+        #
+        #     if not cut_added:
+        #         print("Reject PAB.")
+        #         self.model.addConstrs(self.accept_block[i] == 0 for i in pab)
+        #
+        #     self.delta_PAB -= 10 * increase_count
+        #     self.iteration += 1
+        #     continue
+        #
+        # print("No PAB.")
+        #
+        # print("Computing complex orders with MIC/MP condition violated...")
+        # violated_MIC_MP_complex = self.get_MIC_complex_orders(threshold=False)
+        # if len(violated_MIC_MP_complex) > 0:
+        #     success = False
+        #     print(f"MIC/MP conditions violated in {len(violated_MIC_MP_complex)} complex orders.")
+        #     cut_added = self.add_MIC_complex_cut()
+        #     increase_count = 0
+        #     while not cut_added and increase_count < 5:
+        #         increase_count += 1
+        #         self.delta_MIC += 10
+        #         print(f"Increasing delta_MIC to {self.delta_MIC}.\n")
+        #         cut_added = self.add_MIC_complex_cut()
+        #
+        #     if not cut_added:
+        #         print("Reject complex orders with MIC condition violated.")
+        #         self.model.addConstrs(self.accept_complex[i] == 0 for i in violated_MIC_MP_complex)
+        #
+        #     self.delta_MIC -= 10 * increase_count
+        #     self.iteration += 1
+        #     continue
+        #
+        # print(f"MIC condition satisfied in complex orders.")
+        #
+        # print("Computing scalable complex orders with MIC/MP condition violated...")
+        # violated_MIC_MP_scalable = self.get_MIC_scalable_orders(threshold=False)
+        # if len(violated_MIC_MP_scalable) > 0:
+        #     success = False
+        #     print(f"MIC/MP conditions violated in {len(violated_MIC_MP_scalable)} scalable complex orders.")
+        #     cut_added = self.add_MIC_scalable_cut()
+        #     increase_count = 0
+        #     while not cut_added and increase_count < 5:
+        #         increase_count += 1
+        #         self.delta_MIC += 10
+        #         print(f"Increasing delta_MIC to {self.delta_MIC}.\n")
+        #         cut_added = self.add_MIC_scalable_cut()
+        #
+        #     if not cut_added:
+        #         print("Reject scalable complex orders with MIC condition violated.")
+        #         self.model.addConstrs(self.accept_scalable[i] == 0 for i in violated_MIC_MP_scalable)
+        #
+        #     self.delta_MIC -= 10 * increase_count
+        #     self.iteration += 1
+        #     continue
+        #
+        # print(f"MIC condition satisfied in scalable complex orders.")
+        #
+        # print("\nPRB reinsertion...\n")
+        # PRB_reinsertion(self)
 
         print(f'Final economic surplus: {self.get_objective()}')
+
 
     def check_infeasibility(self, model: gp.Model, reinsertion: Optional[bool] = False) -> bool:
         """
@@ -210,19 +190,32 @@ class Euphemia:
 
     def solve_master_problem(self) -> None:
         """
-        Search for a good selection of block and MIC orders that maximizes the economic surplus.
+        Search for a selection of block and MIC orders that maximizes the economic surplus.
         """
-        self.model.optimize()
+        self.model.optimize(callback=self.master_problem_callback)
 
-        file = open(self.paths['alloc'] + f'/iteration_{self.iteration}', 'w+')
 
-        if self.model.status == GRB.OPTIMAL:
-            file.write(f"Objective Value: {self.get_objective()}\n")
-            for var in self.model.getVars():
-                file.write(f"{var.varName} = {var.X}\n")
-        else:
-            file.write(f"Status: {self.model.status}")
-        file.close()
+    def master_problem_callback(self, model, where) -> None:
+        # when a MIP solution was found
+        if where == GRB.Callback.MIPSOL:
+            objective_value = model.cbGet(GRB.Callback.MIPSOL_OBJ)
+            vars = model.getVars()
+            solution = model.cbGetSolution(vars)
+            if solution is not None:
+                print("Found integer solution:", solution)
+                print("Objective value:", objective_value)
+
+                solution_dict = {v.VarName: [val] for v, val in zip(vars, solution)}
+
+                print("Solving price determination subproblem...")
+                price_subproblem = Price_Subproblem(master_problem=self, solution_dict=solution_dict)
+                price_subproblem.solve_price_determination_subproblem()
+                #infeasible = self.check_infeasibility(self.model)
+                #if infeasible:
+                #    print(f"Model is infeasible - iteration {self.iteration}")
+                #    exit()
+                #print(f"Economic surplus: {self.get_objective()}")
+
 
     def get_block_bids(self, threshold: bool, reinsertion: Optional[bool] = False) -> list:
         """
@@ -258,6 +251,7 @@ class Euphemia:
 
         return res
 
+
     def add_block_cut(self, single: Optional[bool] = False) -> bool:
         """
         If single is False, reject all block orders that are in-the-money by less than delta_PAB.
@@ -275,6 +269,7 @@ class Euphemia:
 
         print("Block cut successfully added.")
         return True
+
 
     def get_MIC_complex_orders(self, threshold: Optional[bool] = False, reinsertion: Optional[bool] = False) -> list:
         """
@@ -331,6 +326,7 @@ class Euphemia:
                 file.writelines(f"{bid}\n" for bid in res)
 
         return res
+
 
     def get_MIC_scalable_orders(self, threshold: Optional[bool] = False, reinsertion: Optional[bool] = False) -> list:
         """
@@ -393,6 +389,7 @@ class Euphemia:
 
         return res
 
+
     def add_MIC_complex_cut(self, single: Optional[bool] = False) -> bool:
         """
         If single is False, add cuts to reject complex orders that are in-the-money by less than delta_MIC.
@@ -411,6 +408,7 @@ class Euphemia:
 
         print("MIC complex cut successfully added.")
         return True
+
 
     def add_MIC_scalable_cut(self, single: Optional[bool] = False) -> bool:
         """
@@ -431,11 +429,13 @@ class Euphemia:
         print("MIC scalable complex cut successfully added.")
         return True
 
+
     def check_in_the_money_complex(self, order_id: int) -> bool:
         """
         Check if a complex MIC/MP order is in-the-money.
         """
         pass
+
 
     def check_in_the_money_scalable(self, order_id: id) -> bool:
         """
@@ -443,9 +443,11 @@ class Euphemia:
         """
         pass
 
+
     def volume_indeterminacy_subproblem(self):
         # later
         pass
+
 
     def set_prices(self, prices: dict, reinsertion: Optional[bool] = False) -> None:
         if not reinsertion:
@@ -453,8 +455,10 @@ class Euphemia:
         else:
             self.prices_reinsertion = prices
 
+
     def get_objective(self) -> float:
         return self.model.getObjective().getValue()
+
 
     def __str__(self):
         return 'Euphemia'
