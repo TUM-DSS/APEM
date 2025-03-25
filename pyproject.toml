@@ -1,0 +1,22 @@
+[build-system]
+ requires = ["setuptools"]
+ build-backend = "setuptools.build_meta"
+ 
+ [project]
+ name = "APEM"
+ version = "0.1.0"     # convention: major.minor.patch
+ dependencies = [
+ ]
+ requires-python = ">=3.10"
+ authors = [
+   {name = "Teodora Dobos"},
+   {name = "Laura Mathews"},
+ ]
+ maintainers = [
+   {name = "Teodora Dobos", email = "teodora.dobos@tum.de"},
+   {name = "Laura Mathews", email = "laura.mathews@tum.de"},
+ ]
+ description = "Allocation and Pricing in Electricity Markets"
+ readme = "README.md"
+ license = {file = "LICENSE.txt"}
+ keywords = ["day-ahead market", "zonal pricing", "nodal pricing", "electricity market"]
