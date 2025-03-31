@@ -27,8 +27,7 @@ def unit_test_pricing_stats(testing_data_set, precise_output):
     # Files to check
     result_files = ['ELMP_results/ELMP_stats.txt', 
                     'IP_results/IP_stats.txt', 
-                    'Join_results/Join_stats.txt', 
-                    'Min_MWP_results/Min_MWP_stats.txt']
+                    'Join_results/Join_stats.txt']
     
     all_files_valid = True
 
@@ -113,8 +112,7 @@ def unit_test_pricing_csv(testing_data_set, precise_output):
     # CSV files to check that follow the "Join" pattern
     csv_files = ['ELMP_results/ELMP_prices.csv', 
                  'IP_results/IP_prices.csv', 
-                 'Join_results/Join_prices.csv', 
-                 'Min_MWP_results/Min_MWP_prices.csv']
+                 'Join_results/Join_prices.csv']
     
     all_csv_files_valid = True  # Variable to track the status of all CSV files
 

@@ -4,7 +4,10 @@ def node_zone_mapper(zonal_configuration: str, lat: float, lon: float) -> int:
     Note: The configurations 'zonal_DE2-k', 'zonal_DE2-s', 'zonal_DE3', 'zonal_DE4' / 'zonal_DE4-refined' were
     suggested by ACER for the BZR.
     """
-    if zonal_configuration == 'zonal_DE2-k':  # DE2 (k-means)
+    if zonal_configuration == 'national':  # National
+        return 1
+
+    elif zonal_configuration == 'zonal_DE2-k':  # DE2 (k-means)
         if (lat < 52 and lon < 7.25) or (lat < 51.4 and lon < 8) or (lat < 51.1 and lon < 10) or (lat < 50.3):
             return 2  # SOUTH
         else:

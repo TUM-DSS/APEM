@@ -11,12 +11,12 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 #PowerFlowModels: DCOPF, Zonal_NTC
-#Pricing Algorithms: ELMP, IP, MinMWP, Join
+#Pricing Algorithms: ELMP, IP, Join
 
 Testing_Data_Set = 'PyPSAEurLarge'  #Choose between IEEE_RTS, PJM, PyPSAEurSmall, PyPSAEurLarge, ARPA
 saving = 1 #for 1: All Outputs will be saved at data_analysis/results_data_analysis
 show_plots = 1
-# Real_data = 0
+Real_data = 0
 
 
 
@@ -41,8 +41,7 @@ def save_results(Testing_Data_Set):
     result_files = {
         'ELMP': 'ELMP_results\\ELMP_stats.txt',
         'IP': 'IP_results\\IP_stats.txt',
-        'Join': 'Join_results\\Join_stats.txt',
-        'Min_MWP': 'Min_MWP_results\\Min_MWP_stats.txt'
+        'Join': 'Join_results\\Join_stats.txt'
     }
 
     # Collect results
@@ -92,101 +91,22 @@ def save_results(Testing_Data_Set):
 
     return data
 
-# def save_results(Testing_Data_Set):
-#     # Get the directory of the script and move one level up
-#     script_dir = os.path.dirname(os.path.abspath(__file__))  
-#     parent_dir = os.path.dirname(script_dir)  # Move one level up
-
-
-#     # Create CSV output directory
-#     output_dir = 'results_data_analysis'
-#     os.makedirs(output_dir, exist_ok=True)
-#     output_file = os.path.join('data_analysis', output_dir, f'Summary_{Testing_Data_Set}.csv')
-
-#     # Set the working directory to the parent directory
-#     os.chdir(parent_dir)
-    
-#     # Define the base path for result files
-#     modified_string = re.sub(r'(?<!^)(?=[A-Z][a-z])', '_', Testing_Data_Set)  # Convert variable name to corresponding folder name
-#     base_path = f"results/{modified_string}_results/DCOPF/"
-
-#     # Define result files with corresponding paths
-#     result_files = {
-#         'ELMP': 'ELMP_results\\ELMP_stats.txt',
-#         'IP': 'IP_results\\IP_stats.txt',
-#         'Join': 'Join_results\\Join_stats.txt',
-#         'Min_MWP': 'Min_MWP_results\\Min_MWP_stats.txt'
-#     }
-
-    
-#     # Collect results
-#     data_dict = {}  # Dictionary to store labels and values
-
-#     for key, rel_path in result_files.items():
-#         file_path = os.path.join(base_path, rel_path)
-#         file_path = os.path.normpath(file_path)
-
-#         if os.path.exists(file_path):
-#             with open(file_path, 'r', encoding='utf-8') as file:
-#                 for line in file:
-#                     if ':' in line:
-#                         parts = line.split(':', 1)  # Split only at the first colon
-#                         label = parts[0].strip()
-#                         value = parts[1].strip()
-
-#                         try:
-#                             value = float(value)  # Convert to float if possible
-#                         except ValueError:
-#                             pass  # Keep it as a string if conversion fails
-
-#                         # Append value if label already exists, otherwise create a new list
-#                         if label in data_dict:
-#                             data_dict[label].append(value)
-#                         else:
-#                             data_dict[label] = [value]  # Create a new list with the first value
-#         else:
-#             print(f'Warning: File {file_path} does not exist and will be skipped.')
-
-#     # Convert dictionary into a list of lists for Pandas DataFrame
-#     data = [[key] + values for key, values in data_dict.items()]
-
-#     # **Adjust column headers**
-#     headers = ["Label"] + list(result_files.keys())  # First column is static, others are dynamic
-
-#     # Create DataFrame with appropriate column names
-#     df = pd.DataFrame(data, columns=headers)
-
-#     # Replace decimal points with commas (only for numeric values)
-#     df = df.map(lambda x: str(x).replace('.', ',') if isinstance(x, (float, int)) else x)
-
-#     # Save CSV with semicolon as column separator
-
-#     os.makedirs('data_analysis/results_data_analysis', exist_ok=True)
-#     df.to_csv(output_file, index=False, encoding='utf-8', sep=';')
-
-#     print(f'CSV file successfully saved at: {output_file}')
-
-#     return data
-
-
 
 
 
 def plot_results(all_results, testing_data_set):
-
-    # # Comparison values from EPEX Spot. Only available locally for data protection reasons
-    # csv_file_path = r'C:\Users\SimonKreiml\OneDrive - FIM Forschungsinstitut\Dokumente - Energiedaten\_Rohdaten\EPEX Spot\Daten-sieheWichtigeBenutzungshinweise\01_EPEXDayAhead\DayAheadAuction-2013-03-01.csv'
-    # # Note: The delimiter in pandas is ',' by default; to use ';' as the delimiter, we must specify it explicitly
-    # try:
-    #     # First, try to open the file with the default encoding ('utf-8')
-    #     csv_data = pd.read_csv(csv_file_path, delimiter=';')
-    # except UnicodeDecodeError:
-    #     # If a UnicodeDecodeError occurs, try 'ISO-8859-1'
-    #     csv_data = pd.read_csv(csv_file_path, delimiter=';', encoding='ISO-8859-1')
-
-    # # csv_data = pd.read_csv(csv_file_path, delimiter=';')
-
-    # hourly_costs_real_prices = csv_data['x__MWh']
+    if Real_data:
+        # # Comparison values from EPEX Spot. Only available locally for data protection reasons
+        csv_file_path = r'C:\Users\SimonKreiml\OneDrive - FIM Forschungsinstitut\Dokumente - Energiedaten\_Rohdaten\EPEX Spot\Daten-sieheWichtigeBenutzungshinweise\01_EPEXDayAhead\DayAheadAuction-2013-03-01.csv'
+        # # Note: The delimiter in pandas is ',' by default; to use ';' as the delimiter, we must specify it explicitly
+        try:
+            # First, try to open the file with the default encoding ('utf-8')
+            csv_data = pd.read_csv(csv_file_path, delimiter=';')
+        except UnicodeDecodeError:
+            # If a UnicodeDecodeError occurs, try 'ISO-8859-1'
+            csv_data = pd.read_csv(csv_file_path, delimiter=';', encoding='ISO-8859-1')
+            csv_data.rename(columns={"/MWh": "€/MWh"}, inplace=True)
+        hourly_costs_real_prices = csv_data['€/MWh']
 
 
     
@@ -202,7 +122,7 @@ def plot_results(all_results, testing_data_set):
     #os.makedirs(output_folder, exist_ok=True)
     
     # Prepare plot data
-    elmp, ip, join, min_mwp = [], [], [], []
+    elmp, ip, join = [], [], []
     
     for key in average_price_keys:
         # row = all_results.loc[all_results[0] == key]
@@ -211,7 +131,6 @@ def plot_results(all_results, testing_data_set):
             elmp.append(float(row[1]))
             ip.append(float(row[2]))
             join.append(float(row[3]))
-            min_mwp.append(float(row[4]))
         else:
             raise ValueError(f'Row with {key} not found.')
     
@@ -220,7 +139,8 @@ def plot_results(all_results, testing_data_set):
     plt.plot(elmp, '-o', label='ELMP')
     plt.plot(ip, '-o', label='IP')
     plt.plot(join, '-o', label='Join')
-    plt.plot(min_mwp, '-o', label='Min MWP')
+    if Real_data:
+        plt.plot(hourly_costs_real_prices, '-o', label='Real Day-Ahead Prices')
     # plt.plot(hourly_costs_real_prices, '-x', label='Real Day-Ahead price')  # Adding the €/MWh values
     plt.title(f'Average Costs per Hour; {testing_data_set}')
     plt.xlabel('Hour')
@@ -242,8 +162,13 @@ def plot_results(all_results, testing_data_set):
         plt.show()
     
     # Boxplot creation
-    data = [elmp, ip, join, min_mwp]  #, hourly_costs_real_prices]
-    variable_names = ['ELMP', 'IP', 'Join', 'Min MWP']  #, 'Real Day-Ahead price']
+    if Real_data:
+        
+        data = [elmp, ip, join, hourly_costs_real_prices]
+        variable_names = ['ELMP', 'IP', 'Join', 'Real Day-Ahead price']
+    else:
+        data = [elmp, ip, join]  #, hourly_costs_real_prices]
+        variable_names = ['ELMP', 'IP', 'Join']  #, 'Real Day-Ahead price']
     
     # Initialize plot
     plt.figure()
@@ -268,11 +193,11 @@ def plot_results(all_results, testing_data_set):
 
     if testing_data_set =='PyPSAEurSmall':
         # Create column names
-        average_price_keys = [f'Average price at node DE0 {x}' for x in list(range(1, 40))],# + list(range(8, 40)),]
+        average_price_keys = [f'Average price at node DE0 {x}' for x in list(range(1, 40))]# + list(range(8, 40)),]
         num_zones = 40
         
         # Prepare plot data
-        ELMP, IP, Join, Min_MWP = [], [], [], []
+        ELMP, IP, Join = [], [], []
         
         for key in average_price_keys:
             row = next((row for row in all_results if row[0] == key), None)
@@ -280,7 +205,6 @@ def plot_results(all_results, testing_data_set):
                 ELMP.append(float(row[1]))
                 IP.append(float(row[2]))
                 Join.append(float(row[3]))
-                Min_MWP.append(float(row[4]))
             else:
                 raise ValueError(f'Row with {key} not found.')
         
@@ -292,7 +216,7 @@ def plot_results(all_results, testing_data_set):
         average_price_keys = [row[0] for row in all_results if row[0].startswith('Average price at node')]
     
         # Prepare plot data
-        ELMP, IP, Join, Min_MWP = [], [], [], []
+        ELMP, IP, Join = [], [], []
         
         for key in average_price_keys:
             num_zones = num_zones + 1
@@ -301,7 +225,6 @@ def plot_results(all_results, testing_data_set):
                 ELMP.append(float(row[1]))
                 IP.append(float(row[2]))
                 Join.append(float(row[3]))
-                Min_MWP.append(float(row[4]))
             else:
                 raise ValueError(f'Row with {key} not found.')
        
@@ -311,10 +234,13 @@ def plot_results(all_results, testing_data_set):
     plt.plot(ELMP, '-o', label='ELMP')
     plt.plot(IP, '-o', label='IP')
     plt.plot(Join, '-o', label='Join')
-    plt.plot(Min_MWP, '-o', label='Min MWP')
-    plt.title(f'Average Costs per zone; {testing_data_set}')
+    plt.title(f'Average Costs per zone ({num_zones} zones); {testing_data_set}')
     plt.xlabel('Zones')
-    plt.xticks(range(num_zones))
+    if testing_data_set =='PyPSAEurSmall':
+        plt.xticks(range(0, num_zones, 2))
+        plt.ylim(-25, 275) 
+    elif testing_data_set =='PyPSAEurLarge':
+        plt.xticks(range(0, num_zones, 20))
     plt.ylabel('Costs')
     plt.legend()
     plt.grid()
@@ -330,14 +256,16 @@ def plot_results(all_results, testing_data_set):
         plt.show()
     
     # Create boxplot
-    data = [ELMP, IP, Join, Min_MWP]
-    variable_names = ['ELMP', 'IP', 'Join', 'Min MWP']
+    data = [ELMP, IP, Join]
+    variable_names = ['ELMP', 'IP', 'Join']
     
     plt.figure()
     plt.boxplot(data, tick_labels=variable_names, patch_artist=True)
     plt.ylabel('Values')
     plt.title(f'Boxplot of average Costs per zone; {testing_data_set}')
     plt.grid()
+    if testing_data_set =='PyPSAEurSmall':    
+        plt.ylim(-25, 275) 
     
     if saving:
         plt.savefig(f'data_analysis/results_data_analysis/Boxplot_Average_Zone_{testing_data_set}.png')
@@ -391,11 +319,27 @@ def plot_results(all_results, testing_data_set):
     
 
 def indicators(All_Results, Testing_Data_Set):
+    
+    if Real_data:
+        # # Comparison values from EPEX Spot. Only available locally for data protection reasons
+        csv_file_path = r'C:\Users\SimonKreiml\OneDrive - FIM Forschungsinstitut\Dokumente - Energiedaten\_Rohdaten\EPEX Spot\Daten-sieheWichtigeBenutzungshinweise\01_EPEXDayAhead\DayAheadAuction-2013-03-01.csv'
+        # # Note: The delimiter in pandas is ',' by default; to use ';' as the delimiter, we must specify it explicitly
+        try:
+            # First, try to open the file with the default encoding ('utf-8')
+            csv_data = pd.read_csv(csv_file_path, delimiter=';')
+        except UnicodeDecodeError:
+            # If a UnicodeDecodeError occurs, try 'ISO-8859-1'
+            csv_data = pd.read_csv(csv_file_path, delimiter=';', encoding='ISO-8859-1')
+            csv_data.rename(columns={"/MWh": "€/MWh"}, inplace=True)
+        hourly_costs_real_prices = csv_data['€/MWh']
+    
+    
+    
     # Create column names
     average_price_keys = [f'Average price in period {x}' for x in range(1, 25)]
     
     # Prepare plot data
-    ELMP, IP, Join, Min_MWP = [], [], [], []
+    ELMP, IP, Join = [], [], []
     All_Results = np.array(All_Results) 
     key_indicators = All_Results[:16, :]
     print(key_indicators)
@@ -407,13 +351,14 @@ def indicators(All_Results, Testing_Data_Set):
             ELMP.append(float(All_Results[rowIndex, 1]))  # Column 2
             IP.append(float(All_Results[rowIndex, 2]))    # Column 3
             Join.append(float(All_Results[rowIndex, 3]))  # Column 4
-            Min_MWP.append(float(All_Results[rowIndex, 4])) # Column 5
         else:
             raise ValueError(f'Row with {key} not found.')
     
     # Add hourlyCosts as a new time series
-    data = np.array([ELMP, IP, Join, Min_MWP])#, hourlyCosts])
-    
+    if Real_data:
+        data = np.array([ELMP, IP, Join, hourly_costs_real_prices])
+    else:
+        data = np.array([ELMP, IP, Join])
     # Compute the statistics matrix
     average = np.mean(data, axis=1)
     medianValue = np.median(data, axis=1)
@@ -429,8 +374,12 @@ def indicators(All_Results, Testing_Data_Set):
     distanceMatrix = np.linalg.norm(data[:, np.newaxis] - data, axis=2)
     
     # Names of time series
-    names = ['ELMP', 'IP', 'Join', 'Min_MWP']#, 'Real Day-Ahead price']
+    if Real_data:
+        names = ['ELMP', 'IP', 'Join', 'Real Day-Ahead price']
+    else:
+        names = ['ELMP', 'IP', 'Join']#, 'Real Day-Ahead price']
     statNames = ['Average', 'Median', 'Variance', 'Min', 'Max']
+    Key_ind_names = ['ELMP', 'IP', 'Join']
     
     # Display statistics matrix
     print('Statistics Matrix:')
@@ -456,7 +405,7 @@ def indicators(All_Results, Testing_Data_Set):
         # Process key_indicators
         headers = key_indicators[:, 0]
         nums = np.array(key_indicators[:, 1:5], dtype=float)
-        df_key_indicators = pd.DataFrame(nums, index=headers, columns=names)
+        df_key_indicators = pd.DataFrame(nums, index=headers, columns=Key_ind_names)
         df_key_indicators.to_excel(writer, sheet_name='Key_Indicators')
 
         # Save statistics matrix

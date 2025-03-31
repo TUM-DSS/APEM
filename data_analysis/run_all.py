@@ -36,14 +36,14 @@ def run_all_models(Testing_Data_Set):
 
     # Define the scenarios to be tested for the selected dataset
     scenarios = [
-        (PowerFlowModels.DCOPF, PricingAlgorithms.ELMP),
-        (PowerFlowModels.DCOPF, PricingAlgorithms.IP),
-        (PowerFlowModels.DCOPF, PricingAlgorithms.MinMWP),
-        (PowerFlowModels.DCOPF, PricingAlgorithms.Join),
         #(PowerFlowModels.DCOPF, PricingAlgorithms.ELMP),
         #(PowerFlowModels.DCOPF, PricingAlgorithms.IP),
         #(PowerFlowModels.DCOPF, PricingAlgorithms.MinMWP),
         #(PowerFlowModels.DCOPF, PricingAlgorithms.Join),
+        (PowerFlowModels.Zonal_NTC, PricingAlgorithms.ELMP),
+        (PowerFlowModels.Zonal_NTC, PricingAlgorithms.IP),
+        (PowerFlowModels.Zonal_NTC, PricingAlgorithms.MinMWP),
+        (PowerFlowModels.Zonal_NTC, PricingAlgorithms.Join),
     ]
     
     total_time = 0  # Initialize total execution time
