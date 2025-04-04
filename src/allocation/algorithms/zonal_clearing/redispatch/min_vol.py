@@ -15,13 +15,11 @@ class MinVolRD(RedispatchAlgorithm):
     deviations from the zonal solution. Assumes that all generators can be redispatched
     """
 
-    def compute_redispatch(self, zonal_scenario: Scenario, nodal_scenario: Scenario,
-                           zonal_allocation: SellersAllocation,
+    def compute_redispatch(self, nodal_scenario: Scenario, zonal_allocation: SellersAllocation,
                            configuration: Configuration, path: str) -> Union[Allocation, Error]:
         dcopf = DCOPF()
         return dcopf.solve(scenario=nodal_scenario, configuration=configuration,
-                           results_file=path + '/min_vol.csv',
-                           stats_file=path + '/min_vol_obj.txt',
+                           results_file=path + '/min_vol.csv', stats_file=path + '/min_vol_obj.txt',
                            redispatch=True, min_vol=True, zonal_allocation=zonal_allocation)
 
     def __str__(self):

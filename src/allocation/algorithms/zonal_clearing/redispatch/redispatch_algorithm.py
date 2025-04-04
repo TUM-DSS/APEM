@@ -13,9 +13,23 @@ class RedispatchAlgorithm(ABC):
     """
 
     @abstractmethod
-    def compute_redispatch(self, zonal_scenario: Scenario, nodal_scenario: Scenario,
-                           zonal_allocation: SellersAllocation, configuration: Configuration,
-                           path: str) -> Union[Allocation, Error]:
+    def compute_redispatch(self, nodal_scenario: Scenario, zonal_allocation: SellersAllocation,
+                           configuration: Configuration, path: str) -> Union[Allocation, Error]:
+        """
+        Computes a redispatch solution for a given zonal solution. The redispatch solution satisfies the constraints
+        formulated based on a nodal scenario.
+
+        :param nodal_scenario: nodal scenario based on which constraints are formulated
+        :type nodal_scenario: Scenario
+        :param zonal_allocation: allocation computed with zonal clearing
+        :type zonal_allocation: SellersAllocation
+        :param configuration: values of some parameters to be set in the optimizer
+        :type configuration: Configuration
+        :param path: path to store the results
+        :type path: str
+        :return: redispatch allocation or error
+        :rtype: Union[Allocation, Error]
+        """
         pass
 
     @abstractmethod

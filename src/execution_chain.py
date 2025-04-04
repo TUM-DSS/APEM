@@ -20,6 +20,7 @@ from src.pricing.algorithms.min_mwp import MinMWP
 from src.pricing.analysis.price_analysis import PriceAnalysis
 from src.allocation.algorithms.zonal_clearing.redispatch.min_cost import MinCostRD
 from src.allocation.algorithms.zonal_clearing.redispatch.min_vol import MinVolRD
+from src.pricing.analysis.pricing import Pricing
 
 
 class PowerFlowModels(Enum):
@@ -61,7 +62,8 @@ def _create_configuration(MIP_gap=1e-4, optimality_tol=1e-6, time_limit=60 * 60,
                          strict_supply_demand_eq, relaxation, output_flag)
 
 
-def _solve_allocation_problem(scenario, power_flow_model, configuration, u_fixed=None):
+def _solve_allocation_problem(scenario: Scenario, power_flow_model: PowerFlowModels, configuration: Configuration,
+                              u_fixed: Optional[dict] = None):
     power_flow_model = power_flow_model.value
 
     zonal_part = f"{power_flow_model.zonal_configuration}/" if isinstance(power_flow_model, Zonal_NTC) else ""
@@ -74,8 +76,8 @@ def _solve_allocation_problem(scenario, power_flow_model, configuration, u_fixed
 
 
 def _solve_redispatch_problem(scenario: Scenario, power_flow_model: PowerFlowModels,
-                              redispatch_algorithm: RedispatchAlgorithms, zonal_scenario: Scenario,
-                              nodal_scenario: Scenario, zonal_allocation: SellersAllocation,
+                              redispatch_algorithm: RedispatchAlgorithms, nodal_scenario: Scenario,
+                              zonal_allocation: SellersAllocation,
                               configuration: Configuration) -> Union[Allocation, Error]:
     redispatch_algorithm = redispatch_algorithm.value
     power_flow_model = power_flow_model.value
@@ -85,11 +87,11 @@ def _solve_redispatch_problem(scenario: Scenario, power_flow_model: PowerFlowMod
     path = base_path + "/" + zonal_part + "allocation_results/redispatch"
     os.makedirs(path, exist_ok=True)
 
-    return redispatch_algorithm.compute_redispatch(zonal_scenario, nodal_scenario, zonal_allocation, configuration,
-                                                   path)
+    return redispatch_algorithm.compute_redispatch(nodal_scenario, zonal_allocation, configuration, path)
 
 
-def _solve_pricing_problem(scenario, allocation, pricing_algorithm, power_flow_model, prices=None):
+def _solve_pricing_problem(scenario: Scenario, allocation: Allocation, pricing_algorithm: PricingAlgorithms,
+                           power_flow_model: PowerFlowModels, prices=None):
     pricing_algorithm = pricing_algorithm.value
     power_flow_model = power_flow_model.value
 
@@ -103,7 +105,7 @@ def _solve_pricing_problem(scenario, allocation, pricing_algorithm, power_flow_m
     return pricing
 
 
-def analyse_results(scenario, allocation, pricing, pf_model_value):
+def analyse_results(scenario: Scenario, allocation: Allocation, pricing: Pricing, pf_model_value):
     """Performs several analyses.
     
     Args:
@@ -124,7 +126,7 @@ def analyse_results(scenario, allocation, pricing, pf_model_value):
     return analysis
 
 
-def solve_scenario(dataset, power_flow_model, pricing_algorithm,
+def solve_scenario(dataset: Datasets, power_flow_model: PowerFlowModels, pricing_algorithm: PricingAlgorithms,
                    redispatch_algorithm: Optional[RedispatchAlgorithms] = RedispatchAlgorithms.MinCostRD):
     """Computes allocation and pricing for some scenario.
 
@@ -154,7 +156,7 @@ def solve_scenario(dataset, power_flow_model, pricing_algorithm,
         zonal_scenario, allocation = _solve_allocation_problem(scenario, power_flow_model, configuration)
 
         _solve_redispatch_problem(scenario, power_flow_model, redispatch_algorithm=redispatch_algorithm,
-                                  zonal_scenario=zonal_scenario, nodal_scenario=scenario, configuration=configuration,
+                                  nodal_scenario=scenario, configuration=configuration,
                                   zonal_allocation=allocation.SellersAllocation)
 
         scenario = zonal_scenario
@@ -163,7 +165,8 @@ def solve_scenario(dataset, power_flow_model, pricing_algorithm,
     return PriceAnalysis(scenario, allocation, pricing)
 
 
-def solve_and_analyse_scenario(dataset, power_flow_model, pricing_algorithm,
+def solve_and_analyse_scenario(dataset: Datasets, power_flow_model: PowerFlowModels,
+                               pricing_algorithm: PricingAlgorithms,
                                redispatch_algorithm: Optional[RedispatchAlgorithms] = RedispatchAlgorithms.MinVolRD):
     """Computes allocation and pricing for some scenario and performs several analyses.
 
@@ -183,15 +186,14 @@ def solve_and_analyse_scenario(dataset, power_flow_model, pricing_algorithm,
     if dataset in [Datasets.PyPSAEurLarge, Datasets.PyPSAEurSmall]:
         price_analysis.scenario.analyse_scenario()  # analyse nodal scenario
 
-        zonal_config = power_flow_model.value.zonal_configuration \
-            if power_flow_model == PowerFlowModels.Zonal_NTC else ""
+        zonal_config = power_flow_model.value.zonal_configuration if power_flow_model == PowerFlowModels.Zonal_NTC else ""
         price_analysis.scenario.plot_network(zonal_config)
 
     return analyse_results(price_analysis.scenario, price_analysis.allocation, price_analysis.pricing,
                            power_flow_model.value)
 
 
-def apply_all_algorithms(dataset):
+def apply_all_algorithms(dataset: Datasets):
     """Computes allocation and pricing and performs several analyses for all valid combinations of power flow 
     models and pricing algorithms for a defined dataset.
 
@@ -224,7 +226,7 @@ def apply_all_algorithms(dataset):
             analyse_results(scenario, allocation, pricing, power_flow_model.value)
 
 
-def apply_to_all_datasets(power_flow_model, pricing_algorithm):  # TODO remove
+def apply_to_all_datasets(power_flow_model: PowerFlowModels, pricing_algorithm: PricingAlgorithms):
     """Computes allocation and pricing and performs several analyses for all valid datasets for a defined 
     combination of power flow model and pricing algorithm.
 
