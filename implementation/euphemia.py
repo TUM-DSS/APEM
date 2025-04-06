@@ -43,6 +43,9 @@ class Euphemia:
                                                   lb=0, ub=1, name='accept_mic_scalable')
         self.accept_scalable_step = self.model.addVars(list(self.scalable_step_orders['id']), vtype=GRB.CONTINUOUS,
                                                        lb=0, ub=1, name='accept_scalable_step')
+        #Needed to avoid race conditions
+        self.model.setParam("Threads", 1)
+
         self.M = 10 ** 6
         self.prices = {}
         self.prices_reinsertion = {}
@@ -199,6 +202,7 @@ class Euphemia:
     def master_problem_callback(self, model, where) -> None:
         # when a MIP solution was found
         if where == GRB.Callback.MIPSOL:
+            # get current solution
             objective_value = model.cbGet(GRB.Callback.MIPSOL_OBJ)
             vars = model.getVars()
             solution = model.cbGetSolution(vars)
@@ -206,16 +210,30 @@ class Euphemia:
                 print("Found integer solution:", solution)
                 print("Objective value:", objective_value)
 
+                # match variables with value in current solution
                 solution_dict = {v.VarName: [val] for v, val in zip(vars, solution)}
 
                 print("Solving price determination subproblem...")
                 price_subproblem = Price_Subproblem(master_problem=self, solution_dict=solution_dict)
                 price_subproblem.solve_price_determination_subproblem()
-                #infeasible = self.check_infeasibility(self.model)
-                #if infeasible:
-                #    print(f"Model is infeasible - iteration {self.iteration}")
-                #    exit()
-                #print(f"Economic surplus: {self.get_objective()}")
+
+                # if price subproblem feasible check if new incumbent
+                if price_subproblem.pricing_model.status == GRB.OPTIMAL:
+                    print("Found market clearing prices")
+                    for v in price_subproblem.pricing_model.getVars():
+                        print(f"{v.varName}: {v.x}")
+
+                # if price subproblem infeasible add cut to master problem
+                if price_subproblem.pricing_model.status == GRB.INFEASIBLE:
+                    print("Price subproblem is infeasible")
+                    price_subproblem.pricing_model.computeIIS()
+
+                    problematic_constraints = []
+
+                    for constr in price_subproblem.pricing_model.getConstrs():
+                        if constr.IISConstr:
+                            print(f"Infeasible constraint: {constr}")
+                            problematic_constraints.append(constr)
 
 
     def get_block_bids(self, threshold: bool, reinsertion: Optional[bool] = False) -> list:

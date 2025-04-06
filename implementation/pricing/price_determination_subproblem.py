@@ -10,6 +10,7 @@ class Price_Subproblem:
         self.master_problem = master_problem
         self.solution_dict_df = pd.DataFrame(solution_dict)
         self.epsilon =master_problem.epsilon
+        self.cuts = {}
 
         self.pricing_model = gp.Model('Price-Subproblem')
 
@@ -28,12 +29,7 @@ class Price_Subproblem:
         self.add_step_price_limits()
 
         self.pricing_model.optimize()
-        if self.pricing_model.status == GRB.OPTIMAL:
-            print("Found market clearing prices")
-            for v in self.pricing_model.getVars():
-                print(f"{v.varName}: {v.x}")
-        if self.pricing_model.status == GRB.INFEASIBLE:
-            print("Price subproblem is infeasible")
+
 
 
         prices = {}
@@ -61,6 +57,14 @@ class Price_Subproblem:
             t = step_order_df['t'][i]
             acceptance = step_order_df['acceptance'][i]
 
+            gurobi_acceptance_var = None
+            # save gurobi accept variable object in order to use it for cuts
+            for index, value in self.master_problem.accept_step.items():
+                if value.VarName == f"accept_step[{i+1}]":
+                    gurobi_acceptance_var = value
+                    break
+
+
             if q == 0:
                 continue
 
@@ -68,27 +72,43 @@ class Price_Subproblem:
             if acceptance == 1.0:
                 if q > 0:
                     # Sale: INM → p <= MCP
-                    self.pricing_model.addConstr(self.MCP[t] >= p - self.epsilon, name=f"check_sale_INM_accept_{i}")
+                    self.pricing_model.addConstr(self.MCP[t] >= p - self.epsilon, name=f"sell_step_INM_accept_{i}")
+                    self.cuts[f"sell_step_INM_accept_{i}"] = gurobi_acceptance_var < 1
+                    print(self.cuts)
                 else:
                     # Purchase: INM → p >= MCP
-                    self.pricing_model.addConstr(self.MCP[t] <= p + self.epsilon, name=f"check_buy_INM_accept_{i}")
+                    self.pricing_model.addConstr(self.MCP[t] <= p + self.epsilon, name=f"buy_step_INM_accept_{i}")
+                    self.cuts[f"buy_step_INM_accept_{i}"] = gurobi_acceptance_var < 1
 
             # OTM → must have been rejected
             elif acceptance == 0.0:
                 if q > 0:
                     # Sale: OTM → p >= MCP
-                    self.pricing_model.addConstr(self.MCP[t] <= p + self.epsilon, name=f"check_sale_OTM_reject_{i}")
+                    self.pricing_model.addConstr(self.MCP[t] <= p + self.epsilon, name=f"sell_step_OTM_reject_{i}")
+                    self.cuts[f"sell_step_OTM_reject_{i}"] = gurobi_acceptance_var > 0
                 else:
                     # Purchase: OTM → p <= MCP
-                    self.pricing_model.addConstr(self.MCP[t] >= p - self.epsilon, name=f"check_buy_OTM_reject_{i}")
+                    self.pricing_model.addConstr(self.MCP[t] >= p - self.epsilon, name=f"buy_step_OTM_reject_{i}")
+                    self.cuts[f"buy_step_OTM_reject_{i}"] = gurobi_acceptance_var > 0
 
             # ATM → must be exactly at the money
             elif 0.0 < acceptance < 1.0:
                 self.pricing_model.addConstr(self.MCP[t] >= p - self.epsilon, name=f"check_ATM_lower_{i}")
                 self.pricing_model.addConstr(self.MCP[t] <= p + self.epsilon, name=f"check_ATM_upper_{i}")
+                if q > 0:
+                    # negative surplus -> accept less
+                    self.cuts[f"check_ATM_lower_{i}"] = gurobi_acceptance_var < acceptance
+                    # positive surplus -> accept more
+                    self.cuts[f"check_ATM_upper_{i}"] = gurobi_acceptance_var > acceptance
+                else:
+                    # positive surplus -> accept more
+                    self.cuts[f"check_ATM_lower_{i}"] = gurobi_acceptance_var > acceptance
+                    # negative surplus -> accept less
+                    self.cuts[f"check_ATM_upper_{i}"] = gurobi_acceptance_var < acceptance
+
 
     """
-    Add constraints in order to avoid the paradocial acceptance of block orders (PABs)
+    Add constraints in order to avoid the paradoxical acceptance of block orders (PABs)
     """
     def add_block_price_limits(self):
         accept_block_columns = [col for col in self.solution_dict_df.columns if 'accept_block' in col]
