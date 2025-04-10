@@ -21,7 +21,7 @@ python -m venv <venv_name>   # Example: python -m venv apem-venv
 source ./<venv-name>/bin/activate   # Example: source ./apem-venv/bin/activate
 
 # Windows: 
-<venv-name>\Scripts\activate      # Example: apem_venv\Scripts\activate
+source <venv-name>/Scripts/activate      # Example: source apem-venv/Scripts/activate
 ```
 
 **Note:** The virtual environment can be deactivated using `deactivate`- however, for the next steps, we want the virtual environment to be active.
@@ -46,8 +46,9 @@ To run the code, a valid academic or commercial Gurobi license is required ([mor
 
 After setting up the repository, you can run the code by executing the [main.py](./main.py) file with different configurations for the
 - **datasets** (currently: ARPA-E, IEEE RTS, PJM, PyPSAEurLarge, and PyPSAEurSmall),
-- **power flow models** (currently: DCOPF and Zonal_NTC), and
-- **pricing algorithms** (currently: ELMP, IP, Join, and Min_MWP).
+- **power flow models** (currently: DCOPF and Zonal_NTC),
+- **pricing algorithms** (currently: ELMP, IP, Join, and Min_MWP), and
+- **redispatch algorithms** (optional - only take effect for Zonal_NTC; currently: MinCostRD (default) and MinVolRD).
 
 It is advised to start working with the tuple (PyPSAEurSmall, DCOPF, IP).
 
