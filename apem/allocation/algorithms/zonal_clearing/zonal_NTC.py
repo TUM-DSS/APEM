@@ -6,12 +6,12 @@ import networkx as nx
 import pandas as pd
 import pypsa
 
-from apem.allocation.algorithms.dcopf import DCOPF
+from apem.allocation.algorithms.nodal_clearing.dcopf import DCOPF
 from apem.allocation.allocation import Allocation
 from apem.allocation.configuration import Configuration
 from apem.allocation.error import Error
 from apem.allocation.power_flow_model import PowerFlowModel
-from apem.allocation.zonal_configuration import node_zone_mapper
+from apem.allocation.algorithms.zonal_clearing.zonal_configuration import node_zone_mapper
 from apem.data.parsing.scenario import Scenario
 
 
