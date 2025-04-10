@@ -283,10 +283,10 @@ class DCOPF(PowerFlowModel):
 
         model.optimize()
 
-        status = model.getAttr('Status')
+        status = model.Status
 
         if status == GRB.OPTIMAL:
-            obj = model.getObjective().getValue()
+            obj = model.ObjVal
 
             x_bt = {(b, t): x_bt[b, t].X for b in buyers for t in periods}
             x_btl = {(b, t, lb): x_btl[b, t, lb].X for b in buyers for t in periods for lb in blocks_buyers}
