@@ -28,6 +28,8 @@ class Price_Subproblem:
         self.add_block_price_limits()
         self.add_step_price_limits()
 
+        self.pricing_model.write(f"{self.master_problem.paths['debug']}/pricing_model.lp")
+
         self.pricing_model.optimize()
 
 
@@ -57,6 +59,7 @@ class Price_Subproblem:
             t = step_order_df['t'][i]
             acceptance = step_order_df['acceptance'][i]
 
+
             gurobi_acceptance_var = None
             # save gurobi accept variable object in order to use it for cuts
             for index, value in self.master_problem.accept_step.items():
@@ -69,41 +72,41 @@ class Price_Subproblem:
                 continue
 
             # INM → must have been accepted
-            if acceptance == 1.0:
+            if acceptance >= 1.0 - self.epsilon:
                 if q > 0:
                     # Sale: INM → p <= MCP
-                    self.pricing_model.addConstr(self.MCP[t] >= p - self.epsilon, name=f"sell_step_INM_accept_{i}")
-                    self.cuts[f"sell_step_INM_accept_{i}"] = gurobi_acceptance_var <= 1 - self.epsilon
+                    self.pricing_model.addConstr(self.MCP[t] >= p - self.epsilon, name=f"sell_step_accepted_{i+1}")
+                    #self.cuts[f"sell_step_INM_accept_{i}"] = gurobi_acceptance_var <= 1 - self.epsilon
                 else:
                     # Purchase: INM → p >= MCP
-                    self.pricing_model.addConstr(self.MCP[t] <= p + self.epsilon, name=f"buy_step_INM_accept_{i}")
-                    self.cuts[f"buy_step_INM_accept_{i}"] = gurobi_acceptance_var <= 1 - self.epsilon
+                    self.pricing_model.addConstr(self.MCP[t] <= p + self.epsilon, name=f"buy_step_accepted_{i+1}")
+                    #self.cuts[f"buy_step_INM_accept_{i}"] = gurobi_acceptance_var <= 1 - self.epsilon
 
             # OTM → must have been rejected
-            elif acceptance == 0.0:
+            elif acceptance <= self.epsilon:
                 if q > 0:
                     # Sale: OTM → p >= MCP
-                    self.pricing_model.addConstr(self.MCP[t] <= p + self.epsilon, name=f"sell_step_OTM_reject_{i}")
-                    self.cuts[f"sell_step_OTM_reject_{i}"] = gurobi_acceptance_var >= 0 + self.epsilon
+                    self.pricing_model.addConstr(self.MCP[t] <= p + self.epsilon, name=f"sell_step_rejected_{i+1}")
+                    #self.cuts[f"sell_step_OTM_reject_{i}"] = gurobi_acceptance_var >= 0 + self.epsilon
                 else:
                     # Purchase: OTM → p <= MCP
-                    self.pricing_model.addConstr(self.MCP[t] >= p - self.epsilon, name=f"buy_step_OTM_reject_{i}")
-                    self.cuts[f"buy_step_OTM_reject_{i}"] = gurobi_acceptance_var >= 0 + self.epsilon
+                    self.pricing_model.addConstr(self.MCP[t] >= p - self.epsilon, name=f"buy_step_rejected_{i+1}")
+                    #self.cuts[f"buy_step_OTM_reject_{i}"] = gurobi_acceptance_var >= 0 + self.epsilon
 
             # ATM → must be exactly at the money
             elif 0.0 < acceptance < 1.0:
-                self.pricing_model.addConstr(self.MCP[t] >= p - self.epsilon, name=f"step_ATM_lower_{i}")
-                self.pricing_model.addConstr(self.MCP[t] <= p + self.epsilon, name=f"step_ATM_upper_{i}")
-                if q > 0:
+                self.pricing_model.addConstr(self.MCP[t] >= p - self.epsilon, name=f"step_partially_accepted_lower_{i+1}")
+                self.pricing_model.addConstr(self.MCP[t] <= p + self.epsilon, name=f"step_partially_accepted_upper_{i+1}")
+                #if q > 0:
                     # negative surplus -> accept less
-                    self.cuts[f"step_ATM_lower_{i}"] = gurobi_acceptance_var <= acceptance - self.epsilon
+                    #self.cuts[f"step_ATM_lower_{i}"] = gurobi_acceptance_var <= acceptance - self.epsilon
                     # positive surplus -> accept more
-                    self.cuts[f"step_ATM_upper_{i}"] = gurobi_acceptance_var >= acceptance + self.epsilon
-                else:
+                    #self.cuts[f"step_ATM_upper_{i}"] = gurobi_acceptance_var >= acceptance + self.epsilon
+                #else:
                     # positive surplus -> accept more
-                    self.cuts[f"step_ATM_lower_{i}"] = gurobi_acceptance_var >= acceptance + self.epsilon
+                    #self.cuts[f"step_ATM_lower_{i}"] = gurobi_acceptance_var >= acceptance + self.epsilon
                     # negative surplus -> accept less
-                    self.cuts[f"step_ATM_upper_{i}"] = gurobi_acceptance_var <= acceptance - self.epsilon
+                    #self.cuts[f"step_ATM_upper_{i}"] = gurobi_acceptance_var <= acceptance - self.epsilon
 
 
     """
@@ -117,7 +120,7 @@ class Price_Subproblem:
         block_order_df['acceptance'] = accept_block_values
 
         for i in range(len(block_order_df)):
-            if block_order_df['acceptance'][i] == 1.0:  # Only accepted blocks relevant
+            if block_order_df['acceptance'][i] > self.epsilon:  # Only accepted blocks relevant
                 p_value = block_order_df['p'][i]
                 q_columns = [col for col in block_order_df.columns if col.startswith('q')]
                 q_values = block_order_df.loc[i, q_columns].values
@@ -129,6 +132,24 @@ class Price_Subproblem:
                 weighted_mcp = gp.quicksum(
                     self.MCP[t] * q for t, q in zip(self.master_problem.periods, q_values)
                 ) / total_quantity
+
+                # if block_order_df['block_type'][i] == 'flexible':
+                #     order_id = i + 1  # oder wie dein Index in flex_period aufgebaut ist
+                #
+                #     # list with flex_period variables for current order
+                #     flex_vars = [
+                #         (t, var) for (oid, t), var in self.master_problem.flex_period.items()
+                #         if oid == order_id
+                #     ]
+                #
+                #     # Hole Lösung (Werte) dieser Variablen
+                #     flex_vals = {
+                #         t: self.pricing_model.cbGetSolution(var)
+                #         for (t, var) in flex_vars
+                #     }
+                #
+                #     # Finde Periode mit Wert 1
+                #     active_period = next((t for t, val in flex_vals.items() if val > 0.5), None)
 
                 # Sales or purchase order
                 is_sale = any(q > 0 for q in q_values)
@@ -143,8 +164,8 @@ class Price_Subproblem:
                 if is_sale:
                     # Sales order: INM, if p < avg(MCP)
                     self.pricing_model.addConstr(weighted_mcp >= p_value, f"sell_block_INM_{i+1}")
-                    self.cuts[f"sell_block_INM_{i+1}"] = gurobi_acceptance_var <= 0.5
+                    self.cuts[f"sell_block_INM_{i+1}"] = gurobi_acceptance_var == 0.0
                 else:
                     # Purchase order: INM, if p > avg(MCP)
                     self.pricing_model.addConstr(weighted_mcp <= p_value, f"buy_block_INM_{i+1}")
-                    self.cuts[f"buy_block_INM_{i+1}"] = gurobi_acceptance_var <= 0.5
+                    self.cuts[f"buy_block_INM_{i+1}"] = gurobi_acceptance_var == 0.0

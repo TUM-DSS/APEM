@@ -84,6 +84,6 @@ class ParseEU(ParseData):
 
         scalable_complex_step_orders_transformed = pd.concat(scalable_dfs)
 
-        return ZonalScenario('EUDataset', periods, step_orders_transformed, block_orders,
+        return ZonalScenario('EUDataset', periods, step_orders, block_orders,
                              complex_orders, complex_step_orders_transformed,
                              scalable_complex_orders, scalable_complex_step_orders_transformed)

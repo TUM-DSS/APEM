@@ -44,7 +44,9 @@ def add_market_constraints(self) -> None:
         (gp.quicksum(self.accept_step[i] * get(self.step_orders, 'q', i)
                      for i in list(self.step_orders['id']) if get(self.step_orders, 't', i) == t) +
          gp.quicksum(self.accept_block[i] * get(self.block_orders, f'q{t}', i)
-                     for i in list(self.block_orders['id'])) +
+                     for i in list(self.block_orders['id']) if get(self.block_orders, 'block_type', i) != 'flexible') +
+         gp.quicksum(self.accept_block[i] * self.flex_period[i, t] * get(self.block_orders, f'q{t}', i)
+                     for i in list(self.block_orders['id']) if get(self.block_orders, 'block_type', i) == 'flexible') +
          gp.quicksum(self.accept_complex_step[i] * get(self.complex_step_orders, 'q', i)
                      for i in list(self.complex_step_orders['id']) if get(self.complex_step_orders, 't', i) == t) +
          gp.quicksum(self.accept_scalable_step[i] * get(self.scalable_step_orders, 'q', i)

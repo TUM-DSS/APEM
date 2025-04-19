@@ -26,7 +26,7 @@ class Euphemia:
 
         self.accept_step = self.model.addVars(list(self.step_orders['id']), vtype=GRB.CONTINUOUS, lb=0, ub=1,
                                               name='accept_step')
-        self.accept_block = self.model.addVars(list(self.block_orders['id']), vtype=GRB.BINARY, lb=0, ub=1,
+        self.accept_block = self.model.addVars(list(self.block_orders['id']), vtype=GRB.CONTINUOUS, lb=0, ub=1,
                                                name='accept_block')
         # required for the big-M constraint to satisfy the MAR condition of block orders
         self.MAR_aux = self.model.addVars(list(self.block_orders['id']), vtype=GRB.BINARY, name='y')
@@ -78,7 +78,7 @@ class Euphemia:
         self.delta_MIC = 50
         self.max_iterations = 30
         self.iteration = 0
-        self.epsilon = 1e-5
+        self.epsilon = 1e-2
         self.paths = {
             "alloc": "euphemia_results/allocation",
             "prices": "euphemia_results/prices",
@@ -219,20 +219,17 @@ class Euphemia:
         """
         Search for a selection of block and MIC orders that maximizes the economic surplus.
         """
+        # Setup debugging
+        file_path = f"{self.paths['alloc']}/results.txt"
+        with open(file_path, 'w') as file:
+            file.write("Starting new optimization run\n")
+
         self.model.optimize(callback=self.master_problem_callback)
 
 
     def master_problem_callback(self, callbackModel, where) -> None:
-        # if where == GRB.Callback.MIPNODE:
-        #     print("MIPNODE callback")
-        #     fixed = []
-        #     for v in callbackModel.getVars():
-        #         lb = callbackModel.cbGet(GRB.Callback.MIPNODE_VARLB, v)
-        #         ub = callbackModel.cbGet(GRB.Callback.MIPNODE_VARUB, v)
-        #         if abs(lb - ub) < 1e-6:
-        #             fixed.append((v, lb))
-        #         print(lb)
-        #     self.fixed_accepts = fixed
+        if where == GRB.Callback.MIPNODE:
+             print("MIPNODE callback")
 
         # when a MIP solution was found
         if where == GRB.Callback.MIPSOL:
@@ -247,6 +244,12 @@ class Euphemia:
                 # match variables with value in current solution
                 solution_dict = {v.VarName: [val] for v, val in zip(vars, solution)}
 
+                file_path = f"{self.paths['alloc']}/results.txt"
+                with open(file_path, 'a') as file:
+                    file.write(f"New solution with objective value {objective_value}\n ------------------")
+                    for var in callbackModel.getVars():
+                        file.write(f"{var.VarName}: {callbackModel.cbGetSolution(var)}\n")
+
                 print("Solving price determination subproblem...")
                 price_subproblem = Price_Subproblem(master_problem=self, solution_dict=solution_dict)
                 price_subproblem.solve_price_determination_subproblem()
@@ -255,14 +258,10 @@ class Euphemia:
                 if price_subproblem.pricing_model.status == GRB.OPTIMAL:
                     print("Found market clearing prices")
 
-                    file_path = f"{self.paths['alloc']}/results.txt"
+                    file_path = f"{self.paths['prices']}/results.txt"
                     with open(file_path, 'w') as file:
                         for v in price_subproblem.pricing_model.getVars():
-                            print(f"{v.varName}: {v.x}")
-                        file.writelines("Continuos variables:\n")
-                        for var in callbackModel.getVars():
-                            if var.VType == GRB.CONTINUOUS:
-                                file.write(f"{var.VarName}: {callbackModel.cbGetSolution(var)}\n")
+                            print(f"{v.varName}: {v.X}")
 
                 # if price subproblem infeasible add cut to master problem
                 if price_subproblem.pricing_model.status == GRB.INFEASIBLE:
@@ -276,7 +275,8 @@ class Euphemia:
                         if constr.IISConstr:
                             print(f"Infeasible constraint: {constr}")
                             problematic_constraints.append(constr)
-                            callbackModel.cbLazy(price_subproblem.cuts[constr.ConstrName])
+                            if constr.ConstrName in price_subproblem.cuts:
+                                callbackModel.cbLazy(price_subproblem.cuts[constr.ConstrName])
                     for var in price_subproblem.pricing_model.getVars():
                         if var.IISLB:
                             print(f"Variable {var.VarName}: untere Schranke verletzt (LB = {var.LB})")
