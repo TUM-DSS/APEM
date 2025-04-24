@@ -2,7 +2,6 @@ import gurobipy as gp
 from gurobipy import GRB
 import os
 
-
 from implementation.utils.extraction import get
 
 
@@ -28,6 +27,17 @@ def add_objective(self) -> None:
         self.accept_scalable_step[i] * get(self.scalable_step_orders, 'q', i) *
         get(self.scalable_step_orders, 'p', i) for i in list(self.scalable_step_orders['id']))
 
+    # 6) piecewise linear orders
+    piecewise_linear_orders_obj = gp.quicksum(
+        self.accept_piecewise_linear[i] * get(self.piecewise_linear_orders, 'q', i) *
+        (
+                get(self.piecewise_linear_orders, 'p0', i) +
+                self.accept_piecewise_linear[i] *
+                (get(self.piecewise_linear_orders, 'p1', i)
+                 - get(self.piecewise_linear_orders, 'p0', i))
+                / 2)
+        for i in list(self.piecewise_linear_orders['id']))
+
     # sign(type(sco))FixedTerm_sco B_ACCEPT_sco
 
     # 7) tariff
@@ -50,7 +60,9 @@ def add_market_constraints(self) -> None:
          gp.quicksum(self.accept_complex_step[i] * get(self.complex_step_orders, 'q', i)
                      for i in list(self.complex_step_orders['id']) if get(self.complex_step_orders, 't', i) == t) +
          gp.quicksum(self.accept_scalable_step[i] * get(self.scalable_step_orders, 'q', i)
-                     for i in list(self.scalable_step_orders['id']) if get(self.scalable_step_orders, 't', i) == t)
+                     for i in list(self.scalable_step_orders['id']) if get(self.scalable_step_orders, 't', i) == t) +
+         gp.quicksum(self.accept_piecewise_linear[i] * get(self.piecewise_linear_orders, 'q', i) for i in
+                     list(self.piecewise_linear_orders['id']))
          == 0
          for t in self.periods), name='power_balance')
 

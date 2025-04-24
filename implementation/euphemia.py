@@ -23,6 +23,7 @@ class Euphemia:
         self.complex_step_orders = scenario.complex_step_orders
         self.scalable_complex_orders = scenario.scalable_complex_orders
         self.scalable_step_orders = scenario.scalable_step_orders
+        self.piecewise_linear_orders = scenario.piecewise_linear_orders
 
         self.accept_step = self.model.addVars(list(self.step_orders['id']), vtype=GRB.CONTINUOUS, lb=0, ub=1,
                                               name='accept_step')
@@ -43,6 +44,8 @@ class Euphemia:
                                                   lb=0, ub=1, name='accept_scalable_complex')
         self.accept_scalable_step = self.model.addVars(list(self.scalable_step_orders['id']), vtype=GRB.CONTINUOUS,
                                                        lb=0, ub=1, name='accept_scalable_step')
+        self.accept_piecewise_linear = self.model.addVars(list(self.piecewise_linear_orders['id']), vtype=GRB.CONTINUOUS, lb=0, ub=1,
+                                                          name='accept_piecewise_linear')
 
         # Make additional cuts in MIPSOL callback possible
         self.model.Params.LazyConstraints = 1
