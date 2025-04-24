@@ -129,22 +129,18 @@ class Price_Subproblem:
 
                 # set right weighted_mcp in case of flexible block order
                 if block_order_df['block_type'][i] == 'flexible':
-
                     # list with flex_period variables for current order
                     flex_vars = [
                         (t, var) for (oid, t), var in self.master_problem.flex_period.items()
                         if oid == i + 1
                     ]
-
                     # Dictionary with values for each time period
                     flex_vals = {
                         t: self.master_problem.model.cbGetSolution(var)
                         for (t, var) in flex_vars
                     }
-
                     # Find time period with value 1
                     active_period = next((t for t, val in flex_vals.items() if val > 0.5), None)
-
                     # overwrite weighted MCP with correct value considering flex_period variable
                     weighted_mcp = self.MCP[active_period] * q_values[0]
 
@@ -164,6 +160,7 @@ class Price_Subproblem:
                     self.cuts[f"buy_block_INM_{i+1}"] = gurobi_acceptance_var == 0.0
 
     def add_MIC_MP_constraints(self):
+        # MIC / MP for complex orders
         accept_complex_columns = [col for col in self.solution_dict_df.columns if 'accept_complex[' in col]
         accept_complex_step_columns = [col for col in self.solution_dict_df.columns if 'accept_complex_step[' in col]
         accept_complex_values = self.solution_dict_df[accept_complex_columns].values.flatten()
@@ -176,23 +173,57 @@ class Price_Subproblem:
 
         for _, order in complex_order_df.iterrows():
             # only accepted complex orders relevant
-            if order['acceptance'] > self.epsilon:
+            if order['acceptance'] > self.epsilon and (order['condition'] == 'MP' or order['condition'] == 'MIC'):
                 order_id = order['id']
 
                 variable_expected_value = 0
-                actual_income_value = gp.LinExpr()
-                # calculate minimal expected income / payment
+                actual_value = gp.LinExpr()
+                # calculate minimal expected income / maximum payment
                 for _, step_order in complex_step_order_df.iterrows():
                     if step_order['complex_order_id'] == order_id:
-                        variable_expected_value += step_order['acceptance'] * order['variable_term']
-                        actual_income_value += step_order['acceptance'] * abs(step_order['q']) * self.MCP[step_order['t']]
-                minimum_value = order['fixed_term'] + variable_expected_value
+                        variable_expected_value += step_order['acceptance'] * order['variable_term'] * abs(step_order['q'])
+                        actual_value += step_order['acceptance'] * abs(step_order['q']) * self.MCP[step_order['t']]
+                expected_value = order['fixed_term'] + variable_expected_value
 
                 gurobi_acceptance_var = self.master_problem.accept_complex[order_id]
 
-                self.pricing_model.addConstr(actual_income_value >= minimum_value, f"MIC_MP_condition_CO_{order_id}")
-                self.cuts[f"MIC_MP_condition_CO_{order_id}"] = gurobi_acceptance_var == 0.0
+                if order['condition'] == 'MP':
+                    self.pricing_model.addConstr(actual_value <= expected_value, f"MP_condition_CO_{order_id}")
+                    self.cuts[f"MP_condition_CO_{order_id}"] = gurobi_acceptance_var == 0.0
+                else:
+                    self.pricing_model.addConstr(actual_value >= expected_value, f"MIC_condition_CO_{order_id}")
+                    self.cuts[f"MIC_condition_CO_{order_id}"] = gurobi_acceptance_var == 0.0
 
 
+        # MIC / MP for scalable complex orders
+        accept_scalable_columns = [col for col in self.solution_dict_df.columns if 'accept_scalable_complex[' in col]
+        accept_scalable_step_columns = [col for col in self.solution_dict_df.columns if 'accept_scalable_step[' in col]
+        accept_scalable_values = self.solution_dict_df[accept_scalable_columns].values.flatten()
+        accept_scalable_step_values = self.solution_dict_df[accept_scalable_step_columns].values.flatten()
 
+        scalable_complex_order_df = self.master_problem.scalable_complex_orders.copy()
+        scalable_complex_step_order_df = self.master_problem.scalable_step_orders.copy()
+        scalable_complex_order_df['acceptance'] = accept_scalable_values
+        scalable_complex_step_order_df['acceptance'] = accept_scalable_step_values
 
+        for _, order in scalable_complex_order_df.iterrows():
+            if order['acceptance'] > self.epsilon and (order['condition'] == 'MP' or order['condition'] == 'MIC'):
+                order_id = order['id']
+
+                variable_expected_value = 0
+                actual_value = gp.LinExpr()
+                # calculate minimal expected income / maximum payment
+                for _, step_order in scalable_complex_step_order_df.iterrows():
+                    if step_order['scalable_order_id'] == order_id:
+                        variable_expected_value += step_order['acceptance'] * step_order['p'] * abs(step_order['q'])
+                        actual_value += step_order['acceptance'] * abs(step_order['q']) * self.MCP[step_order['t']]
+                expected_value = order['fixed_term'] + variable_expected_value
+
+                gurobi_acceptance_var = self.master_problem.accept_scalable[order_id]
+
+                if order['condition'] == 'MP':
+                    self.pricing_model.addConstr(actual_value <= expected_value, f"MP_condition_SCO_{order_id}")
+                    self.cuts[f"MP_condition_SCO_{order_id}"] = gurobi_acceptance_var == 0.0
+                else:
+                    self.pricing_model.addConstr(actual_value >= expected_value, f"MIC_condition_SCO_{order_id}")
+                    self.cuts[f"MIC_condition_SCO_{order_id}"] = gurobi_acceptance_var == 0.0
