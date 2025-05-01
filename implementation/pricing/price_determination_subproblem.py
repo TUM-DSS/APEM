@@ -3,12 +3,15 @@ from typing import Optional
 import gurobipy as gp
 from gurobipy import GRB
 import pandas as pd
+import random
 
 
 class Price_Subproblem:
-    def __init__(self, master_problem, solution_dict):
+    def __init__(self, master_problem):
         self.master_problem = master_problem
-        self.solution_dict_df = pd.DataFrame(solution_dict)
+        self.M = master_problem.M
+        self.distance_factor = master_problem.distance_factor
+        self.solution_dict_df = pd.DataFrame(self.master_problem.current_alloc_solution)
         self.epsilon =master_problem.epsilon
         self.cuts = {}
 
@@ -25,6 +28,7 @@ class Price_Subproblem:
         self.add_block_order_constraints()
         self.add_step_order_constraints()
         self.add_MIC_MP_constraints()
+        self.add_piecewise_linear_order_constraints()
 
         self.pricing_model.write(f"{self.master_problem.paths['debug']}/pricing_model.lp")
 
@@ -48,7 +52,6 @@ class Price_Subproblem:
     Add constraints in order to avoid the paradoxical acceptance and rejection of period step orders
     """
     def add_step_order_constraints(self):
-
         # Step order DataFrame with acceptance values
         step_order_df = self.master_problem.step_orders.copy()
         accept_step_order_columns = [col for col in self.solution_dict_df.columns if 'accept_step' in col]
@@ -60,6 +63,7 @@ class Price_Subproblem:
             q = step_order_df['q'][i]
             t = step_order_df['t'][i]
             acceptance = step_order_df['acceptance'][i]
+            gurobi_acceptance_var = self.master_problem.accept_step[i+1]
 
 
             if q == 0:
@@ -70,37 +74,105 @@ class Price_Subproblem:
                 if q > 0:
                     # Sale: INM → p <= MCP
                     self.pricing_model.addConstr(self.MCP[t] >= p - self.epsilon, name=f"sell_step_accepted_{i+1}")
-                    #self.cuts[f"sell_step_INM_accept_{i}"] = gurobi_acceptance_var <= 1 - self.epsilon
+                    self.cuts[f"sell_step_accepted_{i+1}"] = [
+                        gurobi_acceptance_var <= acceptance - random.uniform(0.8, 1.2) * self.distance_factor * self.epsilon,
+                        gurobi_acceptance_var >= acceptance + random.uniform(0.8, 1.2) * self.distance_factor * self.epsilon]
                 else:
                     # Purchase: INM → p >= MCP
                     self.pricing_model.addConstr(self.MCP[t] <= p + self.epsilon, name=f"buy_step_accepted_{i+1}")
-                    #self.cuts[f"buy_step_INM_accept_{i}"] = gurobi_acceptance_var <= 1 - self.epsilon
+                    self.cuts[f"buy_step_accepted_{i+1}"] = [
+                        gurobi_acceptance_var <= acceptance - random.uniform(0.8, 1.2) * self.distance_factor * self.epsilon,
+                        gurobi_acceptance_var >= acceptance + random.uniform(0.8, 1.2) * self.distance_factor * self.epsilon]
 
             # OTM → must have been rejected
             elif acceptance <= self.epsilon:
                 if q > 0:
                     # Sale: OTM → p >= MCP
                     self.pricing_model.addConstr(self.MCP[t] <= p + self.epsilon, name=f"sell_step_rejected_{i+1}")
-                    #self.cuts[f"sell_step_OTM_reject_{i}"] = gurobi_acceptance_var >= 0 + self.epsilon
+                    self.cuts[f"sell_step_rejected_{i+1}"] = [
+                        gurobi_acceptance_var <= acceptance - random.uniform(0.8, 1.2) * self.distance_factor * self.epsilon,
+                        gurobi_acceptance_var >= acceptance +random.uniform(0.8, 1.2) *  self.distance_factor * self.epsilon]
                 else:
                     # Purchase: OTM → p <= MCP
                     self.pricing_model.addConstr(self.MCP[t] >= p - self.epsilon, name=f"buy_step_rejected_{i+1}")
-                    #self.cuts[f"buy_step_OTM_reject_{i}"] = gurobi_acceptance_var >= 0 + self.epsilon
+                    self.cuts[f"buy_step_rejected_{i+1}"] = [
+                        gurobi_acceptance_var <= acceptance - random.uniform(0.8, 1.2) * self.distance_factor * self.epsilon,
+                        gurobi_acceptance_var >= acceptance + random.uniform(0.8, 1.2) * self.distance_factor * self.epsilon]
 
             # ATM → must be exactly at the money
             elif 0.0 < acceptance < 1.0:
                 self.pricing_model.addConstr(self.MCP[t] >= p - self.epsilon, name=f"step_partially_accepted_lower_{i+1}")
                 self.pricing_model.addConstr(self.MCP[t] <= p + self.epsilon, name=f"step_partially_accepted_upper_{i+1}")
-                #if q > 0:
-                    # negative surplus -> accept less
-                    #self.cuts[f"step_ATM_lower_{i}"] = gurobi_acceptance_var <= acceptance - self.epsilon
-                    # positive surplus -> accept more
-                    #self.cuts[f"step_ATM_upper_{i}"] = gurobi_acceptance_var >= acceptance + self.epsilon
-                #else:
-                    # positive surplus -> accept more
-                    #self.cuts[f"step_ATM_lower_{i}"] = gurobi_acceptance_var >= acceptance + self.epsilon
-                    # negative surplus -> accept less
-                    #self.cuts[f"step_ATM_upper_{i}"] = gurobi_acceptance_var <= acceptance - self.epsilon
+                self.cuts[f"step_partially_accepted_lower_{i+1}"] = [
+                        gurobi_acceptance_var <= acceptance - random.uniform(0.8, 1.2) * self.distance_factor * self.epsilon,
+                        gurobi_acceptance_var >= acceptance + random.uniform(0.8, 1.2) * self.distance_factor * self.epsilon, gurobi_acceptance_var == 0.0]
+                self.cuts[f"step_partially_accepted_upper_{i+1}"] = [
+                        gurobi_acceptance_var <= acceptance - random.uniform(0.8, 1.2) * self.distance_factor * self.epsilon,
+                        gurobi_acceptance_var >= acceptance + random.uniform(0.8, 1.2) * self.distance_factor * self.epsilon, gurobi_acceptance_var == 0.0]
+
+    def add_piecewise_linear_order_constraints(self):
+        accept_piecewise_linear_order_columns = [col for col in self.solution_dict_df.columns if 'accept_piecewise_linear' in col]
+        accept_piecewise_linear_order_values = self.solution_dict_df[accept_piecewise_linear_order_columns].values.flatten()
+
+        piecewise_linear_order_df = self.master_problem.piecewise_linear_orders.copy()
+        piecewise_linear_order_df['acceptance'] = accept_piecewise_linear_order_values
+
+        for _, order in piecewise_linear_order_df.iterrows():
+            order_id = int(order['id'])
+            p0 = order['p0']
+            p1 = order['p1']
+            q = order['q']
+            t = order['t']
+            acceptance = order['acceptance']
+            gurobi_acceptance_var = self.master_problem.accept_piecewise_linear[order_id]
+
+            if acceptance >= 1.0 - self.epsilon:
+                if q > 0:
+                    # Sale: INM → p <= MCP
+                    self.pricing_model.addConstr(self.MCP[t] >= p1 - self.epsilon, name=f"sell_PLO_accepted_{order_id}")
+                    self.cuts[f"sell_PLO_accepted_{order_id}"] = [
+                        gurobi_acceptance_var <= acceptance - random.uniform(0.8, 1.2) * self.distance_factor * self.epsilon,
+                        gurobi_acceptance_var >= acceptance + random.uniform(0.8, 1.2) * self.distance_factor * self.epsilon]
+                else:
+                    # Purchase: INM → p >= MCP
+                    self.pricing_model.addConstr(self.MCP[t] <= p1 + self.epsilon, name=f"buy_PLO_accepted_{order_id}")
+                    self.cuts[f"buy_PLO_accepted_{order_id}"] = [
+                        gurobi_acceptance_var <= acceptance - random.uniform(0.8, 1.2) * self.distance_factor * self.epsilon,
+                        gurobi_acceptance_var >= acceptance + random.uniform(0.8, 1.2) * self.distance_factor * self.epsilon]
+
+            # OTM → must have been rejected
+            elif acceptance <= self.epsilon:
+                if q > 0:
+                    # Sale: OTM → p >= MCP
+                    self.pricing_model.addConstr(self.MCP[t] <= p0 + self.epsilon,
+                                                     name=f"sell_PLO_rejected_{order_id}")
+                    self.cuts[f"sell_PLO_rejected_{order_id}"] = [
+                        gurobi_acceptance_var <= acceptance - random.uniform(0.8, 1.2) * self.distance_factor * self.epsilon,
+                        gurobi_acceptance_var >= acceptance + random.uniform(0.8, 1.2) * self.distance_factor * self.epsilon]
+                else:
+                    # Purchase: OTM → p <= MCP
+                    self.pricing_model.addConstr(self.MCP[t] >= p0 - self.epsilon, name=f"buy_PLO_rejected_{order_id}")
+                    self.cuts[f"buy_PLO_rejected_{order_id}"] = [
+                        gurobi_acceptance_var <= acceptance - random.uniform(0.8, 1.2) * self.distance_factor * self.epsilon,
+                        gurobi_acceptance_var >= acceptance + random.uniform(0.8, 1.2) * self.distance_factor * self.epsilon]
+
+            # ATM → must be exactly at the money
+            elif 0.0 < acceptance < 1.0:
+                    print(f"PLO acceptance = {acceptance}")
+                    self.pricing_model.addConstr((self.MCP[t]-p0)/(p1-p0) - self.epsilon <= acceptance,
+                                                 name=f"PLO_partially_accepted_lower_{order_id}")
+                    self.pricing_model.addConstr((self.MCP[t]-p0)/(p1-p0) + self.epsilon >= acceptance,
+                                                 name=f"PLO_partially_accepted_upper_{order_id}")
+                    self.cuts[f"PLO_partially_accepted_upper_{order_id}"] = [
+                        gurobi_acceptance_var <= acceptance - random.uniform(0.8, 1.2) * self.distance_factor * self.epsilon,
+                        gurobi_acceptance_var >= acceptance + random.uniform(0.8, 1.2) * self.distance_factor * self.epsilon, gurobi_acceptance_var == 0.0]
+                    self.cuts[f"PLO_partially_accepted_lower_{order_id}"] = [
+                        gurobi_acceptance_var <= acceptance - random.uniform(0.8, 1.2) * self.distance_factor * self.epsilon,
+                        gurobi_acceptance_var >= acceptance + random.uniform(0.8, 1.2) * self.distance_factor * self.epsilon, gurobi_acceptance_var == 0.0]
+
+
+
+
 
 
     """
@@ -136,7 +208,7 @@ class Price_Subproblem:
                     ]
                     # Dictionary with values for each time period
                     flex_vals = {
-                        t: self.master_problem.model.cbGetSolution(var)
+                        t: self.master_problem.current_alloc_solution[var.VarName][0]
                         for (t, var) in flex_vars
                     }
                     # Find time period with value 1
@@ -153,11 +225,11 @@ class Price_Subproblem:
                 if is_sale:
                     # Sales order: INM, if p < avg(MCP)
                     self.pricing_model.addConstr(weighted_mcp >= p_value, f"sell_block_INM_{i+1}")
-                    self.cuts[f"sell_block_INM_{i+1}"] = gurobi_acceptance_var == 0.0
+                    self.cuts[f"sell_block_INM_{i+1}"] = [gurobi_acceptance_var == 0.0]
                 else:
                     # Purchase order: INM, if p > avg(MCP)
                     self.pricing_model.addConstr(weighted_mcp <= p_value, f"buy_block_INM_{i+1}")
-                    self.cuts[f"buy_block_INM_{i+1}"] = gurobi_acceptance_var == 0.0
+                    self.cuts[f"buy_block_INM_{i+1}"] = [gurobi_acceptance_var == 0.0]
 
     def add_MIC_MP_constraints(self):
         # MIC / MP for complex orders
@@ -174,13 +246,16 @@ class Price_Subproblem:
         for _, order in complex_order_df.iterrows():
             # only accepted complex orders relevant
             if order['acceptance'] > self.epsilon and (order['condition'] == 'MP' or order['condition'] == 'MIC'):
-                order_id = order['id']
+                order_id = int(order['id'])
 
                 variable_expected_value = 0
                 actual_value = gp.LinExpr()
                 # calculate minimal expected income / maximum payment
                 for _, step_order in complex_step_order_df.iterrows():
                     if step_order['complex_order_id'] == order_id:
+                        self.add_complex_step_constraint(step_order, infix="complex")
+
+                        # calculate values for MIC / MP
                         variable_expected_value += step_order['acceptance'] * order['variable_term'] * abs(step_order['q'])
                         actual_value += step_order['acceptance'] * abs(step_order['q']) * self.MCP[step_order['t']]
                 expected_value = order['fixed_term'] + variable_expected_value
@@ -189,10 +264,10 @@ class Price_Subproblem:
 
                 if order['condition'] == 'MP':
                     self.pricing_model.addConstr(actual_value <= expected_value, f"MP_condition_CO_{order_id}")
-                    self.cuts[f"MP_condition_CO_{order_id}"] = gurobi_acceptance_var == 0.0
+                    self.cuts[f"MP_condition_CO_{order_id}"] = [gurobi_acceptance_var == 0.0]
                 else:
                     self.pricing_model.addConstr(actual_value >= expected_value, f"MIC_condition_CO_{order_id}")
-                    self.cuts[f"MIC_condition_CO_{order_id}"] = gurobi_acceptance_var == 0.0
+                    self.cuts[f"MIC_condition_CO_{order_id}"] = [gurobi_acceptance_var == 0.0]
 
 
         # MIC / MP for scalable complex orders
@@ -208,13 +283,15 @@ class Price_Subproblem:
 
         for _, order in scalable_complex_order_df.iterrows():
             if order['acceptance'] > self.epsilon and (order['condition'] == 'MP' or order['condition'] == 'MIC'):
-                order_id = order['id']
+                order_id = int(order['id'])
 
                 variable_expected_value = 0
                 actual_value = gp.LinExpr()
                 # calculate minimal expected income / maximum payment
                 for _, step_order in scalable_complex_step_order_df.iterrows():
                     if step_order['scalable_order_id'] == order_id:
+                        self.add_complex_step_constraint(step_order, infix="scalable_complex")
+
                         variable_expected_value += step_order['acceptance'] * step_order['p'] * abs(step_order['q'])
                         actual_value += step_order['acceptance'] * abs(step_order['q']) * self.MCP[step_order['t']]
                 expected_value = order['fixed_term'] + variable_expected_value
@@ -223,7 +300,27 @@ class Price_Subproblem:
 
                 if order['condition'] == 'MP':
                     self.pricing_model.addConstr(actual_value <= expected_value, f"MP_condition_SCO_{order_id}")
-                    self.cuts[f"MP_condition_SCO_{order_id}"] = gurobi_acceptance_var == 0.0
+                    self.cuts[f"MP_condition_SCO_{order_id}"] = [gurobi_acceptance_var == 0.0]
                 else:
                     self.pricing_model.addConstr(actual_value >= expected_value, f"MIC_condition_SCO_{order_id}")
-                    self.cuts[f"MIC_condition_SCO_{order_id}"] = gurobi_acceptance_var == 0.0
+                    self.cuts[f"MIC_condition_SCO_{order_id}"] = [gurobi_acceptance_var == 0.0]
+
+    """
+    Add constraints to (scalable) complex step orders in order to make sure there are no paradoxically accepted orders
+    """
+    def add_complex_step_constraint(self, step_order, infix):
+        acceptance = step_order['acceptance']
+        q = step_order['q']
+        t = step_order['t']
+        p = step_order['p']
+        id = int(step_order['id'])
+        if acceptance >= 1.0 - self.epsilon:
+            if q > 0:
+                self.pricing_model.addConstr(self.MCP[t] >= p - self.epsilon, f"sell_{infix}_step_accepted_{id}")
+            else:
+                self.pricing_model.addConstr(self.MCP[t] <= p + self.epsilon, f"buy_{infix}_step_accepted_{id}")
+        elif 0.0 + self.epsilon < acceptance < 1.0 - self.epsilon:
+            self.pricing_model.addConstr(self.MCP[t] >= p - self.epsilon,
+                                             name=f"{infix}_step_partially_accepted_lower_{id}")
+            self.pricing_model.addConstr(self.MCP[t] <= p + self.epsilon,
+                                             name=f"{infix}_step_partially_accepted_upper_{id}")

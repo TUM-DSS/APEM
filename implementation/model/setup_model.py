@@ -175,7 +175,6 @@ def add_market_constraints(self) -> None:
                 periods_orders[t] >= get(self.scalable_complex_orders, f'MAP{t}', i) * self.accept_scalable[i]
                 for t in self.periods)
 
-    self.model.write(os.path.join(self.paths['debug'], f"master_{self.iteration}.lp"))
     self.model.setParam("OutputFlag", 0)
 
 

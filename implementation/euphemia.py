@@ -44,16 +44,16 @@ class Euphemia:
                                                   lb=0, ub=1, name='accept_scalable_complex')
         self.accept_scalable_step = self.model.addVars(list(self.scalable_step_orders['id']), vtype=GRB.CONTINUOUS,
                                                        lb=0, ub=1, name='accept_scalable_step')
-        self.accept_piecewise_linear = self.model.addVars(list(self.piecewise_linear_orders['id']), vtype=GRB.CONTINUOUS, lb=0, ub=1,
+        self.accept_piecewise_linear = self.model.addVars(list(self.piecewise_linear_orders['id']),
+                                                          vtype=GRB.CONTINUOUS, lb=0, ub=1,
                                                           name='accept_piecewise_linear')
-
-        # Make additional cuts in MIPSOL callback possible
-        self.model.Params.LazyConstraints = 1
+        self.current_alloc_solution = {}
+        self.found_solution = False
+        self.violated_constraints = {}
 
         # Needed to avoid race conditions
-        #self.model.setParam("Threads", 1)
-        # Variable to save branching decisions
-        self.fixed_accepts = []
+        # self.model.setParam("Threads", 1)
+
         # Make model branch
         # self.model.setParam("Presolve", 0)  # kein klassisches Presolve
         # self.model.setParam("Cuts", 0)  # keine automatischen Schnitte (Cuts)
@@ -71,7 +71,6 @@ class Euphemia:
         # self.model.Params.OutputFlag = 1
         # self.model.setParam("MIPFocus", 3)
 
-
         self.M = 10 ** 6
         self.prices = {}
         self.prices_reinsertion = {}
@@ -79,9 +78,10 @@ class Euphemia:
         self.price_upper_bound = 4000
         self.delta_PAB = 50
         self.delta_MIC = 50
-        self.max_iterations = 30
+        self.epsilon = 1e-4
+        self.distance_factor = 1
+        self.max_iterations = 20000
         self.iteration = 0
-        self.epsilon = 1e-2
         self.paths = {
             "alloc": "euphemia_results/allocation",
             "prices": "euphemia_results/prices",
@@ -117,87 +117,81 @@ class Euphemia:
         add_objective(self)
         add_market_constraints(self)
         add_network_constraints(self)
+        self.iteration = 1
 
-        print("Solving master problem...")
-        self.solve_master_problem()
+        while self.iteration <= self.max_iterations:
+            self.model.write(os.path.join(self.paths['debug'], f"master_problem.lp"))
+            print("Solving master problem...")
+            self.solve_master_problem()
+            print(f"Master problem status: {self.model.Status}")
+            if self.model.Status == GRB.Status.INFEASIBLE:
+                break
+
+            print("Solving price determination subproblem...")
+            price_subproblem = Price_Subproblem(master_problem=self)
+            price_subproblem.solve_price_determination_subproblem()
+
+            if price_subproblem.pricing_model.status == GRB.OPTIMAL:
+                print("Found market clearing prices")
+
+                file_path = f"{self.paths['prices']}/results.txt"
+                with open(file_path, 'w') as file:
+                    for v in price_subproblem.pricing_model.getVars():
+                        print(f"{v.varName}: {v.X}")
+                break
+
+            # if price subproblem infeasible add cut to master problem
+            if price_subproblem.pricing_model.status == GRB.INFEASIBLE:
+                print("Price subproblem is infeasible")
+                price_subproblem.pricing_model.computeIIS()
+
+                for constr in price_subproblem.pricing_model.getConstrs():
+                    if constr.IISConstr:
+                        print(f"Infeasible constraint: {constr}")
+                        if constr.ConstrName in price_subproblem.cuts:
+                            cut_list = price_subproblem.cuts[constr.ConstrName]
+
+                            if len(cut_list) >= 2:
+                                print(f"Adding cuts (OR) {cut_list}")
+                                delta1 = self.model.addVar(vtype=GRB.BINARY,
+                                                           name=f"{constr.ConstrName}_delta1_iteration{self.iteration}")
+                                delta2 = self.model.addVar(vtype=GRB.BINARY,
+                                                           name=f"{constr.ConstrName}_delta2_iteration{self.iteration}")
+
+                                self.model.addGenConstrIndicator(delta1, True, cut_list[0],
+                                                                 name=f"{constr.ConstrName}_indicatorConstr1_iteration{self.iteration}")
+                                self.model.addGenConstrIndicator(delta2, True, cut_list[1],
+                                                                 name=f"{constr.ConstrName}_indicatorConstr2_iteration{self.iteration}")
+                                self.model.addConstr(delta1 + delta2 >= 1,
+                                                     name=f"{constr.ConstrName}_NoGoodCut_iteration{self.iteration}")
+
+                                if constr.ConstrName in self.violated_constraints:
+                                    self.violated_constraints[constr.ConstrName] += 1
+                                else:
+                                    self.violated_constraints[constr.ConstrName] = 0
 
 
+                            elif len(cut_list) == 1:
+                                print(f"Adding cut {cut_list[0]}")
+                                self.model.addConstr(cut_list[0], f"{constr.ConstrName}_iteration{self.iteration}")
+                            else:
+                                print("Longer OR cuts not supported yet")
 
-        #
-        # print("Computing PAB...")
-        # pab = self.get_block_bids(threshold=False)
-        # if len(pab) > 0:
-        #     success = False
-        #     print(f"There are {len(pab)} PAB. Adding block cut...")
-        #     cut_added = self.add_block_cut()
-        #     increase_count = 0
-        #     while not cut_added and increase_count < 5:
-        #         increase_count += 1
-        #         self.delta_PAB += 10
-        #         print(f"Increasing delta_PAB to {self.delta_PAB}.\n")
-        #         cut_added = self.add_block_cut()
-        #
-        #     if not cut_added:
-        #         print("Reject PAB.")
-        #         self.model.addConstrs(self.accept_block[i] == 0 for i in pab)
-        #
-        #     self.delta_PAB -= 10 * increase_count
-        #     self.iteration += 1
-        #     continue
-        #
-        # print("No PAB.")
-        #
-        # print("Computing complex orders with MIC/MP condition violated...")
-        # violated_MIC_MP_complex = self.get_MIC_complex_orders(threshold=False)
-        # if len(violated_MIC_MP_complex) > 0:
-        #     success = False
-        #     print(f"MIC/MP conditions violated in {len(violated_MIC_MP_complex)} complex orders.")
-        #     cut_added = self.add_MIC_complex_cut()
-        #     increase_count = 0
-        #     while not cut_added and increase_count < 5:
-        #         increase_count += 1
-        #         self.delta_MIC += 10
-        #         print(f"Increasing delta_MIC to {self.delta_MIC}.\n")
-        #         cut_added = self.add_MIC_complex_cut()
-        #
-        #     if not cut_added:
-        #         print("Reject complex orders with MIC condition violated.")
-        #         self.model.addConstrs(self.accept_complex[i] == 0 for i in violated_MIC_MP_complex)
-        #
-        #     self.delta_MIC -= 10 * increase_count
-        #     self.iteration += 1
-        #     continue
-        #
-        # print(f"MIC condition satisfied in complex orders.")
-        #
-        # print("Computing scalable complex orders with MIC/MP condition violated...")
-        # violated_MIC_MP_scalable = self.get_MIC_scalable_orders(threshold=False)
-        # if len(violated_MIC_MP_scalable) > 0:
-        #     success = False
-        #     print(f"MIC/MP conditions violated in {len(violated_MIC_MP_scalable)} scalable complex orders.")
-        #     cut_added = self.add_MIC_scalable_cut()
-        #     increase_count = 0
-        #     while not cut_added and increase_count < 5:
-        #         increase_count += 1
-        #         self.delta_MIC += 10
-        #         print(f"Increasing delta_MIC to {self.delta_MIC}.\n")
-        #         cut_added = self.add_MIC_scalable_cut()
-        #
-        #     if not cut_added:
-        #         print("Reject scalable complex orders with MIC condition violated.")
-        #         self.model.addConstrs(self.accept_scalable[i] == 0 for i in violated_MIC_MP_scalable)
-        #
-        #     self.delta_MIC -= 10 * increase_count
-        #     self.iteration += 1
-        #     continue
-        #
-        # print(f"MIC condition satisfied in scalable complex orders.")
-        #
-        # print("\nPRB reinsertion...\n")
-        # PRB_reinsertion(self)
+                for var in price_subproblem.pricing_model.getVars():
+                    if var.IISLB:
+                        print(f"Variable {var.VarName}: lower bound violated (LB = {var.LB})")
+                    if var.IISUB:
+                        print(f"Variable {var.VarName}: upper bound violated (UB = {var.UB})")
 
-        print(f'Final economic surplus: {self.get_objective()}')
+            self.iteration += 1
 
+            self.model.update()
+            self.model.reset()
+            self.solve_master_problem()
+
+        print(f'Final state of master problem after {self.iteration} iterations: {self.found_solution}')
+        if self.found_solution == True:
+            print(f'Final economic surplus: {self.get_objective()}')
 
     def check_infeasibility(self, model: gp.Model, reinsertion: Optional[bool] = False) -> bool:
         """
@@ -217,22 +211,16 @@ class Euphemia:
         except gp.GurobiError as e:
             print(f'An error occurred while checking infeasibility: {e}')
 
-
     def solve_master_problem(self) -> None:
         """
         Search for a selection of block and MIC orders that maximizes the economic surplus.
         """
-        # Setup debugging
-        file_path = f"{self.paths['alloc']}/results.txt"
-        with open(file_path, 'w') as file:
-            file.write("Starting new optimization run\n")
 
         self.model.optimize(callback=self.master_problem_callback)
 
-
     def master_problem_callback(self, callbackModel, where) -> None:
         if where == GRB.Callback.MIPNODE:
-             print("MIPNODE callback")
+            print("MIPNODE callback")
 
         # when a MIP solution was found
         if where == GRB.Callback.MIPSOL:
@@ -245,53 +233,16 @@ class Euphemia:
                 print("Objective value:", objective_value)
 
                 # match variables with value in current solution
-                solution_dict = {v.VarName: [val] for v, val in zip(vars, solution)}
+                self.current_alloc_solution = {v.VarName: [val] for v, val in zip(vars, solution)}
 
                 file_path = f"{self.paths['alloc']}/results.txt"
-                with open(file_path, 'a') as file:
+                with open(file_path, 'w') as file:
                     file.write(f"New solution with objective value {objective_value}\n ------------------")
                     for var in callbackModel.getVars():
                         file.write(f"{var.VarName}: {callbackModel.cbGetSolution(var)}\n")
 
-                print("Solving price determination subproblem...")
-                price_subproblem = Price_Subproblem(master_problem=self, solution_dict=solution_dict)
-                price_subproblem.solve_price_determination_subproblem()
-
-                # if price subproblem feasible check if new incumbent
-                if price_subproblem.pricing_model.status == GRB.OPTIMAL:
-                    print("Found market clearing prices")
-
-                    file_path = f"{self.paths['prices']}/results.txt"
-                    with open(file_path, 'w') as file:
-                        for v in price_subproblem.pricing_model.getVars():
-                            print(f"{v.varName}: {v.X}")
-
-                # if price subproblem infeasible add cut to master problem
-                if price_subproblem.pricing_model.status == GRB.INFEASIBLE:
-                    print("Price subproblem is infeasible")
-                    price_subproblem.pricing_model.computeIIS()
-
-                    problematic_constraints = []
-                    problematic_bounds = []
-
-                    for constr in price_subproblem.pricing_model.getConstrs():
-                        if constr.IISConstr:
-                            print(f"Infeasible constraint: {constr}")
-                            problematic_constraints.append(constr)
-                            if constr.ConstrName in price_subproblem.cuts:
-                                print(f"Adding cut: {price_subproblem.cuts[constr.ConstrName]}")
-                                callbackModel.cbLazy(price_subproblem.cuts[constr.ConstrName])
-                    for var in price_subproblem.pricing_model.getVars():
-                        if var.IISLB:
-                            print(f"Variable {var.VarName}: untere Schranke verletzt (LB = {var.LB})")
-                        if var.IISUB:
-                            print(f"Variable {var.VarName}: obere Schranke verletzt (UB = {var.UB})")
-
-                    #self.addNoGoodCut(callbackModel, solution_dict)
-
-
-
-
+                print('Stopping master problem')
+                self.model.terminate()
 
     def addNoGoodCut(self, callbackModel, solution_dict) -> None:
         # create cut that makes current solution invalid
@@ -303,7 +254,7 @@ class Euphemia:
                 if solution_value is None:
                     print(f"{gurobi_acceptance_var.VarName} not found in solution dict")
                     continue
-                #print(f"{gurobi_acceptance_var.VarName} -> {solution_value}")
+                # print(f"{gurobi_acceptance_var.VarName} -> {solution_value}")
                 if solution_value[0] > 0.5:
                     terms.append(1 - gurobi_acceptance_var)
                 else:
@@ -311,8 +262,6 @@ class Euphemia:
         expr = gp.quicksum(terms)
         callbackModel.cbLazy(expr >= 1)
         print(f"Added cut: {expr} >= 1")
-
-
 
     def get_block_bids(self, threshold: bool, reinsertion: Optional[bool] = False) -> list:
         """
@@ -348,7 +297,6 @@ class Euphemia:
 
         return res
 
-
     def add_block_cut(self, single: Optional[bool] = False) -> bool:
         """
         If single is False, reject all block orders that are in-the-money by less than delta_PAB.
@@ -366,7 +314,6 @@ class Euphemia:
 
         print("Block cut successfully added.")
         return True
-
 
     def get_MIC_complex_orders(self, threshold: Optional[bool] = False, reinsertion: Optional[bool] = False) -> list:
         """
@@ -423,7 +370,6 @@ class Euphemia:
                 file.writelines(f"{bid}\n" for bid in res)
 
         return res
-
 
     def get_MIC_scalable_orders(self, threshold: Optional[bool] = False, reinsertion: Optional[bool] = False) -> list:
         """
@@ -486,7 +432,6 @@ class Euphemia:
 
         return res
 
-
     def add_MIC_complex_cut(self, single: Optional[bool] = False) -> bool:
         """
         If single is False, add cuts to reject complex orders that are in-the-money by less than delta_MIC.
@@ -505,7 +450,6 @@ class Euphemia:
 
         print("MIC complex cut successfully added.")
         return True
-
 
     def add_MIC_scalable_cut(self, single: Optional[bool] = False) -> bool:
         """
@@ -526,13 +470,11 @@ class Euphemia:
         print("MIC scalable complex cut successfully added.")
         return True
 
-
     def check_in_the_money_complex(self, order_id: int) -> bool:
         """
         Check if a complex MIC/MP order is in-the-money.
         """
         pass
-
 
     def check_in_the_money_scalable(self, order_id: id) -> bool:
         """
@@ -540,11 +482,9 @@ class Euphemia:
         """
         pass
 
-
     def volume_indeterminacy_subproblem(self):
         # later
         pass
-
 
     def set_prices(self, prices: dict, reinsertion: Optional[bool] = False) -> None:
         if not reinsertion:
@@ -552,10 +492,8 @@ class Euphemia:
         else:
             self.prices_reinsertion = prices
 
-
     def get_objective(self) -> float:
         return self.model.getObjective().getValue()
-
 
     def __str__(self):
         return 'Euphemia'

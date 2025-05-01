@@ -59,6 +59,7 @@ class ParseEU(ParseData):
         complex_step_orders = pd.read_csv('../implementation/data/raw_data/european/complex_step_orders.csv')
         scalable_complex_orders = pd.read_csv('../implementation/data/raw_data/european/scalable_complex_orders.csv')
         scalable_step_orders = pd.read_csv('../implementation/data/raw_data/european/scalable_step_orders.csv')
+        piecewise_linear_orders = pd.read_csv('../implementation/data/raw_data/european/piecewise_linear_orders.csv')
 
         step_orders_transformed = pd.concat([transform_step_orders(step_orders, periods, sell=True),
                                              transform_step_orders(step_orders, periods, sell=False)],
@@ -84,6 +85,11 @@ class ParseEU(ParseData):
 
         scalable_complex_step_orders_transformed = pd.concat(scalable_dfs)
 
+        for df in [step_orders, block_orders, complex_orders, complex_step_orders,
+                   scalable_complex_orders, scalable_step_orders, piecewise_linear_orders]:
+            if 'id' in df.columns:
+                df['id'] = df['id'].astype(int)
+
         return ZonalScenario('EUDataset', periods, step_orders, block_orders,
-                             complex_orders, complex_step_orders_transformed,
-                             scalable_complex_orders, scalable_complex_step_orders_transformed)
+                             complex_orders, complex_step_orders,
+                             scalable_complex_orders, scalable_step_orders, piecewise_linear_orders)
