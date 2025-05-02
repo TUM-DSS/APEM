@@ -10,7 +10,7 @@ import re
 from implementation.data.parsing.zonal_scenario import ZonalScenario
 from implementation.model.setup_model import add_objective, add_market_constraints, add_network_constraints
 from implementation.pricing.price_determination_subproblem import Price_Subproblem
-from implementation.reinsertions.prb_reinsertion import PRB_reinsertion
+from implementation.reinsertions.prb_reinsertion import PRMIC_PRB_reinsertion
 from implementation.utils.extraction import get
 
 
@@ -204,7 +204,8 @@ class Euphemia:
             print(f'Final economic surplus{" of reinsertion run" if self.reinsertion_run else ""}: {self.current_best_objective}')
 
             if not self.reinsertion_run:
-                PRB_reinsertion(self)
+                PRMIC_PRB_reinsertion(self, is_prmic_not_prb=True)
+                PRMIC_PRB_reinsertion(self, is_prmic_not_prb=False)
 
     def check_infeasibility(self, model: gp.Model, reinsertion: Optional[bool] = False) -> bool:
         """
