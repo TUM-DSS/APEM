@@ -5,6 +5,7 @@ import shutil
 from typing import Optional
 import gurobipy as gp
 from gurobipy import GRB
+import re
 
 from implementation.data.parsing.zonal_scenario import ZonalScenario
 from implementation.model.setup_model import add_objective, add_market_constraints, add_network_constraints
@@ -16,6 +17,7 @@ from implementation.utils.extraction import get
 class Euphemia:
     def __init__(self, scenario: ZonalScenario):
         self.model = gp.Model('Euphemia')
+        self.scenario = scenario
         self.periods = scenario.periods
         self.step_orders = scenario.step_orders
         self.block_orders = scenario.block_orders
@@ -49,7 +51,9 @@ class Euphemia:
                                                           name='accept_piecewise_linear')
         self.current_alloc_solution = {}
         self.found_solution = False
+        self.current_best_objective = 0
         self.violated_constraints = {}
+        self.reinsertion_run = False
 
         # Needed to avoid race conditions
         # self.model.setParam("Threads", 1)
@@ -80,8 +84,9 @@ class Euphemia:
         self.delta_MIC = 50
         self.epsilon = 1e-4
         self.distance_factor = 1
-        self.max_iterations = 20000
+        self.max_iterations = 2000
         self.iteration = 0
+        self.objective_lower_bound = 0
         self.paths = {
             "alloc": "euphemia_results/allocation",
             "prices": "euphemia_results/prices",
@@ -117,9 +122,10 @@ class Euphemia:
         add_objective(self)
         add_market_constraints(self)
         add_network_constraints(self)
+        self.max_iterations = self.max_iterations if not self.reinsertion_run else 100
         self.iteration = 1
 
-        while self.iteration <= self.max_iterations:
+        while self.iteration <= self.max_iterations and self.current_best_objective >= self.objective_lower_bound:
             self.model.write(os.path.join(self.paths['debug'], f"master_problem.lp"))
             print("Solving master problem...")
             self.solve_master_problem()
@@ -138,6 +144,9 @@ class Euphemia:
                 with open(file_path, 'w') as file:
                     for v in price_subproblem.pricing_model.getVars():
                         print(f"{v.varName}: {v.X}")
+
+                self.set_prices({int(re.search(r'\d+', var.varName).group()): var.X for var in price_subproblem.pricing_model.getVars()}, reinsertion=False)
+                self.found_solution = True
                 break
 
             # if price subproblem infeasible add cut to master problem
@@ -186,12 +195,16 @@ class Euphemia:
             self.iteration += 1
 
             self.model.update()
-            self.model.reset()
+            #self.model.reset()
             self.solve_master_problem()
 
         print(f'Final state of master problem after {self.iteration} iterations: {self.found_solution}')
-        if self.found_solution == True:
-            print(f'Final economic surplus: {self.get_objective()}')
+        if self.found_solution:
+            print(f'------- Surplus maximization and price problem successfully finished -------')
+            print(f'Final economic surplus{" of reinsertion run" if self.reinsertion_run else ""}: {self.current_best_objective}')
+
+            if not self.reinsertion_run:
+                PRB_reinsertion(self)
 
     def check_infeasibility(self, model: gp.Model, reinsertion: Optional[bool] = False) -> bool:
         """
@@ -231,6 +244,7 @@ class Euphemia:
             if solution is not None:
                 print("Found integer solution")
                 print("Objective value:", objective_value)
+                self.current_best_objective = objective_value
 
                 # match variables with value in current solution
                 self.current_alloc_solution = {v.VarName: [val] for v, val in zip(vars, solution)}
