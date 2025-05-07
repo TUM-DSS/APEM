@@ -55,8 +55,10 @@ class Euphemia:
         self.violated_constraints = {}
         self.reinsertion_run = False
 
+        self.model.setParam(GRB.Param.SolutionLimit, 1)
+
         # Needed to avoid race conditions
-        # self.model.setParam("Threads", 1)
+        #self.model.setParam("Threads", 1)
 
         # Make model branch
         # self.model.setParam("Presolve", 0)  # kein klassisches Presolve
@@ -83,7 +85,7 @@ class Euphemia:
         self.delta_PAB = 50
         self.delta_MIC = 50
         self.epsilon = 1e-4
-        self.distance_factor = 1
+        self.distance_factor = 5*1e-2
         self.max_iterations = 2000
         self.iteration = 0
         self.objective_lower_bound = 0
@@ -154,6 +156,7 @@ class Euphemia:
                 print("Price subproblem is infeasible")
                 price_subproblem.pricing_model.computeIIS()
 
+                upper_deltas = []
                 for constr in price_subproblem.pricing_model.getConstrs():
                     if constr.IISConstr:
                         print(f"Infeasible constraint: {constr}")
@@ -171,8 +174,25 @@ class Euphemia:
                                                                  name=f"{constr.ConstrName}_indicatorConstr1_iteration{self.iteration}")
                                 self.model.addGenConstrIndicator(delta2, True, cut_list[1],
                                                                  name=f"{constr.ConstrName}_indicatorConstr2_iteration{self.iteration}")
-                                self.model.addConstr(delta1 + delta2 >= 1,
-                                                     name=f"{constr.ConstrName}_NoGoodCut_iteration{self.iteration}")
+
+
+                                if len(cut_list) >= 3:
+                                    delta3 = self.model.addVar(vtype=GRB.BINARY,
+                                                               name=f"{constr.ConstrName}_delta3_iteration{self.iteration}")
+                                    delta4 = self.model.addVar(vtype=GRB.BINARY,
+                                                               name=f"{constr.ConstrName}_delta4_iteration{self.iteration}")
+                                    self.model.addGenConstrIndicator(delta3, True, cut_list[2],
+                                                                     name=f"{constr.ConstrName}_indicatorConstr3_iteration{self.iteration}")
+                                    self.model.addGenConstrIndicator(delta4, True, cut_list[3],
+                                                                     name=f"{constr.ConstrName}_indicatorConstr4_iteration{self.iteration}")
+                                    self.model.addConstr(delta1 + delta2 + delta3 >= 1,
+                                                         name=f"{constr.ConstrName}_delta_OR_iteration{self.iteration}")
+                                else:
+                                    self.model.addConstr(delta1 + delta2 >= 1,
+                                                         name=f"{constr.ConstrName}_delta_OR_iteration{self.iteration}")
+
+
+                                upper_deltas.append(delta2)
 
                                 if constr.ConstrName in self.violated_constraints:
                                     self.violated_constraints[constr.ConstrName] += 1
@@ -186,6 +206,8 @@ class Euphemia:
                             else:
                                 print("Longer OR cuts not supported yet")
 
+                self.model.addConstr(gp.quicksum(upper_deltas) >= 1, f'force_different_direction_iteration{self.iteration}')
+
                 for var in price_subproblem.pricing_model.getVars():
                     if var.IISLB:
                         print(f"Variable {var.VarName}: lower bound violated (LB = {var.LB})")
@@ -196,7 +218,6 @@ class Euphemia:
 
             self.model.update()
             #self.model.reset()
-            self.solve_master_problem()
 
         print(f'Final state of master problem after {self.iteration} iterations: {self.found_solution}')
         if self.found_solution:
@@ -233,8 +254,8 @@ class Euphemia:
         self.model.optimize(callback=self.master_problem_callback)
 
     def master_problem_callback(self, callbackModel, where) -> None:
-        if where == GRB.Callback.MIPNODE:
-            print("MIPNODE callback")
+        #if where == GRB.Callback.MIPNODE:
+            #print("MIPNODE callback")
 
         # when a MIP solution was found
         if where == GRB.Callback.MIPSOL:
@@ -257,7 +278,6 @@ class Euphemia:
                         file.write(f"{var.VarName}: {callbackModel.cbGetSolution(var)}\n")
 
                 print('Stopping master problem')
-                self.model.terminate()
 
     def addNoGoodCut(self, callbackModel, solution_dict) -> None:
         # create cut that makes current solution invalid
