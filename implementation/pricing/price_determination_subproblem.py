@@ -83,11 +83,11 @@ class Price_Subproblem:
                 if q > 0:
                     # Sale: OTM → p >= MCP
                     self.pricing_model.addConstr(self.MCP[t] <= p + self.epsilon, name=f"sell_step_rejected_{i + 1}")
-                    #self.cuts[f"sell_step_rejected_{i + 1}"] = rejected_cut
+                    self.cuts[f"sell_step_rejected_{i + 1}"] = rejected_cut
                 else:
                     # Purchase: OTM → p <= MCP
                     self.pricing_model.addConstr(self.MCP[t] >= p - self.epsilon, name=f"buy_step_rejected_{i + 1}")
-                    #self.cuts[f"buy_step_rejected_{i + 1}"] = rejected_cut
+                    self.cuts[f"buy_step_rejected_{i + 1}"] = rejected_cut
 
             # ATM → must be exactly at the money
             elif 0.0 < acceptance < 1.0:
@@ -97,9 +97,7 @@ class Price_Subproblem:
                                              name=f"step_partially_accepted_upper_{i + 1}")
                 partially_cut = [
                     gurobi_acceptance_var <= acceptance - self.distance_factor - self.epsilon,
-                    gurobi_acceptance_var >= acceptance + self.distance_factor + self.epsilon,
-                    gurobi_acceptance_var == 0.0,
-                    gurobi_acceptance_var == 1.0
+                    gurobi_acceptance_var >= acceptance + self.distance_factor + self.epsilon
                 ]
                 self.cuts[f"step_partially_accepted_lower_{i + 1}"] = partially_cut
                 self.cuts[f"step_partially_accepted_upper_{i + 1}"] = partially_cut

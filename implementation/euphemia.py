@@ -55,7 +55,7 @@ class Euphemia:
         self.violated_constraints = {}
         self.reinsertion_run = False
 
-        self.model.setParam(GRB.Param.SolutionLimit, 1)
+        #self.model.setParam(GRB.Param.SolutionLimit, 1)
 
         # Needed to avoid race conditions
         #self.model.setParam("Threads", 1)
@@ -85,7 +85,7 @@ class Euphemia:
         self.delta_PAB = 50
         self.delta_MIC = 50
         self.epsilon = 1e-4
-        self.distance_factor = 5*1e-2
+        self.distance_factor = 1e-1
         self.max_iterations = 2000
         self.iteration = 0
         self.objective_lower_bound = 0
@@ -156,7 +156,7 @@ class Euphemia:
                 print("Price subproblem is infeasible")
                 price_subproblem.pricing_model.computeIIS()
 
-                upper_deltas = []
+                activate_indicators = []
                 for constr in price_subproblem.pricing_model.getConstrs():
                     if constr.IISConstr:
                         print(f"Infeasible constraint: {constr}")
@@ -169,44 +169,35 @@ class Euphemia:
                                                            name=f"{constr.ConstrName}_delta1_iteration{self.iteration}")
                                 delta2 = self.model.addVar(vtype=GRB.BINARY,
                                                            name=f"{constr.ConstrName}_delta2_iteration{self.iteration}")
+                                activate_indicator = self.model.addVar(vtype=GRB.BINARY,
+                                                           name=f"{constr.ConstrName}_activate_indicator_iteration{self.iteration}")
 
                                 self.model.addGenConstrIndicator(delta1, True, cut_list[0],
                                                                  name=f"{constr.ConstrName}_indicatorConstr1_iteration{self.iteration}")
                                 self.model.addGenConstrIndicator(delta2, True, cut_list[1],
                                                                  name=f"{constr.ConstrName}_indicatorConstr2_iteration{self.iteration}")
+                                self.model.addGenConstrIndicator(activate_indicator, True, delta1 + delta2 >= 1,
+                                                     name=f"{constr.ConstrName}_delta_OR_iteration{self.iteration}")
 
 
-                                if len(cut_list) >= 3:
-                                    delta3 = self.model.addVar(vtype=GRB.BINARY,
-                                                               name=f"{constr.ConstrName}_delta3_iteration{self.iteration}")
-                                    delta4 = self.model.addVar(vtype=GRB.BINARY,
-                                                               name=f"{constr.ConstrName}_delta4_iteration{self.iteration}")
-                                    self.model.addGenConstrIndicator(delta3, True, cut_list[2],
-                                                                     name=f"{constr.ConstrName}_indicatorConstr3_iteration{self.iteration}")
-                                    self.model.addGenConstrIndicator(delta4, True, cut_list[3],
-                                                                     name=f"{constr.ConstrName}_indicatorConstr4_iteration{self.iteration}")
-                                    self.model.addConstr(delta1 + delta2 + delta3 >= 1,
-                                                         name=f"{constr.ConstrName}_delta_OR_iteration{self.iteration}")
-                                else:
-                                    self.model.addConstr(delta1 + delta2 >= 1,
-                                                         name=f"{constr.ConstrName}_delta_OR_iteration{self.iteration}")
-
-
-                                upper_deltas.append(delta2)
+                                activate_indicators.append(activate_indicator)
 
                                 if constr.ConstrName in self.violated_constraints:
                                     self.violated_constraints[constr.ConstrName] += 1
                                 else:
                                     self.violated_constraints[constr.ConstrName] = 0
 
-
                             elif len(cut_list) == 1:
                                 print(f"Adding cut {cut_list[0]}")
-                                self.model.addConstr(cut_list[0], f"{constr.ConstrName}_iteration{self.iteration}")
+                                activate_indicator = self.model.addVar(vtype=GRB.BINARY,
+                                                                       name=f"{constr.ConstrName}_activate_indicator_iteration{self.iteration}")
+                                self.model.addGenConstrIndicator(activate_indicator, True, cut_list[0], name=f"{constr.ConstrName}_iteration{self.iteration}")
+                                activate_indicators.append(activate_indicator)
                             else:
                                 print("Longer OR cuts not supported yet")
 
-                self.model.addConstr(gp.quicksum(upper_deltas) >= 1, f'force_different_direction_iteration{self.iteration}')
+                if len(activate_indicators) > 0:
+                    self.model.addConstr(gp.quicksum(activate_indicators) >= 1, f'no_good_cut_iteration{self.iteration}')
 
                 for var in price_subproblem.pricing_model.getVars():
                     if var.IISLB:
@@ -276,6 +267,8 @@ class Euphemia:
                     file.write(f"New solution with objective value {objective_value}\n ------------------")
                     for var in callbackModel.getVars():
                         file.write(f"{var.VarName}: {callbackModel.cbGetSolution(var)}\n")
+
+                self.model.terminate()
 
                 print('Stopping master problem')
 
