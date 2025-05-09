@@ -9,6 +9,7 @@ def PRMIC_PRB_reinsertion(self, is_prmic_not_prb: bool):
     from implementation.euphemia import Euphemia
 
     counter = 0
+    activated_order_counter = 0
     rejected_orders, paradoxically_rejected_orders = calculate_paradoxically_rejected_orders(self, is_prmic_not_prb)
     print(f'Rejected orders: {rejected_orders}')
 
@@ -50,7 +51,7 @@ def PRMIC_PRB_reinsertion(self, is_prmic_not_prb: bool):
                 if reinsertion_run.found_solution:
                     # Solution found but surplus smaller
                     if self.current_best_objective >= reinsertion_run.current_best_objective:
-                        print(f'Could not activate {order_type} {id}.')
+                        print(f'Could not activate {order_type} {id}: {self.current_best_objective}(Best objective) >= {reinsertion_run.current_best_objective}(Reinsertion run objective)')
                     # Solution found, order can be reinserted
                     else:
                         print(f'Activated {order_type} {id}.')
@@ -60,11 +61,13 @@ def PRMIC_PRB_reinsertion(self, is_prmic_not_prb: bool):
                         self.current_best_objective = reinsertion_run.current_best_objective
                         self.set_prices(reinsertion_run.prices, reinsertion=False)
 
+                        activated_order_counter += 1
                         recalculate_list = True
                         break_outer_loop = True
                         break
                 else:
                     print(f'Could not activate {order_type} {id}.')
+                print(f'Up to this step {activated_order_counter} {"block" if not is_prmic_not_prb else "(scalable) complex"} orders could be activated')
             if break_outer_loop:
                 break
 
@@ -75,7 +78,8 @@ def PRMIC_PRB_reinsertion(self, is_prmic_not_prb: bool):
         else:
             break
 
-    print(f'PRB reinsertion finished with {len(paradoxically_rejected_orders)} left.')
+    print(f'Reinsertion finished with paradoxically rejected order: {paradoxically_rejected_orders} left.')
+    print(f'--- Activated {activated_order_counter} {"block" if not is_prmic_not_prb else "(scalable) complex"} orders ---')
 
 def calculate_paradoxically_rejected_orders(self, is_prmic_not_prb: bool):
     rejected_orders = {'block': [], 'complex': [], 'scalable_complex': []}

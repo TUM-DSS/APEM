@@ -135,32 +135,13 @@ class Euphemia:
         if self.model.Status == GRB.Status.INFEASIBLE:
             print("Master problem is infeasible")
 
-        print(f'Final state of master problem after {self.iteration} iterations: {self.found_solution}')
         if self.found_solution:
-            print(f'------- Surplus maximization and price problem successfully finished -------')
+            print(f'------- Surplus maximization and price problem successfully finished after {self.iteration} iterations -------')
             print(f'Final economic surplus{" of reinsertion run" if self.reinsertion_run else ""}: {self.current_best_objective}')
 
             if not self.reinsertion_run:
-                PRMIC_PRB_reinsertion(self, is_prmic_not_prb=False)
                 PRMIC_PRB_reinsertion(self, is_prmic_not_prb=True)
-
-    def check_infeasibility(self, model: gp.Model, reinsertion: Optional[bool] = False) -> bool:
-        """
-        Check if model is infeasible. If applicable, compute an Irreducible Inconsistent Subsystem (IIS).
-        """
-        try:
-            if model.status == GRB.INFEASIBLE:
-                print("Model is infeasible. Computing IIS...")
-                model.computeIIS()
-                iis_file = os.path.join(self.paths['debug'],
-                                        f"master_iip_{self.iteration}_reinsertion_{reinsertion}.ilp")
-                model.write(iis_file)
-                print(f"IIS file saved at: {iis_file}")
-                return True
-            else:
-                return False
-        except gp.GurobiError as e:
-            print(f'An error occurred while checking infeasibility: {e}')
+                PRMIC_PRB_reinsertion(self, is_prmic_not_prb=False)
 
     def solve_master_problem(self) -> None:
         """
@@ -182,9 +163,10 @@ class Euphemia:
             if solution is not None:
                 print("Found integer solution")
                 print("Objective value:", objective_value)
+                self.iteration += 1
 
                 # Important for reinsertions in order stop solving at current best solution
-                if objective_value <= self.current_best_objective:
+                if objective_value <= self.current_best_objective and callbackModel.Status == GRB.Status.OPTIMAL:
                     callbackModel.terminate()
 
                 # match variables with value in current solution
@@ -227,14 +209,14 @@ class Euphemia:
                             else:
                                 self.violated_constraints[constr_name] = 1
 
-                            if constr_name in price_subproblem.cuts.keys() and self.violated_constraints[constr_name] >= 5:
+                            if constr_name in price_subproblem.cuts.keys() and self.violated_constraints[constr_name] >= 3:
                                 cut = price_subproblem.cuts[constr_name]
-                                print(f"Adding cut: {cut[0]}")
-                                callbackModel.cbLazy(cut[0])
+                                print(f"Adding cut: {cut}")
+                                callbackModel.cbLazy(cut)
 
-                    self.addNoGoodCut(callbackModel=callbackModel)
+                    self.add_no_good_cut(callbackModel=callbackModel)
 
-    def addNoGoodCut(self, callbackModel) -> None:
+    def add_no_good_cut(self, callbackModel) -> None:
         # create cut that makes current solution invalid
         terms = []
         # match variable from current solution with gurobi variable from model

@@ -65,32 +65,26 @@ class Price_Subproblem:
             if acceptance >= 1.0 - self.epsilon:
                 if q > 0:
                     # Sale: INM → p <= MCP
-                    c = self.pricing_model.addConstr(self.MCP[t] >= p - self.epsilon, name=f"sell_step_accepted_{i + 1}")
-                    self.cuts[c] = gurobi_acceptance_var
+                    self.pricing_model.addConstr(self.MCP[t] >= p - self.epsilon, name=f"sell_step_accepted_{i + 1}")
                 else:
                     # Purchase: INM → p >= MCP
-                    c = self.pricing_model.addConstr(self.MCP[t] <= p + self.epsilon, name=f"buy_step_accepted_{i + 1}")
-                    self.cuts[c] = gurobi_acceptance_var
+                    self.pricing_model.addConstr(self.MCP[t] <= p + self.epsilon, name=f"buy_step_accepted_{i + 1}")
 
             # OTM → must have been rejected
             elif acceptance <= self.epsilon:
                 if q > 0:
                     # Sale: OTM → p >= MCP
-                    c = self.pricing_model.addConstr(self.MCP[t] <= p + self.epsilon, name=f"sell_step_rejected_{i + 1}")
-                    self.cuts[c] = gurobi_acceptance_var
+                    self.pricing_model.addConstr(self.MCP[t] <= p + self.epsilon, name=f"sell_step_rejected_{i + 1}")
                 else:
                     # Purchase: OTM → p <= MCP
-                    c = self.pricing_model.addConstr(self.MCP[t] >= p - self.epsilon, name=f"buy_step_rejected_{i + 1}")
-                    self.cuts[c] = gurobi_acceptance_var
+                    self.pricing_model.addConstr(self.MCP[t] >= p - self.epsilon, name=f"buy_step_rejected_{i + 1}")
 
             # ATM → must be exactly at the money
             elif 0.0 < acceptance < 1.0:
-                c1 = self.pricing_model.addConstr(self.MCP[t] >= p - self.epsilon,
+                self.pricing_model.addConstr(self.MCP[t] >= p - self.epsilon,
                                              name=f"step_partially_accepted_lower_{i + 1}")
-                c2 = self.pricing_model.addConstr(self.MCP[t] <= p + self.epsilon,
+                self.pricing_model.addConstr(self.MCP[t] <= p + self.epsilon,
                                              name=f"step_partially_accepted_upper_{i + 1}")
-                self.cuts[c1] = gurobi_acceptance_var
-                self.cuts[c2] = gurobi_acceptance_var
 
     def add_piecewise_linear_order_constraints(self):
         accept_piecewise_linear_order_columns = [col for col in self.solution_dict_df.columns if
@@ -113,34 +107,26 @@ class Price_Subproblem:
             if acceptance >= 1.0 - self.epsilon:
                 if q > 0:
                     # Sale: INM → p <= MCP
-                    c = self.pricing_model.addConstr(self.MCP[t] >= p1 - self.epsilon, name=f"sell_PLO_accepted_{order_id}")
-                    self.cuts[c] = gurobi_acceptance_var
+                    self.pricing_model.addConstr(self.MCP[t] >= p1 - self.epsilon, name=f"sell_PLO_accepted_{order_id}")
                 else:
                     # Purchase: INM → p >= MCP
-                    c = self.pricing_model.addConstr(self.MCP[t] <= p1 + self.epsilon, name=f"buy_PLO_accepted_{order_id}")
-                    self.cuts[c] = gurobi_acceptance_var
-
+                    self.pricing_model.addConstr(self.MCP[t] <= p1 + self.epsilon, name=f"buy_PLO_accepted_{order_id}")
             # OTM → must have been rejected
             elif acceptance <= self.epsilon:
                 if q > 0:
                     # Sale: OTM → p >= MCP
-                    c = self.pricing_model.addConstr(self.MCP[t] <= p0 + self.epsilon,
+                    self.pricing_model.addConstr(self.MCP[t] <= p0 + self.epsilon,
                                                  name=f"sell_PLO_rejected_{order_id}")
-                    self.cuts[c] = gurobi_acceptance_var
                 else:
                     # Purchase: OTM → p <= MCP
-                    c = self.pricing_model.addConstr(self.MCP[t] >= p0 - self.epsilon, name=f"buy_PLO_rejected_{order_id}")
-                    self.cuts[c] = gurobi_acceptance_var
-
+                    self.pricing_model.addConstr(self.MCP[t] >= p0 - self.epsilon, name=f"buy_PLO_rejected_{order_id}")
             # ATM → must be exactly at the money
             elif 0.0 < acceptance < 1.0:
                 print(f"PLO acceptance = {acceptance}")
-                c1 = self.pricing_model.addConstr((self.MCP[t] - p0) / (p1 - p0) - self.epsilon <= acceptance,
+                self.pricing_model.addConstr((self.MCP[t] - p0) / (p1 - p0) - self.epsilon <= acceptance,
                                              name=f"PLO_partially_accepted_lower_{order_id}")
-                c2 = self.pricing_model.addConstr((self.MCP[t] - p0) / (p1 - p0) + self.epsilon >= acceptance,
+                self.pricing_model.addConstr((self.MCP[t] - p0) / (p1 - p0) + self.epsilon >= acceptance,
                                              name=f"PLO_partially_accepted_upper_{order_id}")
-                self.cuts[c1] = gurobi_acceptance_var
-                self.cuts[c2] = gurobi_acceptance_var
 
     """
     Add constraints in order to avoid the paradoxical acceptance of block orders (PABs)
@@ -185,11 +171,11 @@ class Price_Subproblem:
                     if is_sale:
                         # Sales order: INM, if p < avg(MCP)
                         self.pricing_model.addConstr(weighted_mcp >= p, f"sell_block_INM_{block_id}")
-                        self.cuts[f"sell_block_INM_{block_id}"] = [gurobi_acceptance_var == 0.0]
+                        self.cuts[f"sell_block_INM_{block_id}"] = gurobi_acceptance_var == 0.0
                     else:
                         # Purchase order: INM, if p > avg(MCP)
                         self.pricing_model.addConstr(weighted_mcp <= p, f"buy_block_INM_{block_id}")
-                        self.cuts[f"buy_block_INM_{block_id}"] = [gurobi_acceptance_var == 0.0]
+                        self.cuts[f"buy_block_INM_{block_id}"] = gurobi_acceptance_var == 0.0
                 else:
                     self.add_linked_block_order_constraints(block_order_df=block_order_df, parent_order=block_order)
 
@@ -203,8 +189,8 @@ class Price_Subproblem:
             (child_dict['acceptance'] * child_dict[f'q{t}'] + parent_order['acceptance'] * parent_order[f'q{t}']) * (
                     child_dict['p'] - self.MCP[t]) for t in self.master_problem.periods) >= 0,
                                      f'linked_block_positive_family_parent_{parent_id}_child_{child_id}')
-        self.cuts[f'linked_block_positive_family_parent_{parent_id}_child_{child_id}'] = [self.master_problem.accept_block[
-                                                                    parent_id] == 0.0]
+        self.cuts[f'linked_block_positive_family_parent_{parent_id}_child_{child_id}'] = self.master_problem.accept_block[
+                                                                    parent_id] == 0.0
 
         # Leaf blocks are not allowed to generate negative surplus
         if block_order_df['block_type'][child_id - 1] != 'linked':
@@ -212,8 +198,8 @@ class Price_Subproblem:
                 gp.quicksum(child_dict['acceptance'] * (child_dict['p'] - self.MCP[t]) * child_dict[f'q{t}'] for t in
                          self.master_problem.periods) >= 0,
                 f'linked_block_positive_leaf_{child_id}')
-            self.cuts[f'linked_block_positive_leaf_{child_id}'] = [self.master_problem.accept_block[
-                                                                      parent_id] == 0.0]
+            self.cuts[f'linked_block_positive_leaf_{child_id}'] = self.master_problem.accept_block[
+                                                                      parent_id] == 0.0
 
     def add_MIC_MP_constraints(self):
         # MIC / MP for complex orders
@@ -249,10 +235,10 @@ class Price_Subproblem:
 
                 if order['condition'] == 'MP':
                     self.pricing_model.addConstr(actual_value <= expected_value, f"MP_condition_CO_{order_id}")
-                    self.cuts[f"MP_condition_CO_{order_id}"] = [gurobi_acceptance_var == 0.0]
+                    self.cuts[f"MP_condition_CO_{order_id}"] = gurobi_acceptance_var == 0.0
                 else:
                     self.pricing_model.addConstr(actual_value >= expected_value, f"MIC_condition_CO_{order_id}")
-                    self.cuts[f"MIC_condition_CO_{order_id}"] = [gurobi_acceptance_var == 0.0]
+                    self.cuts[f"MIC_condition_CO_{order_id}"] = gurobi_acceptance_var == 0.0
 
         # MIC / MP for scalable complex orders
         accept_scalable_columns = [col for col in self.solution_dict_df.columns if 'accept_scalable_complex[' in col]
@@ -284,10 +270,10 @@ class Price_Subproblem:
 
                 if order['condition'] == 'MP':
                     self.pricing_model.addConstr(actual_value <= expected_value, f"MP_condition_SCO_{order_id}")
-                    self.cuts[f"MP_condition_SCO_{order_id}"] = [gurobi_acceptance_var == 0.0]
+                    self.cuts[f"MP_condition_SCO_{order_id}"] = gurobi_acceptance_var == 0.0
                 else:
                     self.pricing_model.addConstr(actual_value >= expected_value, f"MIC_condition_SCO_{order_id}")
-                    self.cuts[f"MIC_condition_SCO_{order_id}"] = [gurobi_acceptance_var == 0.0]
+                    self.cuts[f"MIC_condition_SCO_{order_id}"] = gurobi_acceptance_var == 0.0
 
 
     """
