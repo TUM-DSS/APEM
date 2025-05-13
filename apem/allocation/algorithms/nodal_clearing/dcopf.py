@@ -42,8 +42,8 @@ class DCOPF(PowerFlowModel):
         else:
             model = gp.Model(f'DCOPF-MILP-Scenario-{scenario}')
 
-        model.setParam("OutputFlag", configuration.output_flag)
-        model.setParam('TimeLimit', configuration.time_limit)
+        # apply Gurobi configuration parameters
+        configuration.apply_to_model(model)
 
         if not configuration.relaxation:
             model.setParam('IntegralityFocus', 1)

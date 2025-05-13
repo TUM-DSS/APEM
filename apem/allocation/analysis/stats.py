@@ -70,7 +70,7 @@ def compute_stats(stats_file: str, scenario: Scenario, configuration: Configurat
     f.write(f"Demand = {total_demand}\n")
 
     if not configuration.relaxation:
-        f.write(f"Final MIP gap value: {model.MIPGap}\n")
+        f.write(f"\nFinal MIP gap value: {model.MIPGap}\n")
     f.write(f"Nodes: {len(nodes)}\n")
     f.write(f"Branches: {int(len(allocation.TransmissionNetworkAllocation.f_vwt) / (2 * len(scenario.periods)))}\n")
     f.write(f"Buyers: {len(buyers)}\n")
@@ -90,5 +90,8 @@ def compute_stats(stats_file: str, scenario: Scenario, configuration: Configurat
         f.write(f"COUNT FRACTIONAL: {count_frac}\n")
         f.write(f"COUNT BINARY: {count_binary}\n")
 
+    f.write(f"\nCONFIGURATION:\n")
+    for key, value in vars(configuration).items():
+        f.write(f"  {key}: {value}\n")
     f.write("\n")
     f.close()
