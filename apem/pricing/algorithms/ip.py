@@ -236,14 +236,14 @@ class IP(PricingAlgorithm):
         # 7
         model.addConstrs(
             epsilon_up_btl[b, t, lb] + epsilon_down_btl[b, t, lb] - epsilon_bt[b, t]
-            == extract_from_buyers(df_buyers, 'val', b, t, lb)
+            == buyer_val_dict[lb][b, t]
             for b in buyers
             for t in periods
             for lb in blocks_buyers
         )
         # 8
         model.addConstrs(
-            epsilon_bt[b, t] + epsilon_up_bt[b, t] + p_vt[extract_from_buyers(df_buyers, 'node', b, t), t]
+            epsilon_bt[b, t] + epsilon_up_bt[b, t] + p_vt[buyer_node_dict[b, t], t]
             == 0
             for b in buyers
             for t in periods
