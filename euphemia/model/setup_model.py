@@ -85,7 +85,7 @@ def add_market_constraints(self) -> None:
 
     # linked blocks
     linked_blocks = list(self.block_orders[self.block_orders['block_type'] == 'linked']['id'])
-    block_to_parent = {i: int(get(self.block_orders, 'code_prm', i)) for i in linked_blocks}
+    block_to_parent = {i: get(self.block_orders, 'code_prm', i) for i in linked_blocks}
 
     self.model.addConstrs(self.accept_block[i] <= self.accept_block[block_to_parent[i]] for i in linked_blocks)
 

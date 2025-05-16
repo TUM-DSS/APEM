@@ -154,8 +154,7 @@ def check_PRB(self, order: int) -> bool:
     sale = True if sum(q.values()) > 0 else False
     avg_mcp = sum(self.prices[t] * q_t for t, q_t in q.items()) / sum(q.values())
 
-
     if sale and p < avg_mcp or not sale and avg_mcp < p:
         return True
-    #TODO linked block orders
+
     return False

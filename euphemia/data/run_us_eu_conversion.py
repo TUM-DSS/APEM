@@ -1,4 +1,5 @@
 import pandas as pd
+from jinja2.compiler import generate
 
 from apem.data.parsing.parse_arpa import ParseARPA
 from apem.data.parsing.parse_data import ParseData
@@ -81,4 +82,4 @@ def save_df(df, us_data: ParseData, name: str):
 
 
 if __name__ == '__main__':
-   run_us_eu_conversion(ParsePyPSAEurSmall, generate_uptime_patterns=False)
+   run_us_eu_conversion(ParsePJM, generate_uptime_patterns=False)

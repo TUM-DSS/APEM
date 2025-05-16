@@ -12,6 +12,7 @@ from euphemia.model.setup_model import add_objective, add_market_constraints, ad
 from euphemia.pricing.price_determination_subproblem import Price_Subproblem
 from euphemia.reinsertions.prb_reinsertion import PRMIC_PRB_reinsertion
 from euphemia.utils.extraction import get
+from euphemia.utils.paths import EUPHEMIA_ROOT
 
 
 class Euphemia:
@@ -138,6 +139,7 @@ class Euphemia:
         if self.found_solution:
             print(f'------- Surplus maximization and price problem successfully finished after {self.iteration} iterations -------')
             print(f'Final economic surplus{" of reinsertion run" if self.reinsertion_run else ""}: {self.current_best_objective}')
+            print(f'Found prices: {self.prices}')
 
             if not self.reinsertion_run:
                 PRMIC_PRB_reinsertion(self, is_prmic_not_prb=True)
@@ -165,18 +167,17 @@ class Euphemia:
                 print("Objective value:", objective_value)
                 self.iteration += 1
 
-                # Important for reinsertions in order stop solving at current best solution
-                if objective_value <= self.current_best_objective and callbackModel.Status == GRB.Status.OPTIMAL:
-                    callbackModel.terminate()
-
                 # match variables with value in current solution
                 self.current_alloc_solution = {v.VarName: [val] for v, val in zip(vars, solution)}
 
-                file_path = f"{self.paths['alloc']}/results.txt"
-                with open(file_path, 'w') as file:
-                    file.write(f"New solution with objective value {objective_value}\n ------------------")
+                # Write current allocation solution to file
+                file_path = f"{EUPHEMIA_ROOT / self.paths['alloc']}/results.txt"
+                with open(file_path, 'w', buffering=1) as f:
+                    f.write(f"New solution with objective value {objective_value}\n")
                     for var in callbackModel.getVars():
-                        file.write(f"{var.VarName}: {callbackModel.cbGetSolution(var)}\n")
+                        f.write(f"{var.VarName}: {callbackModel.cbGetSolution(var)}\n")
+                    f.flush()
+                    os.fsync(f.fileno())
 
                 print("Solving price determination subproblem...")
                 price_subproblem = Price_Subproblem(master_problem=self)
@@ -185,10 +186,15 @@ class Euphemia:
                 if price_subproblem.pricing_model.Status == GRB.OPTIMAL:
                     print("Found market clearing prices")
 
-                    file_path = f"{self.paths['prices']}/results.txt"
-                    with open(file_path, 'w') as file:
+                    # Write MCPs to file
+                    file_path = f"{EUPHEMIA_ROOT / self.paths['prices']}/results.txt"
+                    with open(file_path, 'a', buffering=1) as file:  # 'a' = append
                         for v in price_subproblem.pricing_model.getVars():
-                            print(f"{v.varName}: {v.X}")
+                            line = f"{v.varName}: {v.X}\n"
+                            file.write(line)  # to file
+                            print(line, end='')  # for console output
+                        file.flush()
+                        os.fsync(file.fileno())
 
                     self.set_prices({int(re.search(r'\d+', var.varName).group()): var.X for var in
                                      price_subproblem.pricing_model.getVars()}, reinsertion=False)

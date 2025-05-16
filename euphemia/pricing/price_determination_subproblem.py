@@ -80,7 +80,7 @@ class Price_Subproblem:
                     self.pricing_model.addConstr(self.MCP[t] >= p - self.epsilon, name=f"buy_step_rejected_{order_id}")
 
             # ATM → must be exactly at the money
-            elif 0.0 < acceptance < 1.0:
+            elif self.epsilon < acceptance < 1.0 - self.epsilon:
                 self.pricing_model.addConstr(self.MCP[t] >= p - self.epsilon,
                                              name=f"step_partially_accepted_lower_{order_id}")
                 self.pricing_model.addConstr(self.MCP[t] <= p + self.epsilon,
@@ -120,7 +120,7 @@ class Price_Subproblem:
                     # Purchase: OTM → p <= MCP
                     self.pricing_model.addConstr(self.MCP[t] >= p0 - self.epsilon, name=f"buy_PLO_rejected_{order_id}")
             # ATM → must be exactly at the money
-            elif 0.0 < acceptance < 1.0:
+            elif self.epsilon < acceptance < 1.0 - self.epsilon:
                 print(f"PLO acceptance = {acceptance}")
                 self.pricing_model.addConstr((self.MCP[t] - p0) / (p1 - p0) - self.epsilon <= acceptance,
                                              name=f"PLO_partially_accepted_lower_{order_id}")
@@ -298,7 +298,7 @@ class Price_Subproblem:
                 self.pricing_model.addConstr(self.MCP[t] >= p - self.epsilon, f"sell_{infix}_step_accepted_{id}")
             else:
                 self.pricing_model.addConstr(self.MCP[t] <= p + self.epsilon, f"buy_{infix}_step_accepted_{id}")
-        elif 0.0 + self.epsilon < acceptance < 1.0 - self.epsilon:
+        elif self.epsilon < acceptance < 1.0 - self.epsilon:
             self.pricing_model.addConstr(self.MCP[t] >= p - self.epsilon,
                                          name=f"{infix}_step_partially_accepted_lower_{id}")
             self.pricing_model.addConstr(self.MCP[t] <= p + self.epsilon,

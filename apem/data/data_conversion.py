@@ -237,33 +237,7 @@ class DataConversion:
 
                 print(f"Exclusive blocks finished - Seller {s} - Pattern {pattern}")
 
-                # add linked block orders for the previously added block order
-                # one linked block order for each active period and step bid
-                for t in self.periods:
-                    if time_commitment[t - 1] == 0:
-                        continue
-
-                    seller_info = self.df_sellers[(self.df_sellers['seller'] == s) & (self.df_sellers['period'] == t)]
-
-                    for block in self.blocks_sellers:
-                        id_block_t = f's{s}pattern{count}t{t}l{block}'
-                        q = seller_info[f'size{block}'].values[0]
-
-                        if block == 1:
-                            q = seller_info[f'size{block}'].values[0] - seller_info['min_prod'].values[0]
-
-                        if q == 0:
-                            continue
-
-                        bid_p = {'id': id_block_t,
-                                 'block_type': 'linked',
-                                 'code_prm': f's{s}pattern{count}',
-                                 'p': seller_info[f'cost{block}'].values[0],
-                                 **{f'q{k}': q if k == t else 0 for k in self.periods},
-                                 'MAR': 0
-                                 }
-
-                        block_bids.append(bid_p)
+                self.add_linked_block_orders(time_commitment, s, count, block_bids, reduce_orders=True)
 
                 count += 1
 
@@ -289,6 +263,94 @@ class DataConversion:
 
         return dp[T]
 
+    def generate_contiguous_patterns(self, min_uptime: int) -> List[List[int]]:
+        """
+        Generate all possible patterns that encode in which periods a seller with minimum uptime min_uptime is committed
+        given there is only one start and one stop of the production unit.
+        """
+        T = len(self.periods)
+        patterns: List[List[int]] = []
+
+        for start_off in range(0, T - min_uptime + 1):  # 1s before ON period
+            for on_len in range(min_uptime, T - start_off + 1):  # length of ON period
+                end_off = T - start_off - on_len  # 1s after ON period
+
+                pattern = [1] * start_off
+                pattern += [on_len]
+                pattern += [1] * end_off
+
+                patterns.append(pattern)
+
+        return patterns
+
+    def add_linked_block_orders(self, time_commitment, s, count, block_bids, reduce_orders: bool):
+        # --- reduce orders by putting all time periods in one linked block instead of multiple linked blocks with each one q != 0 ---
+        if reduce_orders:
+            for block in self.blocks_sellers:
+                id_block = f's{s}pattern{count}l{block}'
+                q_dict = {f'q{k}': 0 for k in self.periods}
+                p_block = None
+
+                # Fill right q for each period for this price step
+                for t in self.periods:
+                    if time_commitment[t - 1] == 0:
+                        continue
+
+                    seller_info = self.df_sellers[
+                        (self.df_sellers['seller'] == s) & (self.df_sellers['period'] == t)
+                        ]
+
+                    q = seller_info[f'size{block}'].values[0]
+                    if block == 1:
+                        q -= seller_info['min_prod'].values[0]
+
+                    if q == 0:
+                        continue
+
+                    q_dict[f'q{t}'] = q
+                    p_block = p_block or seller_info[f'cost{block}'].values[0]
+
+                # Create only one order per price step if there is a q != 0 for at least one period
+                if any(q_dict.values()):
+                    bid_p = {
+                        'id': id_block,
+                        'block_type': 'linked',
+                        'code_prm': f's{s}pattern{count}',
+                        'p': p_block,
+                        **q_dict,
+                        'MAR': 0
+                    }
+                    block_bids.append(bid_p)
+
+        # --- Add one linked block order for each active period and price step ---
+        else:
+            for t in self.periods:
+                if time_commitment[t - 1] == 0:
+                    continue
+
+                seller_info = self.df_sellers[(self.df_sellers['seller'] == s) & (self.df_sellers['period'] == t)]
+
+                for block in self.blocks_sellers:
+                    id_block_t = f's{s}pattern{count}t{t}l{block}'
+                    q = seller_info[f'size{block}'].values[0]
+
+                    if block == 1:
+                        q = seller_info[f'size{block}'].values[0] - seller_info['min_prod'].values[0]
+
+                    if q == 0:
+                        continue
+
+                    bid_p = {'id': id_block_t,
+                             'block_type': 'linked',
+                             'code_prm': f's{s}pattern{count}',
+                             'p': seller_info[f'cost{block}'].values[0],
+                             **{f'q{k}': q if k == t else 0 for k in self.periods},
+                             'MAR': 0
+                             }
+
+                    block_bids.append(bid_p)
+
+
     def generate_write_patterns(self) -> None:
         """
         Generate and write all patterns in .txt files.
@@ -298,7 +360,7 @@ class DataConversion:
         ensure_dir(path)
         for min_uptime in min_uptimes:
             file_name = path / f'{min_uptime}.txt'
-            patterns = self.generate_patterns(min_uptime)
+            patterns = self.generate_contiguous_patterns(min_uptime)
             with open(file_name, 'w') as f:
                 for p in patterns:
                     row = ' '.join(map(str, p))
