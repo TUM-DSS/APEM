@@ -43,4 +43,4 @@ class ParsePyPSAEurSmall(ParseData):
         blocks_sellers = range(1, 1 + 1)
 
         return Scenario('PyPSA_Eur_Small', df_buyers, df_sellers, network, nodes_agents, periods, blocks_buyers,
-                        blocks_sellers, r_star, path / 'elec_s_40_ec_lv1.5_.nc')
+                        blocks_sellers, r_star)

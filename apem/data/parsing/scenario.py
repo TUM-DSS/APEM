@@ -5,7 +5,6 @@ import geopandas as gpd
 import networkx as nx
 import os
 import pandas as pd
-import pypsa
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 
@@ -19,7 +18,7 @@ class Scenario:
 
     def __init__(self, name: str, df_buyers: pd.DataFrame, df_sellers: pd.DataFrame, network: nx.Graph,
                  nodes_agents: dict, periods: list, blocks_buyers: range, blocks_sellers: range,
-                 r_star: str, network_file: Optional[str] = None):
+                 r_star: str):
         self.name = name
         self.df_buyers = df_buyers
         self.df_sellers = df_sellers
@@ -29,7 +28,6 @@ class Scenario:
         self.blocks_buyers = blocks_buyers
         self.blocks_sellers = blocks_sellers
         self.r_star = r_star
-        self.network_file = network_file
 
     def __str__(self):
         return self.name
@@ -81,7 +79,7 @@ class Scenario:
 
     def plot_network(self, zonal_config: str = "") -> None:
         """
-        Plots the PyPSA network.
+        Plots the electricity network for the underlying scenario.
         
         Args:
             zonal_config (str, optional): if provided, nodes are colored according to their zonal assignments. Otherwise, they are colored black.
@@ -92,28 +90,30 @@ class Scenario:
         results_directory = os.path.join("results", f"{self.name}_results", power_flow_model)
         os.makedirs(results_directory, exist_ok=True)
 
-        # Load PyPSA network
-        n = pypsa.Network(self.network_file)
-
-        # Override network with the corresponding nodal PyPSA network, if required
-        if zonal_config and self.name == 'PyPSA_Eur_Large':
-            n = pypsa.Network(RAW_DATA_DIR / "pypsa_eur_large" / "elec_s_334m_ec_lv1.5_.nc")
-        elif zonal_config and self.name == 'PyPSA_Eur_Small':
-            n = pypsa.Network(RAW_DATA_DIR / "pypsa_eur_small" / "elec_s_40_ec_lv1.5_.nc")
-
-        # Filter power lines with non-zero capacity 
-        n.lines = n.lines[n.lines["s_nom"] > 0]
-
-        # Extract longitude (x) & latitude (y) for buses
+        # Get nodes and edges from the network
+        nodes = list(self.network.nodes)
+        edges = self.network.edges(data=True)
+        
         CRS = "EPSG:4326"
+        
+        # Create GeoDataFrame for nodes with longitude & latitude
         geo_df = gpd.GeoDataFrame(
-            n.buses,
+            {
+                "node": nodes,
+                "latitude": [self.nodes_agents[node]["latitude"] for node in nodes],
+                "longitude": [self.nodes_agents[node]["longitude"] for node in nodes],
+            },
             crs=CRS,
-            geometry=[Point(xy) for xy in zip(n.buses["x"], n.buses["y"])]
+            geometry=[
+                Point(self.nodes_agents[node]["longitude"], self.nodes_agents[node]["latitude"])
+                for node in nodes
+            ]
         )
+        geo_df.index = geo_df["node"].astype(str)
 
         # Assign colors based on zonal configuration
         geo_df["color"] = "black"  # default color
+        
         if zonal_config:
             # Load csv file with node-to-zone mapping
             df_zones = pd.read_csv(os.path.join(results_directory, zonal_config, "node_to_zone.csv"),
@@ -138,14 +138,21 @@ class Scenario:
             # Assign colors to buses based on zones
             geo_df["color"] = geo_df["zone"].map(zone_to_color_mapping)
 
-        # Create GeoDataFrame for lines
+        # Create GeoDataFrame for edges   
         line_df = gpd.GeoDataFrame(
-            n.lines,
+            {
+                "from_node": [u for u, v, data in edges],      
+                "to_node": [v for u, v, data in edges],
+                "B": [data["B"] for u, v, data in edges],
+                "F_max": [data["F_max"] for u, v, data in edges]  
+            }, 
             crs=CRS,
             geometry=[
-                LineString([(n.buses.loc[line["bus0"], "x"], n.buses.loc[line["bus0"], "y"]),
-                            (n.buses.loc[line["bus1"], "x"], n.buses.loc[line["bus1"], "y"])])
-                for _, line in n.lines.iterrows()
+                LineString([
+                    Point(self.nodes_agents[u]["longitude"], self.nodes_agents[u]["latitude"]),
+                    Point(self.nodes_agents[v]["longitude"], self.nodes_agents[v]["latitude"])
+                ]) 
+                for u, v, data in edges
             ]
         )
 
@@ -162,12 +169,7 @@ class Scenario:
         line_df.plot(ax=ax, color="gray", linewidth=1.0, alpha=0.7)
 
         # Plot bus nodes with longitude & latitude 
-        geo_df.plot(
-            ax=ax,
-            markersize=100,
-            marker="o",
-            color=geo_df["color"]
-        )
+        geo_df.plot(ax=ax, markersize=100, marker="o", color=geo_df["color"])
 
         if zonal_config:
             # Add legend with zone colors to the plot
@@ -180,16 +182,3 @@ class Scenario:
         file_name = f"{self.name}_{zonal_config}" if zonal_config else self.name
         plt.savefig(f"{results_directory}/{file_name}_network.png", bbox_inches='tight', dpi=300)
         plt.close(fig)
-
-    def get_geo_coordinates(self) -> dict:
-        """
-        Computes the geographic coordinates of each node.
-        """
-        n = pypsa.Network(self.network_file)
-        nodes = n.buses.index
-        node_geo = {}
-        for node in nodes:
-            x = n.buses[n.buses.index == node]['x'][0]
-            y = n.buses[n.buses.index == node]['y'][0]
-            node_geo[node] = {'x': x, 'y': y}
-        return node_geo

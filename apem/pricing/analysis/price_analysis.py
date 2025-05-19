@@ -1,4 +1,5 @@
 from typing import Optional, Tuple
+
 import os
 import pandas as pd
 
@@ -10,17 +11,18 @@ from apem.data.parsing.scenario import Scenario
 from apem.pricing.algorithms.elmp import ELMP
 from apem.pricing.algorithms.ip import IP
 from apem.pricing.algorithms.min_mwp import MinMWP
-from apem.pricing.analysis.plot import plot_avg_prices, plot_pypsa_heatmap
+from apem.pricing.analysis.plot import plot_avg_prices, plot_price_heatmap
 from apem.pricing.analysis.pricing import Pricing, GLOCS, LLOCS, MWPS
 
 
 class PriceAnalysis:
 
-    def __init__(self, scenario: Scenario, allocation: Allocation, pricing: Pricing, configuration: Configuration):
+    def __init__(self, scenario: Scenario, allocation: Allocation, pricing: Pricing, configuration: Configuration, base_scenario: Optional[Scenario] = None):
         self.scenario = scenario
         self.allocation = allocation
         self.pricing = pricing
         self.configuration = configuration
+        self.base_scenario = base_scenario # used only for zonal_NTC
 
     def compute_glocs(self, file_glocs: str = "", mode="w") -> Optional[GLOCS]:
         pricing = self.pricing
@@ -187,5 +189,7 @@ class PriceAnalysis:
         avg_prices = self.avg_node_prices(file_avg=file_stats, mode="a")
 
         if self.scenario.name in ["PyPSA_Eur_Large", "PyPSA_Eur_Small"]:
-            plot_pypsa_heatmap(f"{path}/{self.pricing.used_algorithm}_heatmap.png", self.scenario.name,
+            nodal_scenario = self.base_scenario if zonal_config else self.scenario
+                
+            plot_price_heatmap(f"{path}/{self.pricing.used_algorithm}_heatmap.png", nodal_scenario,
                                avg_prices, zonal_config)
