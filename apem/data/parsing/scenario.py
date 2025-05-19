@@ -38,35 +38,47 @@ class Scenario:
         """
         count_sellers = len(self.df_sellers['seller'].unique())
         count_buyers = len(self.df_buyers['buyer'].unique())
-        count_nodes = len(self.df_sellers['node'].unique())
-
-        energy_carriers = self.df_sellers['carrier'].unique().tolist()
-
-        res_carriers = ['onwind', 'solar', 'offwind-ac', 'offwind-dc']
-        res_sellers = self.df_sellers[self.df_sellers['carrier'].isin(res_carriers)]
-        res_proportion = round(len(res_sellers) / len(self.df_sellers), 2)
+        count_nodes = len(self.network.nodes)
+        nodes_without_agents = [
+            node for node, data in self.nodes_agents.items()
+            if not data['buyers'] and not data['sellers']
+        ]
+        count_nodes_without_agents = len(nodes_without_agents)
+        count_lines = len(self.network.edges)
+        
         demand = self.df_buyers['max_dem'].sum()
         supply = self.df_sellers['max_prod'].sum()
+
+        if 'carrier' in self.df_sellers.columns:
+            energy_carriers = self.df_sellers['carrier'].unique().tolist()
+            res_carriers = ['onwind', 'solar', 'offwind-ac', 'offwind-dc']
+            res_sellers = self.df_sellers[self.df_sellers['carrier'].isin(res_carriers)]
+            res_proportion = round(len(res_sellers) / len(self.df_sellers), 2)
+            res_supply_proportion = round(res_sellers['max_prod'].sum() / supply, 2)
 
         # Define and create results directory, if not exists
         results_directory = f"./results/{self.name}_results"
         os.makedirs(results_directory, exist_ok=True)
 
         # Write contents to scenario.txt file
-        output_file = os.path.join(results_directory, f"{self.name}_nodal_scenario.txt")
+        output_file = os.path.join(results_directory, f"{self.name}_base_scenario.txt")
         f = open(output_file, 'w+')
         f.write(f'Sellers: {count_sellers}\n')
         f.write(f'Buyers: {count_buyers}\n')
         f.write(f'Nodes: {count_nodes}\n')
-        f.write(f'Transmission lines: {len(self.network)}\n')
+        f.write(f'Nodes without agents: {count_nodes_without_agents}\n')
+        f.write(f'Transmission lines: {count_lines}\n')
         f.write(f'Periods: {len(self.periods)}\n')
-        f.write(f'Energy carriers: {energy_carriers}\n')
-        f.write(f'RES proportion in energy mix: {res_proportion}\n')
+        if 'carrier' in self.df_sellers.columns:
+            f.write(f'Energy carriers: {energy_carriers}\n')
+            f.write(f'RES generator proportion in energy mix: {res_proportion}\n')
+            f.write(f'RES supply proportion in energy mix: {res_supply_proportion}\n')
+        
+        f.write('\n')
         f.write(f'Demand: {demand}\n\n')
-
         for t in self.periods:
             demand_t = self.df_buyers[self.df_buyers['period'] == t]['max_dem'].sum()
-            f.write(f'Demand period {t}: {demand_t}\n')
+            f.write(f'Demand period {t}: {demand_t}\n')          
 
         f.write('\n')
         f.write(f'Available supply: {supply}\n\n')
@@ -74,7 +86,6 @@ class Scenario:
             supply_t = self.df_sellers[self.df_sellers['period'] == t]['max_prod'].sum()
             f.write(f'Available supply period {t}: {supply_t}\n')
 
-        f.write('\n')
         f.close()
 
     def plot_network(self, zonal_config: str = "") -> None:
