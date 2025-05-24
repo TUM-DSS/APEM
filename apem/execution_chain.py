@@ -1,7 +1,6 @@
 import os
 from enum import Enum
 from typing import Optional, Union, Dict, Any
-from typing import Optional, Union, Dict, Any
 
 from apem.allocation.algorithms.nodal_clearing.dcopf import DCOPF
 from apem.allocation.algorithms.zonal_clearing.zonal_NTC import Zonal_NTC
@@ -29,41 +28,25 @@ from apem.config_loader import ConfigLoader
 from apem.enums import Datasets, PricingAlgorithms, RedispatchAlgorithms, PowerFlowModels
 from apem.allocation.power_flow_model import PowerFlowModel
 
-
 def _retrieve_data(dataset: Datasets) -> Scenario:
     return dataset.value.parse_data()
 
+def _create_configuration() -> Configuration:
+    """Create a Configuration instance using the current configuration."""
+    config = ConfigLoader().get_solver_configuration()
+    return Configuration(
+        MIP_gap=config.get('MIP_gap', 1e-4),
+        optimality_tol=config.get('optimality_tol', 1e-6),
+        time_limit=config.get('time_limit', 3600),
+        work_limit=config.get('work_limit', 3600),
+        threads=config.get('threads', 0),
+        presparsify=config.get('presparsify', -1),
+        strict_supply_demand_eq=config.get('strict_supply_demand_eq', True),
+        relaxation=config.get('relaxation', False),
+        output_flag=config.get('output_flag', 0),
+        verbosity=config.get('verbosity', True)
+    )
 
-def _create_configuration() -> Configuration:
-    """Create a Configuration instance using the current configuration."""
-    config = ConfigLoader().get_solver_configuration()
-    return Configuration(
-        MIP_gap=config.get('MIP_gap', 1e-4),
-        optimality_tol=config.get('optimality_tol', 1e-6),
-        time_limit=config.get('time_limit', 3600),
-        work_limit=config.get('work_limit', 3600),
-        threads=config.get('threads', 0),
-        presparsify=config.get('presparsify', -1),
-        strict_supply_demand_eq=config.get('strict_supply_demand_eq', True),
-        relaxation=config.get('relaxation', False),
-        output_flag=config.get('output_flag', 0),
-        verbosity=config.get('verbosity', True)
-    )
-def _create_configuration() -> Configuration:
-    """Create a Configuration instance using the current configuration."""
-    config = ConfigLoader().get_solver_configuration()
-    return Configuration(
-        MIP_gap=config.get('MIP_gap', 1e-4),
-        optimality_tol=config.get('optimality_tol', 1e-6),
-        time_limit=config.get('time_limit', 3600),
-        work_limit=config.get('work_limit', 3600),
-        threads=config.get('threads', 0),
-        presparsify=config.get('presparsify', -1),
-        strict_supply_demand_eq=config.get('strict_supply_demand_eq', True),
-        relaxation=config.get('relaxation', False),
-        output_flag=config.get('output_flag', 0),
-        verbosity=config.get('verbosity', True)
-    )
 
 
 def _solve_allocation_problem(scenario: Scenario, power_flow_model: PowerFlowModel, configuration: Configuration,
@@ -203,14 +186,14 @@ def solve_and_analyse_scenario(dataset: Datasets, power_flow_model: PowerFlowMod
         scenario_to_analyse = (price_analysis.scenario if isDCOPF 
                                else price_analysis.base_scenario)
         base_scenario = None if isDCOPF else price_analysis.base_scenario
-        zonal_config = (power_flow_model.value.zonal_configuration if 
+        zonal_config = (power_flow_model.zonal_configuration if 
                         isinstance(power_flow_model, Zonal_NTC) else "")
         
         scenario_to_analyse.analyse_scenario()  # analyse base scenario
         scenario_to_analyse.plot_network(zonal_config)  # plot underlying network
         
     return analyse_results(price_analysis.scenario, price_analysis.allocation, price_analysis.pricing, 
-                           price_analysis.configuration, power_flow_model.value, base_scenario)
+                           price_analysis.configuration, power_flow_model, base_scenario)
 
 
 def apply_all_algorithms(dataset: Datasets):
