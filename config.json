@@ -26,7 +26,8 @@
         "zonal_DE2-s",
         "zonal_DE3",
         "zonal_DE4",
-        "zonal_DE4-refined"
+        "zonal_DE4-refined",
+        "zonal_DE5"
     ],
     "verbosity": true,
     "scenario": {
