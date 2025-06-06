@@ -80,7 +80,7 @@ def add_market_constraints(self) -> None:
 
     self.model.addConstrs(
         gp.quicksum(
-            self.accept_block[i] for i in exclusive_blocks if get(self.block_orders, 'code_prm', i) == eg) <= 1
+            self.MAR_aux[i] for i in exclusive_blocks if get(self.block_orders, 'code_prm', i) == eg) <= 1
         for eg in exclusive_groups)
 
     # linked blocks

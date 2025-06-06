@@ -32,7 +32,8 @@ class Price_Subproblem:
 
         self.add_block_order_constraints()
         self.add_step_order_constraints()
-        self.add_MIC_MP_constraints()
+        self.add_complex_order_constraints()
+        self.add_scalable_complex_order_constraints()
         self.add_piecewise_linear_order_constraints()
 
         self.pricing_model.write(f"{self.master_problem.paths['debug']}/pricing_model.lp")
@@ -51,40 +52,41 @@ class Price_Subproblem:
         step_order_df['acceptance'] = accept_step_values
 
         for _, order in step_order_df.iterrows():
-            order_id = order['id']
-            p = order['p']
-            q = order['q']
-            t = order['t']
-            acceptance = order['acceptance']
+            self.add_step_order_constraint(order, infix="normal")
 
-            if q == 0:
-                continue
+    def add_step_order_constraint(self, step_order, infix):
+        acceptance = step_order['acceptance']
+        q = step_order['q']
+        t = step_order['t']
+        p = step_order['p']
+        id = step_order['id']
+        if q == 0:
+            return
 
+        # INM → must have been accepted
+        if acceptance >= 1.0 - self.epsilon:
+            if q > 0:
+                # Sale: INM → p <= MCP
+                self.pricing_model.addConstr(self.MCP[t] >= p - self.epsilon, f"sell_{infix}_step_accepted_{id}")
+            else:
+                # Purchase: INM → p >= MCP
+                self.pricing_model.addConstr(self.MCP[t] <= p + self.epsilon, f"buy_{infix}_step_accepted_{id}")
 
-            # INM → must have been accepted
-            if acceptance >= 1.0 - self.epsilon:
-                if q > 0:
-                    # Sale: INM → p <= MCP
-                    self.pricing_model.addConstr(self.MCP[t] >= p - self.epsilon, name=f"sell_step_accepted_{order_id}")
-                else:
-                    # Purchase: INM → p >= MCP
-                    self.pricing_model.addConstr(self.MCP[t] <= p + self.epsilon, name=f"buy_step_accepted_{order_id}")
+        # OTM → must have been rejected
+        elif acceptance <= self.epsilon:
+            if q > 0:
+                # Sale: OTM → p >= MCP
+                self.pricing_model.addConstr(self.MCP[t] <= p + self.epsilon, name=f"sell_step_rejected_{id}")
+            else:
+                # Purchase: OTM → p <= MCP
+                self.pricing_model.addConstr(self.MCP[t] >= p - self.epsilon, name=f"buy_step_rejected_{id}")
 
-            # OTM → must have been rejected
-            elif acceptance <= self.epsilon:
-                if q > 0:
-                    # Sale: OTM → p >= MCP
-                    self.pricing_model.addConstr(self.MCP[t] <= p + self.epsilon, name=f"sell_step_rejected_{order_id}")
-                else:
-                    # Purchase: OTM → p <= MCP
-                    self.pricing_model.addConstr(self.MCP[t] >= p - self.epsilon, name=f"buy_step_rejected_{order_id}")
-
-            # ATM → must be exactly at the money
-            elif self.epsilon < acceptance < 1.0 - self.epsilon:
-                self.pricing_model.addConstr(self.MCP[t] >= p - self.epsilon,
-                                             name=f"step_partially_accepted_lower_{order_id}")
-                self.pricing_model.addConstr(self.MCP[t] <= p + self.epsilon,
-                                             name=f"step_partially_accepted_upper_{order_id}")
+        # ATM → must be exactly at the money
+        elif self.epsilon < acceptance < 1.0 - self.epsilon:
+            self.pricing_model.addConstr(self.MCP[t] >= p - self.epsilon,
+                                         name=f"{infix}_step_partially_accepted_lower_{id}")
+            self.pricing_model.addConstr(self.MCP[t] <= p + self.epsilon,
+                                         name=f"{infix}_step_partially_accepted_upper_{id}")
 
     def add_piecewise_linear_order_constraints(self):
         accept_piecewise_linear_order_columns = [col for col in self.solution_dict_df.columns if
@@ -161,7 +163,9 @@ class Price_Subproblem:
 
                 # Sales or purchase order
                 is_sale = any(q > 0 for q in q_values)
-                is_linked_parent = any(other_order['block_type'] == 'linked' and block_order['id'] == other_order['code_prm'] for _, other_order in block_order_df.iterrows())
+                is_linked_parent = any(
+                    other_order['block_type'] == 'linked' and block_order['id'] == other_order['code_prm'] for
+                    _, other_order in block_order_df.iterrows())
 
                 # save gurobi accept variable object in order to use it for cuts
                 gurobi_acceptance_var = self.master_problem.accept_block[block_id]
@@ -186,17 +190,19 @@ class Price_Subproblem:
                     self.add_linked_block_order_constraints(block_order_df=block_order_df, parent_order=block_order)
 
     def add_linked_block_order_constraints(self, block_order_df, parent_order):
-        children_df = block_order_df[(block_order_df['code_prm'] == 'linked') & (block_order_df['block_type'] == 'linked')]
+        children_df = block_order_df[
+            (block_order_df['code_prm'] == 'linked') & (block_order_df['block_type'] == 'linked')]
         parent_id = parent_order['id']
 
         # Family surplus must not be negative
         self.pricing_model.addConstr(gp.quicksum(
             parent_order['acceptance'] * parent_order[f'q{t}'] * (
                     parent_order['p'] - self.MCP[t]) + gp.quicksum(child['acceptance'] * child[f'q{t}'] * (
-                    child['p'] - self.MCP[t]) for _, child in children_df.iterrows()) for t in self.master_problem.periods) >= 0,
+                    child['p'] - self.MCP[t]) for _, child in children_df.iterrows()) for t in
+            self.master_problem.periods) >= 0,
                                      f'linked_block_positive_family_parent_{parent_id}')
         self.cuts[f'linked_block_positive_family_parent_{parent_id}'] = self.master_problem.accept_block[
-                                                                    parent_id] == 0.0
+                                                                            parent_id] == 0.0
 
     def add_linked_leafs_positive_surplus(self, child_order):
         parent_id = child_order['code_prm']
@@ -209,7 +215,7 @@ class Price_Subproblem:
         self.cuts[f'linked_block_positive_leaf_{child_id}'] = self.master_problem.accept_block[
                                                                   parent_id] == 0.0
 
-    def add_MIC_MP_constraints(self):
+    def add_complex_order_constraints(self):
         # MIC / MP for complex orders
         accept_complex_columns = [col for col in self.solution_dict_df.columns if 'accept_complex[' in col]
         accept_complex_step_columns = [col for col in self.solution_dict_df.columns if 'accept_complex_step[' in col]
@@ -223,31 +229,13 @@ class Price_Subproblem:
 
         for _, order in complex_order_df.iterrows():
             # only accepted complex orders relevant
-            if order['acceptance'] > self.epsilon and (order['condition'] == 'MP' or order['condition'] == 'MIC'):
-                order_id = order['id']
+            if order['acceptance'] > self.epsilon and order['condition'] != 'load gradient':
+                self.add_MIC_MP_constraints(order, complex_step_order_df, isComplex=True)
+            elif order['acceptance'] > self.epsilon and order['condition'] == 'load gradient':
+                self.add_load_gradient_constraints(order, complex_step_order_df, isComplex=True)
 
-                variable_expected_value = 0
-                actual_value = gp.LinExpr()
-                # calculate minimal expected income / maximum payment
-                for _, step_order in complex_step_order_df.iterrows():
-                    if step_order['complex_order_id'] == order_id:
-                        self.add_complex_step_constraint(step_order, infix="complex")
 
-                        # calculate values for MIC / MP
-                        variable_expected_value += step_order['acceptance'] * order['variable_term'] * abs(
-                            step_order['q'])
-                        actual_value += step_order['acceptance'] * abs(step_order['q']) * self.MCP[step_order['t']]
-                expected_value = order['fixed_term'] + variable_expected_value
-
-                gurobi_acceptance_var = self.master_problem.accept_complex[order_id]
-
-                if order['condition'] == 'MP':
-                    self.pricing_model.addConstr(actual_value <= expected_value, f"MP_condition_CO_{order_id}")
-                    self.cuts[f"MP_condition_CO_{order_id}"] = gurobi_acceptance_var == 0.0
-                else:
-                    self.pricing_model.addConstr(actual_value >= expected_value, f"MIC_condition_CO_{order_id}")
-                    self.cuts[f"MIC_condition_CO_{order_id}"] = gurobi_acceptance_var == 0.0
-
+    def add_scalable_complex_order_constraints(self):
         # MIC / MP for scalable complex orders
         accept_scalable_columns = [col for col in self.solution_dict_df.columns if 'accept_scalable_complex[' in col]
         accept_scalable_step_columns = [col for col in self.solution_dict_df.columns if 'accept_scalable_step[' in col]
@@ -260,46 +248,59 @@ class Price_Subproblem:
         scalable_complex_step_order_df['acceptance'] = accept_scalable_step_values
 
         for _, order in scalable_complex_order_df.iterrows():
-            if order['acceptance'] > self.epsilon and (order['condition'] == 'MP' or order['condition'] == 'MIC'):
-                order_id = order['id']
+            if order['acceptance'] > self.epsilon and order['condition'] != 'load gradient':
+                self.add_MIC_MP_constraints(order, scalable_complex_step_order_df, isComplex=False)
+            elif order['acceptance'] > self.epsilon and order['condition'] == 'load gradient':
+                self.add_load_gradient_constraints(order, scalable_complex_step_order_df, isComplex=False)
 
-                variable_expected_value = 0
-                actual_value = gp.LinExpr()
-                # calculate minimal expected income / maximum payment
-                for _, step_order in scalable_complex_step_order_df.iterrows():
-                    if step_order['scalable_order_id'] == order_id:
-                        self.add_complex_step_constraint(step_order, infix="scalable_complex")
+    def add_MIC_MP_constraints(self, order, step_order_df, isComplex: bool):
+        order_id = order['id']
 
-                        variable_expected_value += step_order['acceptance'] * step_order['p'] * abs(step_order['q'])
-                        actual_value += step_order['acceptance'] * abs(step_order['q']) * self.MCP[step_order['t']]
-                expected_value = order['fixed_term'] + variable_expected_value
-
-                gurobi_acceptance_var = self.master_problem.accept_scalable[order_id]
-
-                if order['condition'] == 'MP':
-                    self.pricing_model.addConstr(actual_value <= expected_value, f"MP_condition_SCO_{order_id}")
-                    self.cuts[f"MP_condition_SCO_{order_id}"] = gurobi_acceptance_var == 0.0
+        parent_column = 'complex_order_id' if isComplex else 'scalable_order_id'
+        variable_expected_value = 0
+        actual_value = gp.LinExpr()
+        # calculate minimal expected income / maximum payment
+        for _, step_order in step_order_df.iterrows():
+            if step_order[parent_column] == order_id:
+                # calculate values for MIC / MP
+                if isComplex:
+                    variable_expected_value += step_order['acceptance'] * order['variable_term'] * abs(
+                        step_order['q'])
                 else:
-                    self.pricing_model.addConstr(actual_value >= expected_value, f"MIC_condition_SCO_{order_id}")
-                    self.cuts[f"MIC_condition_SCO_{order_id}"] = gurobi_acceptance_var == 0.0
+                    variable_expected_value += step_order['acceptance'] * step_order['p'] * abs(step_order['q'])
 
+                actual_value += step_order['acceptance'] * abs(step_order['q']) * self.MCP[step_order['t']]
+        expected_value = order['fixed_term'] + variable_expected_value
 
-    """
-    Add constraints to (scalable) complex step orders in order to make sure there are no paradoxically accepted orders
-    """
-    def add_complex_step_constraint(self, step_order, infix):
-        acceptance = step_order['acceptance']
-        q = step_order['q']
-        t = step_order['t']
-        p = step_order['p']
-        id = step_order['id']
-        if acceptance >= 1.0 - self.epsilon:
-            if q > 0:
-                self.pricing_model.addConstr(self.MCP[t] >= p - self.epsilon, f"sell_{infix}_step_accepted_{id}")
-            else:
-                self.pricing_model.addConstr(self.MCP[t] <= p + self.epsilon, f"buy_{infix}_step_accepted_{id}")
-        elif self.epsilon < acceptance < 1.0 - self.epsilon:
-            self.pricing_model.addConstr(self.MCP[t] >= p - self.epsilon,
-                                         name=f"{infix}_step_partially_accepted_lower_{id}")
-            self.pricing_model.addConstr(self.MCP[t] <= p + self.epsilon,
-                                         name=f"{infix}_step_partially_accepted_upper_{id}")
+        gurobi_acceptance_var = self.master_problem.accept_complex[order_id] if isComplex else \
+        self.master_problem.accept_scalable[order_id]
+        label_MP = f"MP_condition_CO_{order_id}" if isComplex else f"MP_condition_SCO_{order_id}"
+        label_MIC = f"MIC_condition_CO_{order_id}" if isComplex else f"MIC_condition_SCO_{order_id}"
+
+        if order['condition'] == 'MP':
+            self.pricing_model.addConstr(actual_value <= expected_value, label_MP)
+            self.cuts[label_MP] = gurobi_acceptance_var == 0.0
+        elif order['condition'] == 'MIC':
+            self.pricing_model.addConstr(actual_value >= expected_value, label_MIC)
+            self.cuts[label_MIC] = gurobi_acceptance_var == 0.0
+
+    def add_load_gradient_constraints(self, order, step_order_df, isComplex: bool):
+        order_id = order['id']
+        surplus_expr = gp.LinExpr()
+
+        parent_column = 'complex_order_id' if isComplex else 'scalable_order_id'
+
+        for _, step in step_order_df.iterrows():
+            if step[parent_column] == order_id:
+                t = step['t']
+                p = step['p']
+                q = step['q']
+                accept = step['acceptance']
+                surplus_expr += accept * q * (self.MCP[t] - p)
+
+        label = f'load_gradient_surplus_CO_{order_id}' if isComplex else f'load_gradient_SCO_{order_id}'
+        gurobi_acceptance_var = self.master_problem.accept_complex[order_id] if isComplex else \
+        self.master_problem.accept_scalable[order_id]
+
+        self.pricing_model.addConstr(surplus_expr >= 0.0, name=label)
+        self.cuts[label] = gurobi_acceptance_var == 0.0

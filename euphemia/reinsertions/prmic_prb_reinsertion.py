@@ -5,18 +5,17 @@ from euphemia.utils.extraction import get
 from euphemia.utils.calculations import calculate_flexible_order_active_period
 
 
-def PRMIC_PRB_reinsertion(self, is_prmic_not_prb: bool):
+def PRMIC_PRB_reinsertion(self, is_prmic_reinsertion: bool):
     from euphemia.euphemia import Euphemia
 
     counter = 0
     activated_order_counter = 0
-    rejected_orders, paradoxically_rejected_orders = calculate_paradoxically_rejected_orders(self, is_prmic_not_prb)
+    rejected_orders, paradoxically_rejected_orders = calculate_paradoxically_rejected_orders(self, is_prmic_reinsertion)
     print(f'Rejected orders: {rejected_orders}')
 
 
-    # Search as long a there are paradoxically rejected orders
-    while (len(paradoxically_rejected_orders['block']) + len(paradoxically_rejected_orders['complex']) + len(paradoxically_rejected_orders['scalable_complex']) > 0
-           or counter >= 20):
+    # Search as long as there are paradoxically rejected orders
+    while len(paradoxically_rejected_orders['block']) + len(paradoxically_rejected_orders['complex']) + len(paradoxically_rejected_orders['scalable_complex']) > 0:
         recalculate_list = False
         print(f"Checking {paradoxically_rejected_orders} paradoxically rejected orders...")
         # Try to activate all paradoxically rejected orders
@@ -29,14 +28,25 @@ def PRMIC_PRB_reinsertion(self, is_prmic_not_prb: bool):
                 reinsertion_run.reinsertion_run = True
                 reinsertion_run.current_best_objective = self.current_best_objective
 
+                # Give Gurobi incumbent as starting point
+                if is_prmic_reinsertion:
+                    for _, order in self.complex_orders.iterrows():
+                        reinsertion_run.accept_complex[order['id']].Start = self.current_alloc_solution[f'accept_complex[{order["id"]}]'][0]
+                    for _, order in self.complex_orders.iterrows():
+                        reinsertion_run.accept_scalable[order['id']].Start = self.current_alloc_solution[f'accept_scalable_complex[{order["id"]}]'][0]
+
+
                 # PRB reinsertion: Fix selection of (Scalable) Complex Orders
-                if not is_prmic_not_prb:
+                if not is_prmic_reinsertion:
                     for _, order in self.complex_orders.iterrows():
                         reinsertion_run.model.addConstr(reinsertion_run.accept_complex[order['id']] == self.current_alloc_solution[f'accept_complex[{order["id"]}]'][0])
                     for _, order in self.scalable_complex_orders.iterrows():
                         reinsertion_run.model.addConstr(reinsertion_run.accept_scalable[order['id']] ==
                                                         self.current_alloc_solution[f'accept_scalable_complex[{order["id"]}]'][
                                                             0])
+                    # Give Gurobi incumbent as starting point
+                    for _, order in self.block_orders.iterrows():
+                        reinsertion_run.MAR_aux[order['id']].Start = self.current_alloc_solution[f'y[{order["id"]}]'][0]
 
                 # Activate paradoxically rejected order
                 if (order_type == 'block'):
@@ -67,25 +77,25 @@ def PRMIC_PRB_reinsertion(self, is_prmic_not_prb: bool):
                         break
                 else:
                     print(f'Could not activate {order_type} {id}.')
-                print(f'Up to this step {activated_order_counter} {"block" if not is_prmic_not_prb else "(scalable) complex"} orders could be activated')
+                print(f'Up to this step {activated_order_counter} {"block" if not is_prmic_reinsertion else "(scalable) complex"} orders could be activated')
             if break_outer_loop:
                 break
 
         # Recalculate list with paradoxically rejected orders after reinsertion was successful
         if recalculate_list:
-            _, paradoxically_rejected_orders = calculate_paradoxically_rejected_orders(self, is_prmic_not_prb)
+            _, paradoxically_rejected_orders = calculate_paradoxically_rejected_orders(self, is_prmic_reinsertion)
         # No recalculation -> All PR orders checked
         else:
             break
 
     print(f'Reinsertion finished with paradoxically rejected order: {paradoxically_rejected_orders} left.')
-    print(f'--- Activated {activated_order_counter} {"block" if not is_prmic_not_prb else "(scalable) complex"} orders ---')
+    print(f'--- Activated {activated_order_counter} {"block" if not is_prmic_reinsertion else "(scalable) complex"} orders ---')
 
-def calculate_paradoxically_rejected_orders(self, is_prmic_not_prb: bool):
+def calculate_paradoxically_rejected_orders(self, is_prmic_reinsertion: bool):
     rejected_orders = {'block': [], 'complex': [], 'scalable_complex': []}
     paradoxically_rejected_orders = {'block': [], 'complex': [], 'scalable_complex': []}
     # Calculate rejected orders
-    if not is_prmic_not_prb:
+    if not is_prmic_reinsertion:
         # Rejected blocks
         for _, order in self.block_orders.iterrows():
             id = order['id']

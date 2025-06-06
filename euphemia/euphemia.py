@@ -10,7 +10,7 @@ import re
 from euphemia.data.parsing.zonal_scenario import ZonalScenario
 from euphemia.model.setup_model import add_objective, add_market_constraints, add_network_constraints
 from euphemia.pricing.price_determination_subproblem import Price_Subproblem
-from euphemia.reinsertions.prb_reinsertion import PRMIC_PRB_reinsertion
+from euphemia.reinsertions.prmic_prb_reinsertion import PRMIC_PRB_reinsertion
 from euphemia.utils.extraction import get
 from euphemia.utils.paths import EUPHEMIA_ROOT
 
@@ -53,7 +53,6 @@ class Euphemia:
         self.current_alloc_solution = {}
         self.found_solution = False
         self.current_best_objective = -1
-        self.violated_constraints = {}
         self.reinsertion_run = False
 
         self.model.Params.LazyConstraints = 1
@@ -61,23 +60,31 @@ class Euphemia:
         # Needed to avoid race conditions
         #self.model.setParam("Threads", 1)
 
+        # Disable presolve to avoid model simplification
+        # self.model.setParam("Presolve", 0)
+        # Disable all automatic cutting planes (global cuts)
+        #self.model.setParam("Cuts", 0)
+        # Disable primal heuristics (e.g., feasibility pump, local branching)
+        # self.model.setParam("Heuristics", 0)
+        # Use pseudo-costs for branching (more predictable, reproducible)
+        #self.model.setParam("VarBranch", 0)
+        # Solve node relaxations using the dual simplex method (not barrier)
+        #self.model.setParam("NodeMethod", 1)
+        # Do not bias the solver toward improving bound or finding solutions
+        #self.model.setParam("MIPFocus", 0)
+        # Disable symmetry detection and exploitation
+        #self.model.setParam("Symmetry", 0)
+        # Disable presolve sparsification
+        #self.model.setParam("PreSparsify", 0)
+        # Disable variable aggregation in presolve
+        #self.model.setParam("Aggregate", 0)
+        # Use single-threaded execution for reproducibility and full control
+        #self.model.setParam("Threads", 1)
+        # Provide detailed info in case of infeasibility or unboundedness
+        #self.model.setParam("InfUnbdInfo", 1)
+        # Dual Simplex
+        #self.model.setParam("Method", 1)
 
-        # Make model branch
-        # self.model.setParam("Presolve", 0)  # kein klassisches Presolve
-        # self.model.setParam("Cuts", 0)  # keine automatischen Schnitte (Cuts)
-        # self.model.setParam("Heuristics", 0)  # keine Heuristiklösungen
-        # self.model.setParam("AggFill", 0)  # keine Aggregation
-        # self.model.setParam("Aggregate", 0)  # keine Spaltenaggregation
-        # self.model.setParam("Symmetry", 0)  # keine Symmetrieerkennung
-        # self.model.setParam("PrePasses", 0)  # keine extra Presolve-Passes
-        # self.model.setParam("Method", 1)  # Simplex (nicht Barrier) für LP
-        # self.model.setParam("VarBranch", 0)  # Standard-Branching
-        # self.model.setParam("NodefileStart", 0.5)  # Speichert Knoten ggf. auf Festplatte
-        # self.model.setParam("Threads", 1)
-        # self.model.setParam("RINS", 0)
-        # self.model.setParam("Disconnected", 0)
-        # self.model.Params.OutputFlag = 1
-        # self.model.setParam("MIPFocus", 3)
 
         self.M = 10 ** 6
         self.prices = {}
@@ -142,8 +149,8 @@ class Euphemia:
             print(f'Found prices: {self.prices}')
 
             if not self.reinsertion_run:
-                PRMIC_PRB_reinsertion(self, is_prmic_not_prb=True)
-                PRMIC_PRB_reinsertion(self, is_prmic_not_prb=False)
+                PRMIC_PRB_reinsertion(self, is_prmic_reinsertion=True)
+                PRMIC_PRB_reinsertion(self, is_prmic_reinsertion=False)
 
     def solve_master_problem(self) -> None:
         """
@@ -153,8 +160,8 @@ class Euphemia:
         self.model.optimize(callback=self.master_problem_callback)
 
     def master_problem_callback(self, callbackModel, where) -> None:
-        #if where == GRB.Callback.MIPNODE:
-            #print("MIPNODE callback")
+        if where == GRB.Callback.MIPNODE:
+            print("MIPNODE callback")
 
         # when a MIP solution was found
         if where == GRB.Callback.MIPSOL:
@@ -211,12 +218,8 @@ class Euphemia:
                         if constr.IISConstr:
                             print(f"Infeasible constraint: {constr}")
                             constr_name = constr.ConstrName
-                            if constr_name in self.violated_constraints.keys():
-                                self.violated_constraints[constr_name] += 1
-                            else:
-                                self.violated_constraints[constr_name] = 1
 
-                            if constr_name in price_subproblem.cuts.keys() and self.violated_constraints[constr_name] >= 3:
+                            if constr_name in price_subproblem.cuts.keys():
                                 cut = price_subproblem.cuts[constr_name]
                                 print(f"Adding cut: {cut}")
                                 callbackModel.cbLazy(cut)
