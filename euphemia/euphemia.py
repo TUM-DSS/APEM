@@ -1,4 +1,3 @@
-import ast
 import os
 import random
 import shutil
@@ -7,6 +6,7 @@ import gurobipy as gp
 from gurobipy import GRB
 import re
 import pandas as pd
+import time
 
 from euphemia.data.parsing.zonal_scenario import ZonalScenario
 from euphemia.enums.cut_types import CutType
@@ -65,6 +65,7 @@ class Euphemia:
         self.found_solution = False
         self.current_best_objective = -1
         self.reinsertion_run = False
+        self.reinsertionDisabled = False
 
         self.model.Params.LazyConstraints = 1
 
@@ -91,13 +92,15 @@ class Euphemia:
             "scalable_mic": "euphemia_results/scalable_mic",
             "scalable_mic_inm_threshold": "euphemia_results/scalable_mic_inm_threshold",
             "debug": "euphemia_results/debug",
+            "evaluation": "euphemia_results/evaluation",
 
         }
 
         for attr, path in self.paths.items():
             setattr(self, attr, path)
             full_path = EUPHEMIA_ROOT / path
-            if os.path.exists(full_path):
+            # Exclude folders that should not be deleted for each run here
+            if os.path.exists(full_path) and attr != "evaluation":
                 shutil.rmtree(full_path)
             os.makedirs(full_path, exist_ok=True)
 
@@ -114,6 +117,8 @@ class Euphemia:
             - no PAB constraints
             - MIC
         """
+        start_time = time.time()
+
         add_objective(self)
         add_market_constraints(self)
         add_network_constraints(self)
@@ -134,7 +139,19 @@ class Euphemia:
                 f'Final economic surplus{" of reinsertion run" if self.reinsertion_run else ""}: {self.current_best_objective}')
             print(f'Found prices: {self.prices}')
 
+            # Log metrics for evaluation
             if not self.reinsertion_run:
+                elapsed = time.time() - start_time
+                file_path = EUPHEMIA_ROOT / self.paths['evaluation'] / f"evaluation.txt"
+                with open(file_path, 'a', buffering=1) as file:
+                    file.write(f"--- Evaluation: {self.cutting_strategy} on {self.scenario.name} ---\n")
+                    file.write(f"Iterations: {self.iteration}\n")
+                    file.write(f"Final welfare: {self.current_best_objective}\n")
+                    file.write(f"Time passed: {elapsed:.3f} seconds\n\n")
+                    file.flush()
+                    os.fsync(file.fileno())
+
+            if not self.reinsertion_run and not self.reinsertionDisabled:
                 PRMIC_PRB_reinsertion(self, is_prmic_reinsertion=True)
                 PRMIC_PRB_reinsertion(self, is_prmic_reinsertion=False)
 
@@ -234,11 +251,6 @@ class Euphemia:
                         self.add_no_good_cut(callbackModel=callbackModel)
 
                     elif self.cutting_strategy == CutType.PB:
-                        price_subproblem.pricing_model.computeIIS()
-                        terms = []
-                        for constr in price_subproblem.pricing_model.getConstrs():
-                            if constr.IISConstr:
-                                print(f"Infeasible constraint: {constr}")
                         self.handle_price_based_cutting(callbackModel=callbackModel)
 
 
@@ -366,20 +378,18 @@ class Euphemia:
                 block_order = self.block_orders[self.block_orders['id'] == b].iloc[0]
                 self.add_price_based_cut_to_block(callbackModel, block_order)
 
-            # Apply combinatorial benders cut over PAMICs/PAMPs
+            # Deactivate PAMICs/PAMPs
             terms = []
             #TODO load gradient orders
-            violated_complex_mic = self.get_MIC_complex_orders(threshold=False)
+            violated_complex_mic = self.get_MIC_complex_orders(threshold=True)
             print(f"PAMIC complex: {violated_complex_mic}")
             if violated_complex_mic:
                 terms.extend(self.accept_complex[i] for i in violated_complex_mic)
-                #terms.extend(1 - self.accept_complex[i] for i in violated_complex_mic)
 
-            violated_scalable_mic = self.get_MIC_scalable_orders(threshold=False)
+            violated_scalable_mic = self.get_MIC_scalable_orders(threshold=True)
             print(f"PAMIC scalable complex: {violated_scalable_mic}")
             if violated_scalable_mic:
                 terms.extend(self.accept_scalable[i] for i in violated_scalable_mic)
-                #terms.extend(1 - self.accept_scalable[i] for i in violated_scalable_mic)
 
             if terms:
                 print(f"Deactivate PA (scalable) complex orders: {gp.quicksum(terms)} == 0")

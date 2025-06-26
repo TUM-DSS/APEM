@@ -31,7 +31,7 @@ def PRMIC_PRB_reinsertion(self, is_prmic_reinsertion: bool):
                 if is_prmic_reinsertion:
                     for _, order in self.complex_orders.iterrows():
                         reinsertion_run.accept_complex[order['id']].Start = order['acceptance']
-                    for _, order in self.complex_orders.iterrows():
+                    for _, order in self.scalable_complex_orders.iterrows():
                         reinsertion_run.accept_scalable[order['id']].Start = order['acceptance']
 
 
@@ -135,7 +135,9 @@ def check_PRCO_PRSCO(self, id: int, isComplex: bool) -> bool:
         return False
 
     for _, step_order in step_orders.iterrows():
-        step_acceptance = step_order['acceptance']
+        # if step order is INM it could be accepted
+        sign = 1 if step_order['q'] >= 0 else -1
+        step_acceptance = sign * (self.prices[step_order['t']] - step_order['p']) >= 0
         if step_order['complex_order_id' if isComplex else 'scalable_order_id'] == id:
             variable_term = step_order['p'] if not isComplex else variable_term
 

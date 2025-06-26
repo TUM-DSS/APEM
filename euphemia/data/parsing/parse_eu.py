@@ -50,8 +50,9 @@ def transform_step_orders(orders: pd.DataFrame, periods: List[int], sell: bool, 
 
 
 class ParseEU(ParseData):
-    def __init__(self, path: str):
+    def __init__(self, path: str, title: str):
         self.path = path
+        self.title = title
 
     def parse_data(self, day=None) -> ZonalScenario:
         step_orders = pd.read_csv(self.path / 'step_orders.csv')
@@ -90,6 +91,6 @@ class ParseEU(ParseData):
 
 
 
-        return ZonalScenario('EUDataset', periods, step_orders, block_orders,
+        return ZonalScenario(self.title, periods, step_orders, block_orders,
                              complex_orders, complex_step_orders,
                              scalable_complex_orders, scalable_step_orders, piecewise_linear_orders)
