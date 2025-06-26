@@ -15,7 +15,7 @@ from euphemia.model.setup_model import add_objective, add_market_constraints, ad
 from euphemia.pricing.price_determination_subproblem import Price_Subproblem
 from euphemia.reinsertions.prmic_prb_reinsertion import PRMIC_PRB_reinsertion
 from euphemia.utils.calculations import calculate_flexible_order_active_period
-from euphemia.utils.extraction import get
+from euphemia.utils.extraction import get, parse_step_order_ids
 from euphemia.utils.paths import EUPHEMIA_ROOT
 
 
@@ -221,7 +221,7 @@ class Euphemia:
                         callbackModel.cbLazy(gp.quicksum(terms) >= 1)
                         # For security to always invalidate solution
                         # TODO check if necessary
-                        self.add_no_good_cut(callbackModel=callbackModel)
+                        #self.add_no_good_cut(callbackModel=callbackModel)
 
                     elif self.cutting_strategy == CutType.NG:
                         self.add_no_good_cut(callbackModel=callbackModel)
@@ -372,11 +372,10 @@ class Euphemia:
                 terms.extend(1 - self.accept_scalable[i] for i in violated_scalable_mic)
 
             if terms:
-                print(f"Added cb cut: {gp.quicksum(terms)} >= 1")
+                print(f"Added cb cut on PA (scalable) complex orders: {gp.quicksum(terms)} >= 1")
                 callbackModel.cbLazy(gp.quicksum(terms) >= 1)
         else:
             print("Something went wrong and in the unconstrained problem no prices could be found")
-            callbackModel.terminate()
 
     def add_price_based_cut_to_block(self, callbackModel, block_order) -> None:
         terms = [1 - self.MAR_aux[block_order['id']]]  # (1 - ACCEPT_hat)
@@ -386,7 +385,7 @@ class Euphemia:
             [f"q{t}" for t in self.periods]].values.sum() > 0
 
         for overlapping_order_id in block_order['overlap_set']:
-            accepted = get(self.block_orders, 'acceptance', overlapping_order_id) > self.epsilon
+            accepted = self.current_alloc_solution[f"y[{overlapping_order_id}]"][0] > self.epsilon
             sale = is_sale(overlapping_order_id)
 
             if is_sale(block_order['id']):
@@ -481,11 +480,15 @@ class Euphemia:
         res = []
         for i in mic_complex_order_ids + mp_complex_order_ids:
             accepted = get(self.complex_orders, 'acceptance', i) > self.epsilon
-            if not accepted == 0:
+            if not accepted:
                 continue
             fixed_term = get(self.complex_orders, 'fixed_term', i)
             variable_term = get(self.complex_orders, 'variable_term', i)
-            step_orders = ast.literal_eval(get(self.complex_orders, 'step_orders', i))
+            step_orders_str = get(self.complex_orders, 'step_orders', i)
+            step_orders = parse_step_order_ids(step_orders_str, self.complex_step_orders)
+
+            print(i)
+            print(step_orders)
 
             expected = sum(variable_term * abs(get(self.complex_step_orders, 'q', j)) * get(self.complex_step_orders, 'acceptance', j)
                            for j in step_orders) + fixed_term
@@ -539,7 +542,8 @@ class Euphemia:
             if not accepted:
                 continue
             fixed_term = get(self.scalable_complex_orders, 'fixed_term', i)
-            step_orders = ast.literal_eval(get(self.scalable_complex_orders, 'step_orders', i))
+            step_orders_str = get(self.scalable_complex_orders, 'step_orders', i)
+            step_orders = parse_step_order_ids(step_orders_str, self.scalable_step_orders)
 
             expected, actual = 0, 0
             for t in self.periods:

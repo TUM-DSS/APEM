@@ -33,10 +33,10 @@ class Price_Subproblem:
             ((self.MCP[t] - (self.master_problem.price_upper_bound - self.master_problem.price_lower_bound) / 2) ** 2)
             for t in self.master_problem.periods), GRB.MINIMIZE)
 
-        self.add_block_order_constraints()
+        self.add_step_order_constraints()
         self.add_piecewise_linear_order_constraints()
         if self.isConstrained:
-            self.add_step_order_constraints()
+            self.add_block_order_constraints()
             self.add_complex_order_constraints()
             self.add_scalable_complex_order_constraints()
 
