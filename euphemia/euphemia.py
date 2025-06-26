@@ -96,9 +96,10 @@ class Euphemia:
 
         for attr, path in self.paths.items():
             setattr(self, attr, path)
-            if os.path.exists(path):
-                shutil.rmtree(path)
-            os.makedirs(path, exist_ok=True)
+            full_path = EUPHEMIA_ROOT / path
+            if os.path.exists(full_path):
+                shutil.rmtree(full_path)
+            os.makedirs(full_path, exist_ok=True)
 
     def solve(self) -> None:
         """
@@ -149,6 +150,12 @@ class Euphemia:
 
         # when a MIP solution was found
         if where == GRB.Callback.MIPSOL:
+            # Check iteration limit
+            if self.iteration >= self.max_iterations:
+                print(f"Maximum iterations ({self.max_iterations}) reached. Terminating.")
+                callbackModel.terminate()
+                return
+                
             # get current solution
             objective_value = callbackModel.cbGet(GRB.Callback.MIPSOL_OBJ)
             vars = callbackModel.getVars()
@@ -163,7 +170,7 @@ class Euphemia:
                 self.update_order_dataframes()
 
                 # Write current allocation solution to file
-                file_path = f"{EUPHEMIA_ROOT / self.paths['alloc']}/results.txt"
+                file_path = EUPHEMIA_ROOT / self.paths['alloc'] / "results.txt"
                 with open(file_path, 'w', buffering=1) as f:
                     f.write(f"New solution with objective value {objective_value}\n")
                     for var in callbackModel.getVars():
@@ -180,7 +187,7 @@ class Euphemia:
                     print("Found market clearing prices")
 
                     # Write MCPs to file
-                    file_path = f"{EUPHEMIA_ROOT / self.paths['prices']}/results.txt"
+                    file_path = EUPHEMIA_ROOT / self.paths['prices'] / "results.txt"
                     with open(file_path, 'a', buffering=1) as file:  # 'a' = append
                         for v in price_subproblem.pricing_model.getVars():
                             line = f"{v.varName}: {v.X}\n"
@@ -376,6 +383,7 @@ class Euphemia:
                 callbackModel.cbLazy(gp.quicksum(terms) >= 1)
         else:
             print("Something went wrong and in the unconstrained problem no prices could be found")
+        self.add_no_good_cut(callbackModel)
 
     def add_price_based_cut_to_block(self, callbackModel, block_order) -> None:
         terms = [1 - self.MAR_aux[block_order['id']]]  # (1 - ACCEPT_hat)
@@ -415,29 +423,80 @@ class Euphemia:
             sale = True if sum(q.values()) > 0 else False
             type = get(self.block_orders, 'block_type', i)
 
+            # Check if this is a linked parent order
+            is_linked_parent = any(
+                other_order['block_type'] == 'linked' and i == other_order['code_prm'] 
+                for _, other_order in self.block_orders.iterrows()
+            )
 
-            total_quantity = sum(abs(q_t) for q_t in q)
-            if not reinsertion:
-                weighted_mcp = sum(
-                    self.prices[t] * abs(q) / total_quantity for t, q in zip(self.periods, q))
+            if is_linked_parent:
+                # For linked parent orders, calculate family surplus (parent + all children)
+                family_surplus = 0
+                
+                # Parent surplus: acceptance * q_t * (MCP_t - p)
+                parent_surplus = 0
+                for t in self.periods:
+                    q_t = get(self.block_orders, f'q{t}', i)
+                    if q_t != 0:
+                        if not reinsertion:
+                            parent_surplus += get(self.block_orders, 'acceptance', i) * q_t * (self.prices[t] - p)
+                        else:
+                            parent_surplus += get(self.block_orders, 'acceptance', i) * q_t * (self.prices_reinsertion[t] - p)
+                
+                family_surplus += parent_surplus
+                
+                # Children surplus: Find children where code_prm == parent_id
+                children_df = self.block_orders[
+                    (self.block_orders['code_prm'] == i) & (self.block_orders['block_type'] == 'linked')
+                ]
+                
+                for _, child in children_df.iterrows():
+                    child_id = child['id']
+                    child_p = child['p']
+                    child_accepted = get(self.block_orders, 'acceptance', child_id) > self.epsilon
+                    
+                    if child_accepted:
+                        child_surplus = 0
+                        for t in self.periods:
+                            child_q_t = get(self.block_orders, f'q{t}', child_id)
+                            if child_q_t != 0:
+                                if not reinsertion:
+                                    child_surplus += get(self.block_orders, 'acceptance', child_id) * child_q_t * (self.prices[t] - child_p)
+                                else:
+                                    child_surplus += get(self.block_orders, 'acceptance', child_id) * child_q_t * (self.prices_reinsertion[t] - child_p)
+                        
+                        family_surplus += child_surplus
+                
+                # Check if family has negative surplus (PAB condition for linked parent)
+                if not threshold:
+                    if family_surplus < 0:  # Family has negative surplus -> PAB
+                        res.append(i)
+                else:
+                    pass
+                    
             else:
-                weighted_mcp = sum(
-                    self.prices_reinsertion[t] * abs(q) / total_quantity for t, q in zip(self.periods, q))
+                # Normal block order logic (non-linked parent)
+                total_quantity = sum(abs(q_t) for q_t in q.values())
+                if not reinsertion:
+                    weighted_mcp = sum(
+                        self.prices[t] * abs(q_t) / total_quantity for t, q_t in zip(self.periods, q.values()))
+                else:
+                    weighted_mcp = sum(
+                        self.prices_reinsertion[t] * abs(q_t) / total_quantity for t, q_t in zip(self.periods, q.values()))
 
+                # set right weighted_mcp in case of flexible block order
+                if type == 'flexible':
+                    # overwrite weighted MCP with correct value considering flex_period variable
+                    active_period = calculate_flexible_order_active_period(master_problem=self,
+                                                                           block_id=i)
+                    weighted_mcp = self.prices[active_period] * q[1] if not reinsertion else self.prices_reinsertion[active_period] * q[1]
 
-            # set right weighted_mcp in case of flexible block order
-            if type == 'flexible':
-                # overwrite weighted MCP with correct value considering flex_period variable
-                active_period = calculate_flexible_order_active_period(master_problem=self,
-                                                                       block_id=i)
-                weighted_mcp = self.prices[active_period] * q[1] if not reinsertion else self.prices_reinsertion[active_period] * q[1]
-
-            if threshold:
-                if sale and weighted_mcp - self.delta_PAB < p < weighted_mcp or not sale and weighted_mcp < p < weighted_mcp - self.delta_PAB:
-                    res.append(i)
-            else:
-                if sale and p > weighted_mcp or not sale and weighted_mcp > p:
-                    res.append(i)
+                if threshold:
+                    if sale and weighted_mcp - self.delta_PAB < p < weighted_mcp or not sale and weighted_mcp < p < weighted_mcp - self.delta_PAB:
+                        res.append(i)
+                else:
+                    if sale and p > weighted_mcp or not sale and weighted_mcp > p:
+                        res.append(i)
 
         path_key = 'pab' if not threshold else 'block_inm_threshold'
         file_path = f"{self.paths[path_key]}/iteration_{self.iteration}.txt"

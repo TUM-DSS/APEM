@@ -1,5 +1,4 @@
 from fontTools.merge.util import recalculate
-from pyomo.core.kernel.variable import variable
 
 from euphemia.utils.extraction import get
 from euphemia.utils.calculations import calculate_flexible_order_active_period

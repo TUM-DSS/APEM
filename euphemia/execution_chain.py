@@ -32,9 +32,9 @@ def retrieve_data(dataset, day=None):
 def solve_and_analyse_scenario(dataset):
     scenario = retrieve_data(dataset)
 
-    file = open(EUPHEMIA_ROOT / "euphemia_results/scenario", 'w+')
-    file.write(scenario.overview())
-    file.close()
+    #file = open(EUPHEMIA_ROOT / "euphemia_results/scenario", 'w+')
+    #file.write(scenario.overview())
+    #file.close()
 
     euphemia = Euphemia(scenario)
     euphemia.solve()

@@ -174,15 +174,15 @@ class Price_Subproblem:
                     self.add_linked_block_order_constraints(parent_order=block_order)
 
     def add_linked_block_order_constraints(self, parent_order):
-        children_df = self.master_problem.block_orders[
-            (self.master_problem.block_orders['code_prm'] == 'linked') & (self.master_problem.block_orders['block_type'] == 'linked')]
         parent_id = parent_order['id']
+        children_df = self.master_problem.block_orders[
+            (self.master_problem.block_orders['code_prm'] == parent_id) & (self.master_problem.block_orders['block_type'] == 'linked')]
 
         # Family surplus must not be negative
         self.pricing_model.addConstr(gp.quicksum(
             parent_order['acceptance'] * parent_order[f'q{t}'] * (
-                    parent_order['p'] - self.MCP[t]) + gp.quicksum(child['acceptance'] * child[f'q{t}'] * (
-                    child['p'] - self.MCP[t]) for _, child in children_df.iterrows()) for t in
+                    self.MCP[t] - parent_order['p']) + gp.quicksum(child['acceptance'] * child[f'q{t}'] * (
+                    self.MCP[t] - child['p']) for _, child in children_df.iterrows()) for t in
             self.master_problem.periods) >= 0,
                                      f'linked_block_positive_family_parent_{parent_id}')
         self.constraint_meta_data[f'linked_block_positive_family_parent_{parent_id}'] = (OrderType.BLOCK, parent_id, CutType.CB)
@@ -192,7 +192,7 @@ class Price_Subproblem:
         child_id = child_order['id']
 
         self.pricing_model.addConstr(
-            gp.quicksum(child_order['acceptance'] * (child_order['p'] - self.MCP[t]) * child_order[f'q{t}'] for t in
+            gp.quicksum(child_order['acceptance'] * (self.MCP[t] - child_order['p']) * child_order[f'q{t}'] for t in
                         self.master_problem.periods) >= 0,
             f'linked_block_positive_leaf_{child_id}')
         self.constraint_meta_data[f'linked_block_positive_leaf_{child_id}'] = (OrderType.BLOCK, parent_id, CutType.CB)
