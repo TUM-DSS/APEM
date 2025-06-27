@@ -15,7 +15,6 @@ def indicators(all_results, testing_data_set):
     ELMP, IP, Join = [], [], []
     all_results = np.array(all_results)
     key_indicators = all_results[:16, :]
-    print(key_indicators)
 
     for key in average_price_keys:
         rowIndex = np.where(all_results[:, 0] == key)[0]
