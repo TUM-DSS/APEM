@@ -82,3 +82,30 @@ def node_zone_mapper(zonal_configuration: str, lat: float, lon: float) -> int:
         if zone == 4 and lat >= 49 and lon <= 8.1:
             zone = 2  # WEST
         return zone
+
+    elif zonal_configuration == 'zonal_DE5':
+        if 53.7 < lat < 55 and 8 < lon < 11.2:
+            zone = 5
+        elif lat > 53 and lon < 11 or 52.8 < lat < 53.9 and lon < 9 or \
+                52.9 < lat < 53.3 and 7.4 < lon < 10.75 or 51.7 < lat < 52 and 8 < lon < 10:
+            zone = 1
+        elif lon < 8.28 or 49.5 < lat < 50.2 and lon < 9.1:
+            zone = 2
+        elif lat > 50.35 and lon > 10 or lat > 50.2 and lon > 10:
+            zone = 3
+        else:
+            zone = 4
+
+        # Refinements
+        if 8.2 <= lon <= 10 and 51.9 <= lat <= 53:
+            zone = 1
+        if zone == 2 and lat < 49:
+            zone = 4
+        if zone == 4 and lat > 49 and 8.2 < lon < 8.5:
+            zone = 2
+        if 54.3 < lat < 56 and 7.5 < lon < 8.2 or lat > 55 and lon < 8:
+            zone = 5
+        if 53.5 < lat < 54 and 8 < lon < 8.2:
+            zone = 1
+
+        return zone
