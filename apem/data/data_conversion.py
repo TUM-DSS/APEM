@@ -3,6 +3,9 @@ from collections import defaultdict
 from typing import Tuple, List
 
 import pandas as pd
+import hashlib
+import json
+import numpy as np
 
 from apem.data.parsing.scenario import Scenario
 from apem.utils.paths import RAW_DATA_DIR, ensure_dir
@@ -365,6 +368,109 @@ class DataConversion:
                 for p in patterns:
                     row = ' '.join(map(str, p))
                     f.write(row + '\n')
+
+    """
+    Generate a stable hash for a *single* block
+    
+    The hash must uniquely identify a block by the attributes that
+    are relevant for Euphemia's optimisation: block type, the 24‑hour
+    quantity vector, price and MAR.  Seller/buyer IDs are *not* part
+    of the hash because they do not influence the market clearing.
+    We round numerical values to avoid hash instability due to tiny
+    floating‑point noise.
+    """
+    def _blk_signature(self, row: pd.Series) -> str:
+        qty_cols = [c for c in row.index if c.startswith("q")]
+        tup = (
+            row["block_type"],
+            tuple(round(float(row[c]), 6) for c in qty_cols),  # quantity vector
+            round(float(row["p"]), 4),  # price in €/MWh
+            round(float(row["MAR"]), 4),  # minimum acceptance ratio
+        )
+        # Short but collision‑resistant fingerprint (SHA‑1 over JSON dump)
+        return hashlib.sha1(json.dumps(tup).encode()).hexdigest()
+
+    """
+    Lossless aggregation of *identical* linked‑block chains
+    
+    A linked chain is a rooted tree: one exclusive parent order plus
+    zero or more linked children.  Two chains are considered identical
+    (and thus mergeable) if *every* node (block) in both trees has an
+    identical signature and the tree topology is the same.
+
+    After merging we:
+      • sum the quantities of identical blocks,
+      • adjust MAR of the parent (MAR=1/n if all originals had MAR=1),
+      • concatenate the original IDs so that we can still trace them,
+      • update the children so their `code_prm` points to the *new*
+        parent ID.
+    """
+    def _compress_linked(self, df: pd.DataFrame) -> pd.DataFrame:
+        qty_cols = [c for c in df.columns if c.startswith("q")]
+
+        # 1) Determine the parent ID for every row:
+        #    – exclusive blocks reference themselves,
+        #    – linked blocks reference the column `code_prm`.
+        df["parent_id"] = np.where(
+            df["block_type"] == "exclusive", df["id"], df["code_prm"]
+        )
+
+        # 2) Build a mapping  Parent‑ID → [child‑IDs]  (only linked rows)
+        children_map = (
+            df[df["block_type"] == "linked"].groupby("parent_id")["id"].apply(list).to_dict()
+        )
+
+        # 3) Build the per‑block signature dict  {order_id: signature}
+        sig_series = df.apply(self._blk_signature, axis=1)
+        blk_sig = dict(zip(df["id"], sig_series))
+
+        def chain_sig(pid: str):
+            """Recursively compute the signature of the entire chain below *pid*."""
+            return (
+                blk_sig[pid],
+                tuple(sorted(chain_sig(c) for c in children_map.get(pid, [])))
+            )
+
+        # All roots = exclusive blocks (one per chain)
+        roots = df.loc[df["block_type"] == "exclusive", "id"].tolist()
+        chain_sigs = {r: chain_sig(r) for r in roots}
+
+        # 4) Group roots whose *full chain* signatures are identical
+        buckets: dict[tuple, list[str]] = defaultdict(list)
+        for rid, sig in chain_sigs.items():
+            buckets[sig].append(rid)
+
+        merged_rows: list[pd.Series] = []
+        for root_ids in buckets.values():
+            # Collect every order ID in this chain family (roots + children)
+            all_ids = root_ids + sum([children_map.get(r, []) for r in root_ids], [])
+            sub = df[df["id"].isin(all_ids)]
+
+            # ---- Merge the root (exclusive) blocks ---------------------
+            p_rows = sub[sub["block_type"] == "exclusive"]
+            parent = p_rows.iloc[0].copy()
+            parent[qty_cols] = p_rows[qty_cols].sum()
+            parent["MAR"] = (
+                1 / len(p_rows)
+                if (p_rows["MAR"] == 1).all()
+                else (p_rows["MAR"] * p_rows[qty_cols].sum(axis=1)).sum()
+                     / p_rows[qty_cols].sum().sum()
+            )
+            parent["id"] = "+".join(p_rows["id"])
+            parent_new_id = parent["id"]  # remember for children
+            merged_rows.append(parent)
+
+            # ---- Merge the children (group by identical qty+price+MAR) ---
+            linked_rows = sub[sub["block_type"] == "linked"]
+            for (_qty_price_mar, child_grp) in linked_rows.groupby(qty_cols + ["p", "MAR"]):
+                kid = child_grp.iloc[0].copy()
+                kid[qty_cols] = child_grp[qty_cols].sum()
+                kid["id"] = "+".join(child_grp["id"])
+                kid["code_prm"] = parent_new_id  # update parent reference
+                merged_rows.append(kid)
+
+        # Drop helper column before returning
+        return pd.DataFrame(merged_rows).drop(columns="parent_id")
 
     def set_block_bids(self) -> None:
         pass

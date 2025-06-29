@@ -65,7 +65,7 @@ class Euphemia:
         self.found_solution = False
         self.current_best_objective = -1
         self.reinsertion_run = False
-        self.reinsertionDisabled = False
+        self.reinsertionDisabled = True
 
         self.model.Params.LazyConstraints = 1
 
@@ -162,9 +162,6 @@ class Euphemia:
         self.model.optimize(callback=self.master_problem_callback)
 
     def master_problem_callback(self, callbackModel, where) -> None:
-        if where == GRB.Callback.MIPNODE:
-            print("MIPNODE callback")
-
         # when a MIP solution was found
         if where == GRB.Callback.MIPSOL:
             # Check iteration limit
@@ -245,7 +242,7 @@ class Euphemia:
                         callbackModel.cbLazy(gp.quicksum(terms) >= 1)
                         # For security to always invalidate solution
                         # TODO check if necessary
-                        #self.add_no_good_cut(callbackModel=callbackModel)
+                        self.add_no_good_cut(callbackModel=callbackModel)
 
                     elif self.cutting_strategy == CutType.NG:
                         self.add_no_good_cut(callbackModel=callbackModel)
