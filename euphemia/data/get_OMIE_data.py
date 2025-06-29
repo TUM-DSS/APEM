@@ -1,17 +1,38 @@
 from euphemia.utils.paths import EUPHEMIA_ROOT
 
 import datetime as dt
-import matplotlib.pyplot as plt
+from OMIEData.DataImport.omie_supply_demand_curve_importer import OMIESupplyDemandCurvesImporter
+import pandas as pd
 
-from OMIEData.DataImport.omie_marginalprice_importer import OMIEMarginalPriceFileImporter
-from OMIEData.Enums.all_enums import DataTypeInMarginalPriceFile
+dateIni = dt.datetime(2025, 3, 25)
+dateEnd = dt.datetime(2025, 3, 25)
 
-dateIni = dt.datetime(2025, 2, 1)
-dateEnd = dt.datetime(2025, 2, 20)
+# Initialize empty list to store all dataframes
+all_data = []
 
-# This can take time, it is downloading the files from the website..
-df = OMIEMarginalPriceFileImporter(date_ini=dateIni, date_end=dateEnd).read_to_dataframe(verbose=True)
-df.sort_values(by='DATE', axis=0, inplace=True)
-print(df)
+# Loop through all hours (1-24)
+for hour in range(1, 25):
+    print(f"Fetching data for hour {hour}...")
+    
+    # This can take time, it is downloading the files from the website..
+    df = OMIESupplyDemandCurvesImporter(date_ini=dateIni, date_end=dateEnd, hour=hour).read_to_dataframe(verbose=True)
+    
+    if not df.empty:
+        all_data.append(df)
+        print(f"Successfully fetched data for hour {hour}")
+    else:
+        print(f"No data available for hour {hour}")
 
-df.to_csv(EUPHEMIA_ROOT / 'data/raw_data/omie/omie_prices_hourly.csv', index=False)
+# Combine all dataframes
+if all_data:
+    combined_df = pd.concat(all_data, ignore_index=True)
+    combined_df.sort_values(by=['DATE', 'HOUR'], axis=0, inplace=True)
+    print(f"Total data shape: {combined_df.shape}")
+    print(combined_df.head())
+    
+    # Save to CSV
+    output_path = EUPHEMIA_ROOT / 'data/raw_data/omie/supply_demand.csv'
+    combined_df.to_csv(output_path, index=False)
+    print(f"Data saved to {output_path}")
+else:
+    print("No data was fetched for any hour")
