@@ -40,6 +40,7 @@ def run_us_eu_conversion(us_data: ParseData, generate_uptime_patterns: bool = Tr
 
    # merge block orders
    block_orders = pd.concat([block_orders_buyers, block_orders_sellers], ignore_index=True)
+   block_orders = DataConversion._compress_linked(conversion, block_orders)
 
    periods = data.periods
    periods_df = pd.DataFrame({'period': periods})
@@ -78,8 +79,8 @@ def save_df(df, us_data: ParseData, name: str):
    output_dir.mkdir(parents=True, exist_ok=True)
    filepath = output_dir / f"{name}.csv"
    df.to_csv(filepath, index=False)
-   print(f"  → saved: {filepath}")
+   print(f"saved: {filepath}")
 
 
 if __name__ == '__main__':
-   run_us_eu_conversion(ParsePJM, generate_uptime_patterns=False)
+   run_us_eu_conversion(ParseIEEERTS, generate_uptime_patterns=False)
