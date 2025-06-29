@@ -10,8 +10,8 @@ Download data from 4. Bid section from https://www.omie.es/en/file-access-list#D
 '''
 
 # === STEP 1: Define file paths ===
-cab_path = RAW_DATA_DIR / "omie/CAB_20250325.1"
-det_path = RAW_DATA_DIR / "omie/DET_20250325.1"
+cab_path = RAW_DATA_DIR / "omie/CAB_20250318.1"
+det_path = RAW_DATA_DIR / "omie/DET_20250318.1"
 output_csv = RAW_DATA_DIR / "omie/OMIE_orderdata_parsed.csv"
 
 # === STEP 2: Read DET file (detail of orders) ===

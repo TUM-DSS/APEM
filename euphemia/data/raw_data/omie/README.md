@@ -2,8 +2,8 @@
 
 This dataset combines two official OMIE sources, e.g.:
 
-- `CAB_20250325.1`: Header information for each offer ("cabecera")
-- `DET_20250325.1`: Detailed price/quantity records for each offer and market hour
+- `CAB_20250318.1`: Header information for each offer ("cabecera")
+- `DET_20250318.1`: Detailed price/quantity records for each offer and market hour
 
 These files are formatted according to OMIE’s public specification (Version 1.36, March 2025) and merged via the `cod_oferta` (Offer ID).
 

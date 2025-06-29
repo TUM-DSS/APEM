@@ -4,10 +4,10 @@ from euphemia.execution_chain import Datasets as Euphemia_datasets, run_evaluati
 from euphemia.execution_chain import solve_and_analyse_scenario as solve_euphemia
 
 
-#solve_euphemia(Euphemia_datasets.IEEE_RTS)
+solve_euphemia(Euphemia_datasets.OMIE)
 #run_evaluation()
 
-solve_and_analyse_scenario(Datasets.IEEE_RTS, PowerFlowModels.DCOPF, PricingAlgorithms.IP)
+#solve_and_analyse_scenario(Datasets.IEEE_RTS, PowerFlowModels.DCOPF, PricingAlgorithms.IP)
 
 
 
