@@ -16,48 +16,46 @@ output_csv = RAW_DATA_DIR / "omie/OMIE_orderdata_parsed.csv"
 
 # === STEP 2: Read DET file (detail of orders) ===
 det_colspecs = [
-    (0, 7),   # cod_oferta
-    (7, 10),  # version
-    (10, 12),  # periodo
-    (12, 14),  # num_block - 0 for simple order
-    #(20, 22),  # num_tramo - 1 for block order
-    #(22, 24),  # grupo_excl - exclusive block order group
-    (31, 48),  # precio
-    (48, 55),  # cantidad
-    (55, 56),  # mav
-    (56, 57),  # mar
+    (0, 7),   # CodOferta
+    (7, 10),  # Version
+    (10, 12),  # Período
+    (12, 14),  # NumBloq
+    (31, 48),  # PrecEuro
+    (48, 55),  # Energía
+    (55, 56),  # BloqInd
+    (56, 57),  # BloqRet
 ]
-det_columns = ['cod_oferta', 'version', 'periodo', 'num_block',
-               'precio', 'cantidad', 'mav', 'mar']
+det_columns = ['cod_oferta', 'version', 'periodo', 'num_bloq',
+               'prec_euro', 'energia', 'bloq_ind', 'bloq_ret']
 det_df = pd.read_fwf(det_path, colspecs=det_colspecs, names=det_columns, encoding="latin1")
 
 # === STEP 3: Read CAB file (header metadata) ===
 cab_colspecs = [
-    (0, 7),    # cod_oferta
-    (7, 10),   # version
-    (10, 17),  # cod_uof
-    (17, 47),  # unidad
-    (47, 48),  # cv - C=buy V=sell
-    (49, 50),  # ofer_plazo
-    (84, 91),  # MaxRamSub - Up load gradient
-    (91, 98),  # MaxRamBaj - Down load gradient
-    (98, 115), # fijo_eur - fixed term
-    (115, 132),# var_eur - variable term
-    (132, 139),# potencia_max
-    (139, 146),# MaxRamArr - Startup load gradient
-    (146, 153),# MaxRamPar - Stopping load gradient
-    (153, 155),# cod_int
-    (155, 169) # timestamp
+    (0, 7),    # CodOferta
+    (7, 10),   # Version
+    (10, 17),  # Código Unidad
+    (17, 47),  # Descripción
+    (47, 48),  # CV
+    (49, 50),  # OferPlazo
+    (84, 91),  # MaxRamSub
+    (91, 98),  # MaxRamBaj
+    (98, 115), # Fijoeuro
+    (115, 132),# Vareuro
+    (132, 139),# MaxPot
+    (139, 146),# MaxRamArr
+    (146, 153),# MaxRamPar
+    (153, 155),# CodInt
+    (155, 169) # timestamp (Año, Mes, Día, Hora, Minuto, Segundo)
 ]
 
-cab_columns = ['cod_oferta', 'version', 'cod_uof', 'unidad', 'cv', 'ofer_plazo', 'max_ram_sub', 'max_ram_baj',
-               'fijo_eur', 'var_eur', 'potencia_max', 'max_ram_arr', 'max_ram_par', 'cod_int', 'timestamp']
+cab_columns = ['cod_oferta', 'version', 'codigo_unidad', 'descripcion', 'cv', 'ofer_plazo', 'max_ram_sub', 'max_ram_baj',
+               'fijoeuro', 'vareuro', 'max_pot', 'max_ram_arr', 'max_ram_par', 'cod_int', 'timestamp']
 cab_df = pd.read_fwf(cab_path, colspecs=cab_colspecs, names=cab_columns, encoding="latin1")
 
 print(cab_df.head())
 print(det_df.head())
 
-# === STEP 4: Normalize cod_oferta for merging ===
+# === STEP 4: Normalize CodOferta for merging ===
 det_df['cod_oferta'] = det_df['cod_oferta'].astype(str).str.strip()
 cab_df['cod_oferta'] = cab_df['cod_oferta'].astype(str).str.strip()
 
