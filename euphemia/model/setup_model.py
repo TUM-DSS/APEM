@@ -62,7 +62,7 @@ def add_market_constraints(self) -> None:
          gp.quicksum(self.accept_scalable_step[i] * get(self.scalable_step_orders, 'q', i)
                      for i in list(self.scalable_step_orders['id']) if get(self.scalable_step_orders, 't', i) == t) +
          gp.quicksum(self.accept_piecewise_linear[i] * get(self.piecewise_linear_orders, 'q', i) for i in
-                     list(self.piecewise_linear_orders['id']))
+                     list(self.piecewise_linear_orders['id']) if get(self.piecewise_linear_orders, 't', i) == t)
          == 0
          for t in self.periods), name='power_balance')
 

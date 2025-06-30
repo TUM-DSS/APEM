@@ -69,40 +69,40 @@ Subject To
  sell_step_rejected_53: MCP[1] <= 176.8501
  sell_step_rejected_54: MCP[1] <= 173.7001
  sell_step_rejected_55: MCP[1] <= 173.4701
- sell_step_rejected_56: MCP[1] <= 172.9401
- sell_step_rejected_57: MCP[1] <= 170.0001
- sell_step_rejected_58: MCP[1] <= 169.0001
- sell_step_rejected_59: MCP[1] <= 168.5701
- sell_step_rejected_60: MCP[1] <= 167.1201
- sell_step_rejected_61: MCP[1] <= 165.0001
- sell_step_rejected_62: MCP[1] <= 164.5501
- sell_step_rejected_63: MCP[1] <= 164.2901
- sell_step_rejected_64: MCP[1] <= 164.2201
- sell_step_rejected_65: MCP[1] <= 163.8301
- sell_step_rejected_66: MCP[1] <= 163.7001
- sell_step_rejected_67: MCP[1] <= 160.0001
- sell_step_rejected_68: MCP[1] <= 159.4901
- sell_step_rejected_69: MCP[1] <= 158.7101
- sell_step_rejected_70: MCP[1] <= 155.0001
- sell_step_rejected_71: MCP[1] <= 150.0001
- sell_step_rejected_72: MCP[1] <= 146.1501
- sell_step_rejected_73: MCP[1] <= 145.1001
- sell_step_rejected_74: MCP[1] <= 145.0001
- sell_step_rejected_75: MCP[1] <= 144.9301
- sell_step_rejected_76: MCP[1] <= 144.0001
- sell_step_rejected_77: MCP[1] <= 141.9701
- sell_step_rejected_78: MCP[1] <= 141.8701
- sell_step_rejected_79: MCP[1] <= 140.0001
- sell_step_rejected_80: MCP[1] <= 139.0801
- sell_step_rejected_81: MCP[1] <= 139.0001
- sell_step_rejected_82: MCP[1] <= 138.5001
- sell_step_rejected_83: MCP[1] <= 138.1001
- sell_step_rejected_84: MCP[1] <= 137.7501
- sell_step_rejected_85: MCP[1] <= 137.4001
- sell_step_rejected_86: MCP[1] <= 135.2501
- sell_step_rejected_87: MCP[1] <= 135.0001
- normal_step_partially_accepted_lower_88: MCP[1] >= 133.8499
- normal_step_partially_accepted_upper_88: MCP[1] <= 133.8501
+ normal_step_partially_accepted_lower_56: MCP[1] >= 172.9399
+ normal_step_partially_accepted_upper_56: MCP[1] <= 172.9401
+ sell_normal_step_accepted_57: MCP[1] >= 169.9999
+ sell_normal_step_accepted_58: MCP[1] >= 168.9999
+ sell_normal_step_accepted_59: MCP[1] >= 168.5699
+ sell_normal_step_accepted_60: MCP[1] >= 167.1199
+ sell_normal_step_accepted_61: MCP[1] >= 164.9999
+ sell_normal_step_accepted_62: MCP[1] >= 164.5499
+ sell_normal_step_accepted_63: MCP[1] >= 164.2899
+ sell_normal_step_accepted_64: MCP[1] >= 164.2199
+ sell_normal_step_accepted_65: MCP[1] >= 163.8299
+ sell_normal_step_accepted_66: MCP[1] >= 163.6999
+ sell_normal_step_accepted_67: MCP[1] >= 159.9999
+ sell_normal_step_accepted_68: MCP[1] >= 159.4899
+ sell_normal_step_accepted_69: MCP[1] >= 158.7099
+ sell_normal_step_accepted_70: MCP[1] >= 154.9999
+ sell_normal_step_accepted_71: MCP[1] >= 149.9999
+ sell_normal_step_accepted_72: MCP[1] >= 146.1499
+ sell_normal_step_accepted_73: MCP[1] >= 145.0999
+ sell_normal_step_accepted_74: MCP[1] >= 144.9999
+ sell_normal_step_accepted_75: MCP[1] >= 144.9299
+ sell_normal_step_accepted_76: MCP[1] >= 143.9999
+ sell_normal_step_accepted_77: MCP[1] >= 141.9699
+ sell_normal_step_accepted_78: MCP[1] >= 141.8699
+ sell_normal_step_accepted_79: MCP[1] >= 139.9999
+ sell_normal_step_accepted_80: MCP[1] >= 139.0799
+ sell_normal_step_accepted_81: MCP[1] >= 138.9999
+ sell_normal_step_accepted_82: MCP[1] >= 138.4999
+ sell_normal_step_accepted_83: MCP[1] >= 138.0999
+ sell_normal_step_accepted_84: MCP[1] >= 137.7499
+ sell_normal_step_accepted_85: MCP[1] >= 137.3999
+ sell_normal_step_accepted_86: MCP[1] >= 135.2499
+ sell_normal_step_accepted_87: MCP[1] >= 134.9999
+ sell_normal_step_accepted_88: MCP[1] >= 133.8499
  sell_normal_step_accepted_89: MCP[1] >= 133.2499
  sell_normal_step_accepted_90: MCP[1] >= 133.0599
  sell_normal_step_accepted_91: MCP[1] >= 132.4899
@@ -314,10 +314,10 @@ Subject To
  buy_normal_step_accepted_297: MCP[1] <= 176.4401
  buy_normal_step_accepted_298: MCP[1] <= 174.2201
  buy_normal_step_accepted_299: MCP[1] <= 173.1801
- buy_normal_step_accepted_300: MCP[1] <= 143.1801
- buy_normal_step_accepted_301: MCP[1] <= 141.9701
- buy_normal_step_accepted_302: MCP[1] <= 137.0001
- buy_normal_step_accepted_303: MCP[1] <= 135.0001
+ buy_step_rejected_300: MCP[1] >= 143.1799
+ buy_step_rejected_301: MCP[1] >= 141.9699
+ buy_step_rejected_302: MCP[1] >= 136.9999
+ buy_step_rejected_303: MCP[1] >= 134.9999
  buy_step_rejected_304: MCP[1] >= 121.9999
  buy_step_rejected_305: MCP[1] >= 119.4999
  buy_step_rejected_306: MCP[1] >= 119.1799
@@ -433,46 +433,46 @@ Subject To
  sell_step_rejected_416: MCP[2] <= 168.5701
  sell_step_rejected_417: MCP[2] <= 167.1201
  sell_step_rejected_418: MCP[2] <= 165.0001
- sell_step_rejected_419: MCP[2] <= 164.6901
- sell_step_rejected_420: MCP[2] <= 164.2901
- sell_step_rejected_421: MCP[2] <= 163.8401
- sell_step_rejected_422: MCP[2] <= 162.5001
- sell_step_rejected_423: MCP[2] <= 160.0001
- sell_step_rejected_424: MCP[2] <= 159.5001
- sell_step_rejected_425: MCP[2] <= 159.3001
- sell_step_rejected_426: MCP[2] <= 158.6501
- sell_step_rejected_427: MCP[2] <= 155.0001
- sell_step_rejected_428: MCP[2] <= 152.1401
- sell_step_rejected_429: MCP[2] <= 150.0001
- sell_step_rejected_430: MCP[2] <= 145.1001
- sell_step_rejected_431: MCP[2] <= 145.0001
- sell_step_rejected_432: MCP[2] <= 144.9301
- sell_step_rejected_433: MCP[2] <= 144.0001
- sell_step_rejected_434: MCP[2] <= 142.2201
- sell_step_rejected_435: MCP[2] <= 141.8701
- sell_step_rejected_436: MCP[2] <= 140.0001
- sell_step_rejected_437: MCP[2] <= 139.0901
- sell_step_rejected_438: MCP[2] <= 139.0001
- sell_step_rejected_439: MCP[2] <= 138.1301
- sell_step_rejected_440: MCP[2] <= 138.1001
- sell_step_rejected_441: MCP[2] <= 137.4001
- sell_step_rejected_442: MCP[2] <= 135.2501
- sell_step_rejected_443: MCP[2] <= 135.0001
- sell_step_rejected_444: MCP[2] <= 133.8501
- sell_step_rejected_445: MCP[2] <= 133.2501
- sell_step_rejected_446: MCP[2] <= 133.0601
- sell_step_rejected_447: MCP[2] <= 132.5001
- sell_step_rejected_448: MCP[2] <= 132.4901
- sell_step_rejected_449: MCP[2] <= 132.0801
- sell_step_rejected_450: MCP[2] <= 132.0001
- sell_step_rejected_451: MCP[2] <= 131.0901
- sell_step_rejected_452: MCP[2] <= 130.2201
- sell_step_rejected_453: MCP[2] <= 130.0001
- sell_step_rejected_454: MCP[2] <= 128.5001
- sell_step_rejected_455: MCP[2] <= 128.0001
- sell_step_rejected_456: MCP[2] <= 127.4001
- normal_step_partially_accepted_lower_457: MCP[2] >= 127.1699
- normal_step_partially_accepted_upper_457: MCP[2] <= 127.1701
+ normal_step_partially_accepted_lower_419: MCP[2] >= 164.6899
+ normal_step_partially_accepted_upper_419: MCP[2] <= 164.6901
+ sell_normal_step_accepted_420: MCP[2] >= 164.2899
+ sell_normal_step_accepted_421: MCP[2] >= 163.8399
+ sell_normal_step_accepted_422: MCP[2] >= 162.4999
+ sell_normal_step_accepted_423: MCP[2] >= 159.9999
+ sell_normal_step_accepted_424: MCP[2] >= 159.4999
+ sell_normal_step_accepted_425: MCP[2] >= 159.2999
+ sell_normal_step_accepted_426: MCP[2] >= 158.6499
+ sell_normal_step_accepted_427: MCP[2] >= 154.9999
+ sell_normal_step_accepted_428: MCP[2] >= 152.1399
+ sell_normal_step_accepted_429: MCP[2] >= 149.9999
+ sell_normal_step_accepted_430: MCP[2] >= 145.0999
+ sell_normal_step_accepted_431: MCP[2] >= 144.9999
+ sell_normal_step_accepted_432: MCP[2] >= 144.9299
+ sell_normal_step_accepted_433: MCP[2] >= 143.9999
+ sell_normal_step_accepted_434: MCP[2] >= 142.2199
+ sell_normal_step_accepted_435: MCP[2] >= 141.8699
+ sell_normal_step_accepted_436: MCP[2] >= 139.9999
+ sell_normal_step_accepted_437: MCP[2] >= 139.0899
+ sell_normal_step_accepted_438: MCP[2] >= 138.9999
+ sell_normal_step_accepted_439: MCP[2] >= 138.1299
+ sell_normal_step_accepted_440: MCP[2] >= 138.0999
+ sell_normal_step_accepted_441: MCP[2] >= 137.3999
+ sell_normal_step_accepted_442: MCP[2] >= 135.2499
+ sell_normal_step_accepted_443: MCP[2] >= 134.9999
+ sell_normal_step_accepted_444: MCP[2] >= 133.8499
+ sell_normal_step_accepted_445: MCP[2] >= 133.2499
+ sell_normal_step_accepted_446: MCP[2] >= 133.0599
+ sell_normal_step_accepted_447: MCP[2] >= 132.4999
+ sell_normal_step_accepted_448: MCP[2] >= 132.4899
+ sell_normal_step_accepted_449: MCP[2] >= 132.0799
+ sell_normal_step_accepted_450: MCP[2] >= 131.9999
+ sell_normal_step_accepted_451: MCP[2] >= 131.0899
+ sell_normal_step_accepted_452: MCP[2] >= 130.2199
+ sell_normal_step_accepted_453: MCP[2] >= 129.9999
+ sell_normal_step_accepted_454: MCP[2] >= 128.4999
+ sell_normal_step_accepted_455: MCP[2] >= 127.9999
+ sell_normal_step_accepted_456: MCP[2] >= 127.3999
+ sell_normal_step_accepted_457: MCP[2] >= 127.1699
  sell_normal_step_accepted_458: MCP[2] >= 126.2199
  sell_normal_step_accepted_459: MCP[2] >= 125.4999
  sell_normal_step_accepted_460: MCP[2] >= 124.9999
@@ -672,12 +672,12 @@ Subject To
  buy_normal_step_accepted_654: MCP[2] <= 174.3401
  buy_normal_step_accepted_655: MCP[2] <= 170.2901
  buy_normal_step_accepted_656: MCP[2] <= 168.3201
- buy_normal_step_accepted_657: MCP[2] <= 164.6701
- buy_normal_step_accepted_658: MCP[2] <= 161.9901
- buy_normal_step_accepted_659: MCP[2] <= 142.0001
- buy_normal_step_accepted_660: MCP[2] <= 137.0001
- buy_normal_step_accepted_661: MCP[2] <= 135.0001
- buy_normal_step_accepted_662: MCP[2] <= 134.6701
+ buy_step_rejected_657: MCP[2] >= 164.6699
+ buy_step_rejected_658: MCP[2] >= 161.9899
+ buy_step_rejected_659: MCP[2] >= 141.9999
+ buy_step_rejected_660: MCP[2] >= 136.9999
+ buy_step_rejected_661: MCP[2] >= 134.9999
+ buy_step_rejected_662: MCP[2] >= 134.6699
  buy_step_rejected_663: MCP[2] >= 121.9999
  buy_step_rejected_664: MCP[2] >= 115.1599
  buy_step_rejected_665: MCP[2] >= 111.2299
@@ -795,45 +795,45 @@ Subject To
  sell_step_rejected_777: MCP[3] <= 164.2801
  sell_step_rejected_778: MCP[3] <= 163.8601
  sell_step_rejected_779: MCP[3] <= 162.5001
- sell_step_rejected_780: MCP[3] <= 160.0001
- sell_step_rejected_781: MCP[3] <= 159.5001
- sell_step_rejected_782: MCP[3] <= 158.8801
- sell_step_rejected_783: MCP[3] <= 157.5001
- sell_step_rejected_784: MCP[3] <= 155.0001
- sell_step_rejected_785: MCP[3] <= 150.0001
- sell_step_rejected_786: MCP[3] <= 145.1001
- sell_step_rejected_787: MCP[3] <= 145.0001
- sell_step_rejected_788: MCP[3] <= 144.9301
- sell_step_rejected_789: MCP[3] <= 144.0001
- sell_step_rejected_790: MCP[3] <= 141.8701
- sell_step_rejected_791: MCP[3] <= 140.6601
- sell_step_rejected_792: MCP[3] <= 140.0001
- sell_step_rejected_793: MCP[3] <= 139.1201
- sell_step_rejected_794: MCP[3] <= 139.0001
- sell_step_rejected_795: MCP[3] <= 138.3201
- sell_step_rejected_796: MCP[3] <= 138.1001
- sell_step_rejected_797: MCP[3] <= 137.4001
- sell_step_rejected_798: MCP[3] <= 136.2301
- sell_step_rejected_799: MCP[3] <= 135.2501
- sell_step_rejected_800: MCP[3] <= 135.0001
- sell_step_rejected_801: MCP[3] <= 133.8501
- sell_step_rejected_802: MCP[3] <= 133.2501
- sell_step_rejected_803: MCP[3] <= 133.0601
- sell_step_rejected_804: MCP[3] <= 132.5001
- sell_step_rejected_805: MCP[3] <= 132.4901
- sell_step_rejected_806: MCP[3] <= 132.0801
- sell_step_rejected_807: MCP[3] <= 131.3001
- sell_step_rejected_808: MCP[3] <= 131.0901
- sell_step_rejected_809: MCP[3] <= 130.2201
- sell_step_rejected_810: MCP[3] <= 130.0001
- sell_step_rejected_811: MCP[3] <= 128.5001
- sell_step_rejected_812: MCP[3] <= 128.0001
- sell_step_rejected_813: MCP[3] <= 127.1701
- sell_step_rejected_814: MCP[3] <= 126.2201
- sell_step_rejected_815: MCP[3] <= 125.8001
- sell_step_rejected_816: MCP[3] <= 125.5001
- normal_step_partially_accepted_lower_817: MCP[3] >= 124.9999
- normal_step_partially_accepted_upper_817: MCP[3] <= 125.0001
+ normal_step_partially_accepted_lower_780: MCP[3] >= 159.9999
+ normal_step_partially_accepted_upper_780: MCP[3] <= 160.0001
+ sell_normal_step_accepted_781: MCP[3] >= 159.4999
+ sell_normal_step_accepted_782: MCP[3] >= 158.8799
+ sell_normal_step_accepted_783: MCP[3] >= 157.4999
+ sell_normal_step_accepted_784: MCP[3] >= 154.9999
+ sell_normal_step_accepted_785: MCP[3] >= 149.9999
+ sell_normal_step_accepted_786: MCP[3] >= 145.0999
+ sell_normal_step_accepted_787: MCP[3] >= 144.9999
+ sell_normal_step_accepted_788: MCP[3] >= 144.9299
+ sell_normal_step_accepted_789: MCP[3] >= 143.9999
+ sell_normal_step_accepted_790: MCP[3] >= 141.8699
+ sell_normal_step_accepted_791: MCP[3] >= 140.6599
+ sell_normal_step_accepted_792: MCP[3] >= 139.9999
+ sell_normal_step_accepted_793: MCP[3] >= 139.1199
+ sell_normal_step_accepted_794: MCP[3] >= 138.9999
+ sell_normal_step_accepted_795: MCP[3] >= 138.3199
+ sell_normal_step_accepted_796: MCP[3] >= 138.0999
+ sell_normal_step_accepted_797: MCP[3] >= 137.3999
+ sell_normal_step_accepted_798: MCP[3] >= 136.2299
+ sell_normal_step_accepted_799: MCP[3] >= 135.2499
+ sell_normal_step_accepted_800: MCP[3] >= 134.9999
+ sell_normal_step_accepted_801: MCP[3] >= 133.8499
+ sell_normal_step_accepted_802: MCP[3] >= 133.2499
+ sell_normal_step_accepted_803: MCP[3] >= 133.0599
+ sell_normal_step_accepted_804: MCP[3] >= 132.4999
+ sell_normal_step_accepted_805: MCP[3] >= 132.4899
+ sell_normal_step_accepted_806: MCP[3] >= 132.0799
+ sell_normal_step_accepted_807: MCP[3] >= 131.2999
+ sell_normal_step_accepted_808: MCP[3] >= 131.0899
+ sell_normal_step_accepted_809: MCP[3] >= 130.2199
+ sell_normal_step_accepted_810: MCP[3] >= 129.9999
+ sell_normal_step_accepted_811: MCP[3] >= 128.4999
+ sell_normal_step_accepted_812: MCP[3] >= 127.9999
+ sell_normal_step_accepted_813: MCP[3] >= 127.1699
+ sell_normal_step_accepted_814: MCP[3] >= 126.2199
+ sell_normal_step_accepted_815: MCP[3] >= 125.7999
+ sell_normal_step_accepted_816: MCP[3] >= 125.4999
+ sell_normal_step_accepted_817: MCP[3] >= 124.9999
  sell_normal_step_accepted_818: MCP[3] >= 124.2999
  sell_normal_step_accepted_819: MCP[3] >= 123.4999
  sell_normal_step_accepted_820: MCP[3] >= 120.1099
@@ -1031,10 +1031,10 @@ Subject To
  buy_normal_step_accepted_1012: MCP[3] <= 165.5501
  buy_normal_step_accepted_1013: MCP[3] <= 165.0001
  buy_normal_step_accepted_1014: MCP[3] <= 162.6801
- buy_normal_step_accepted_1015: MCP[3] <= 137.0001
- buy_normal_step_accepted_1016: MCP[3] <= 136.2301
- buy_normal_step_accepted_1017: MCP[3] <= 135.0001
- buy_normal_step_accepted_1018: MCP[3] <= 132.6801
+ buy_step_rejected_1015: MCP[3] >= 136.9999
+ buy_step_rejected_1016: MCP[3] >= 136.2299
+ buy_step_rejected_1017: MCP[3] >= 134.9999
+ buy_step_rejected_1018: MCP[3] >= 132.6799
  buy_step_rejected_1019: MCP[3] >= 121.9999
  buy_step_rejected_1020: MCP[3] >= 112.1399
  buy_step_rejected_1021: MCP[3] >= 111.2799
@@ -1160,40 +1160,40 @@ Subject To
  sell_step_rejected_1141: MCP[4] <= 155.0001
  sell_step_rejected_1142: MCP[4] <= 152.1401
  sell_step_rejected_1143: MCP[4] <= 150.0001
- sell_step_rejected_1144: MCP[4] <= 145.1001
- sell_step_rejected_1145: MCP[4] <= 145.0001
- sell_step_rejected_1146: MCP[4] <= 144.9301
- sell_step_rejected_1147: MCP[4] <= 144.0001
- sell_step_rejected_1148: MCP[4] <= 141.8701
- sell_step_rejected_1149: MCP[4] <= 140.0001
- sell_step_rejected_1150: MCP[4] <= 139.9601
- sell_step_rejected_1151: MCP[4] <= 139.1501
- sell_step_rejected_1152: MCP[4] <= 139.0001
- sell_step_rejected_1153: MCP[4] <= 138.4801
- sell_step_rejected_1154: MCP[4] <= 138.1001
- sell_step_rejected_1155: MCP[4] <= 137.4001
- sell_step_rejected_1156: MCP[4] <= 135.2401
- sell_step_rejected_1157: MCP[4] <= 135.0001
- sell_step_rejected_1158: MCP[4] <= 133.8501
- sell_step_rejected_1159: MCP[4] <= 133.2501
- sell_step_rejected_1160: MCP[4] <= 133.0601
- sell_step_rejected_1161: MCP[4] <= 132.5001
- sell_step_rejected_1162: MCP[4] <= 132.4901
- sell_step_rejected_1163: MCP[4] <= 132.0801
- sell_step_rejected_1164: MCP[4] <= 131.0901
- sell_step_rejected_1165: MCP[4] <= 130.6001
- sell_step_rejected_1166: MCP[4] <= 130.2201
- sell_step_rejected_1167: MCP[4] <= 130.0001
- sell_step_rejected_1168: MCP[4] <= 128.5001
- sell_step_rejected_1169: MCP[4] <= 128.0001
- sell_step_rejected_1170: MCP[4] <= 127.1701
- sell_step_rejected_1171: MCP[4] <= 126.2201
- sell_step_rejected_1172: MCP[4] <= 125.5001
- sell_step_rejected_1173: MCP[4] <= 125.0001
- sell_step_rejected_1174: MCP[4] <= 123.6001
- sell_step_rejected_1175: MCP[4] <= 123.5001
- normal_step_partially_accepted_lower_1176: MCP[4] >= 119.9999
- normal_step_partially_accepted_upper_1176: MCP[4] <= 120.0001
+ normal_step_partially_accepted_lower_1144: MCP[4] >= 145.0999
+ normal_step_partially_accepted_upper_1144: MCP[4] <= 145.1001
+ sell_normal_step_accepted_1145: MCP[4] >= 144.9999
+ sell_normal_step_accepted_1146: MCP[4] >= 144.9299
+ sell_normal_step_accepted_1147: MCP[4] >= 143.9999
+ sell_normal_step_accepted_1148: MCP[4] >= 141.8699
+ sell_normal_step_accepted_1149: MCP[4] >= 139.9999
+ sell_normal_step_accepted_1150: MCP[4] >= 139.9599
+ sell_normal_step_accepted_1151: MCP[4] >= 139.1499
+ sell_normal_step_accepted_1152: MCP[4] >= 138.9999
+ sell_normal_step_accepted_1153: MCP[4] >= 138.4799
+ sell_normal_step_accepted_1154: MCP[4] >= 138.0999
+ sell_normal_step_accepted_1155: MCP[4] >= 137.3999
+ sell_normal_step_accepted_1156: MCP[4] >= 135.2399
+ sell_normal_step_accepted_1157: MCP[4] >= 134.9999
+ sell_normal_step_accepted_1158: MCP[4] >= 133.8499
+ sell_normal_step_accepted_1159: MCP[4] >= 133.2499
+ sell_normal_step_accepted_1160: MCP[4] >= 133.0599
+ sell_normal_step_accepted_1161: MCP[4] >= 132.4999
+ sell_normal_step_accepted_1162: MCP[4] >= 132.4899
+ sell_normal_step_accepted_1163: MCP[4] >= 132.0799
+ sell_normal_step_accepted_1164: MCP[4] >= 131.0899
+ sell_normal_step_accepted_1165: MCP[4] >= 130.5999
+ sell_normal_step_accepted_1166: MCP[4] >= 130.2199
+ sell_normal_step_accepted_1167: MCP[4] >= 129.9999
+ sell_normal_step_accepted_1168: MCP[4] >= 128.4999
+ sell_normal_step_accepted_1169: MCP[4] >= 127.9999
+ sell_normal_step_accepted_1170: MCP[4] >= 127.1699
+ sell_normal_step_accepted_1171: MCP[4] >= 126.2199
+ sell_normal_step_accepted_1172: MCP[4] >= 125.4999
+ sell_normal_step_accepted_1173: MCP[4] >= 124.9999
+ sell_normal_step_accepted_1174: MCP[4] >= 123.5999
+ sell_normal_step_accepted_1175: MCP[4] >= 123.4999
+ sell_normal_step_accepted_1176: MCP[4] >= 119.9999
  sell_normal_step_accepted_1177: MCP[4] >= 119.9799
  sell_normal_step_accepted_1178: MCP[4] >= 117.9999
  sell_normal_step_accepted_1179: MCP[4] >= 117.1999
@@ -1391,11 +1391,11 @@ Subject To
  buy_normal_step_accepted_1371: MCP[4] <= 164.9301
  buy_normal_step_accepted_1372: MCP[4] <= 161.2701
  buy_normal_step_accepted_1373: MCP[4] <= 160.6301
- buy_normal_step_accepted_1374: MCP[4] <= 144.8201
- buy_normal_step_accepted_1375: MCP[4] <= 137.0001
- buy_normal_step_accepted_1376: MCP[4] <= 135.0001
- buy_normal_step_accepted_1377: MCP[4] <= 131.2701
- buy_normal_step_accepted_1378: MCP[4] <= 122.0001
+ buy_step_rejected_1374: MCP[4] >= 144.8199
+ buy_step_rejected_1375: MCP[4] >= 136.9999
+ buy_step_rejected_1376: MCP[4] >= 134.9999
+ buy_step_rejected_1377: MCP[4] >= 131.2699
+ buy_step_rejected_1378: MCP[4] >= 121.9999
  buy_step_rejected_1379: MCP[4] >= 111.0399
  buy_step_rejected_1380: MCP[4] >= 109.9999
  buy_step_rejected_1381: MCP[4] >= 109.5999
@@ -1520,38 +1520,38 @@ Subject To
  sell_step_rejected_1500: MCP[5] <= 155.0001
  sell_step_rejected_1501: MCP[5] <= 150.0001
  sell_step_rejected_1502: MCP[5] <= 145.1001
- sell_step_rejected_1503: MCP[5] <= 145.0001
- sell_step_rejected_1504: MCP[5] <= 144.9301
- sell_step_rejected_1505: MCP[5] <= 144.0001
- sell_step_rejected_1506: MCP[5] <= 141.8701
- sell_step_rejected_1507: MCP[5] <= 140.1401
- sell_step_rejected_1508: MCP[5] <= 140.0001
- sell_step_rejected_1509: MCP[5] <= 139.1701
- sell_step_rejected_1510: MCP[5] <= 139.0001
- sell_step_rejected_1511: MCP[5] <= 138.2801
- sell_step_rejected_1512: MCP[5] <= 138.1001
- sell_step_rejected_1513: MCP[5] <= 137.4001
- sell_step_rejected_1514: MCP[5] <= 135.2101
- sell_step_rejected_1515: MCP[5] <= 135.0001
- sell_step_rejected_1516: MCP[5] <= 133.8501
- sell_step_rejected_1517: MCP[5] <= 133.2501
- sell_step_rejected_1518: MCP[5] <= 133.0601
- sell_step_rejected_1519: MCP[5] <= 132.4901
- sell_step_rejected_1520: MCP[5] <= 132.0801
- sell_step_rejected_1521: MCP[5] <= 131.0901
- sell_step_rejected_1522: MCP[5] <= 130.2201
- sell_step_rejected_1523: MCP[5] <= 130.0001
- sell_step_rejected_1524: MCP[5] <= 129.4001
- sell_step_rejected_1525: MCP[5] <= 128.0001
- sell_step_rejected_1526: MCP[5] <= 127.1701
- sell_step_rejected_1527: MCP[5] <= 127.0001
- sell_step_rejected_1528: MCP[5] <= 126.5001
- sell_step_rejected_1529: MCP[5] <= 126.2201
- sell_step_rejected_1530: MCP[5] <= 125.0001
- sell_step_rejected_1531: MCP[5] <= 123.5001
- sell_step_rejected_1532: MCP[5] <= 122.4001
- normal_step_partially_accepted_lower_1533: MCP[5] >= 119.9999
- normal_step_partially_accepted_upper_1533: MCP[5] <= 120.0001
+ normal_step_partially_accepted_lower_1503: MCP[5] >= 144.9999
+ normal_step_partially_accepted_upper_1503: MCP[5] <= 145.0001
+ sell_normal_step_accepted_1504: MCP[5] >= 144.9299
+ sell_normal_step_accepted_1505: MCP[5] >= 143.9999
+ sell_normal_step_accepted_1506: MCP[5] >= 141.8699
+ sell_normal_step_accepted_1507: MCP[5] >= 140.1399
+ sell_normal_step_accepted_1508: MCP[5] >= 139.9999
+ sell_normal_step_accepted_1509: MCP[5] >= 139.1699
+ sell_normal_step_accepted_1510: MCP[5] >= 138.9999
+ sell_normal_step_accepted_1511: MCP[5] >= 138.2799
+ sell_normal_step_accepted_1512: MCP[5] >= 138.0999
+ sell_normal_step_accepted_1513: MCP[5] >= 137.3999
+ sell_normal_step_accepted_1514: MCP[5] >= 135.2099
+ sell_normal_step_accepted_1515: MCP[5] >= 134.9999
+ sell_normal_step_accepted_1516: MCP[5] >= 133.8499
+ sell_normal_step_accepted_1517: MCP[5] >= 133.2499
+ sell_normal_step_accepted_1518: MCP[5] >= 133.0599
+ sell_normal_step_accepted_1519: MCP[5] >= 132.4899
+ sell_normal_step_accepted_1520: MCP[5] >= 132.0799
+ sell_normal_step_accepted_1521: MCP[5] >= 131.0899
+ sell_normal_step_accepted_1522: MCP[5] >= 130.2199
+ sell_normal_step_accepted_1523: MCP[5] >= 129.9999
+ sell_normal_step_accepted_1524: MCP[5] >= 129.3999
+ sell_normal_step_accepted_1525: MCP[5] >= 127.9999
+ sell_normal_step_accepted_1526: MCP[5] >= 127.1699
+ sell_normal_step_accepted_1527: MCP[5] >= 126.9999
+ sell_normal_step_accepted_1528: MCP[5] >= 126.4999
+ sell_normal_step_accepted_1529: MCP[5] >= 126.2199
+ sell_normal_step_accepted_1530: MCP[5] >= 124.9999
+ sell_normal_step_accepted_1531: MCP[5] >= 123.4999
+ sell_normal_step_accepted_1532: MCP[5] >= 122.3999
+ sell_normal_step_accepted_1533: MCP[5] >= 119.9999
  sell_normal_step_accepted_1534: MCP[5] >= 119.8299
  sell_normal_step_accepted_1535: MCP[5] >= 115.9999
  sell_normal_step_accepted_1536: MCP[5] >= 115.8399
@@ -1752,10 +1752,10 @@ Subject To
  buy_normal_step_accepted_1731: MCP[5] <= 165.2001
  buy_normal_step_accepted_1732: MCP[5] <= 165.0001
  buy_normal_step_accepted_1733: MCP[5] <= 158.7001
- buy_normal_step_accepted_1734: MCP[5] <= 137.0001
- buy_normal_step_accepted_1735: MCP[5] <= 135.0001
- buy_normal_step_accepted_1736: MCP[5] <= 128.7001
- buy_normal_step_accepted_1737: MCP[5] <= 122.0001
+ buy_step_rejected_1734: MCP[5] >= 136.9999
+ buy_step_rejected_1735: MCP[5] >= 134.9999
+ buy_step_rejected_1736: MCP[5] >= 128.6999
+ buy_step_rejected_1737: MCP[5] >= 121.9999
  buy_step_rejected_1738: MCP[5] >= 111.1999
  buy_step_rejected_1739: MCP[5] >= 109.9999
  buy_step_rejected_1740: MCP[5] >= 108.3999
@@ -1869,38 +1869,38 @@ Subject To
  sell_step_rejected_1848: MCP[6] <= 167.0601
  sell_step_rejected_1849: MCP[6] <= 165.0001
  sell_step_rejected_1850: MCP[6] <= 164.9301
- sell_step_rejected_1851: MCP[6] <= 164.0201
- sell_step_rejected_1852: MCP[6] <= 163.9301
- sell_step_rejected_1853: MCP[6] <= 160.0001
- sell_step_rejected_1854: MCP[6] <= 159.7001
- sell_step_rejected_1855: MCP[6] <= 159.5001
- sell_step_rejected_1856: MCP[6] <= 158.7201
- sell_step_rejected_1857: MCP[6] <= 155.0001
- sell_step_rejected_1858: MCP[6] <= 150.0001
- sell_step_rejected_1859: MCP[6] <= 145.1001
- sell_step_rejected_1860: MCP[6] <= 145.0001
- sell_step_rejected_1861: MCP[6] <= 144.9301
- sell_step_rejected_1862: MCP[6] <= 144.0001
- sell_step_rejected_1863: MCP[6] <= 142.9001
- sell_step_rejected_1864: MCP[6] <= 141.8701
- sell_step_rejected_1865: MCP[6] <= 140.0001
- sell_step_rejected_1866: MCP[6] <= 139.2001
- sell_step_rejected_1867: MCP[6] <= 139.0001
- sell_step_rejected_1868: MCP[6] <= 138.1001
- sell_step_rejected_1869: MCP[6] <= 138.0701
- sell_step_rejected_1870: MCP[6] <= 137.4001
- sell_step_rejected_1871: MCP[6] <= 135.2401
- sell_step_rejected_1872: MCP[6] <= 135.0001
- sell_step_rejected_1873: MCP[6] <= 133.8501
- sell_step_rejected_1874: MCP[6] <= 133.4001
- sell_step_rejected_1875: MCP[6] <= 133.2501
- sell_step_rejected_1876: MCP[6] <= 133.0601
- sell_step_rejected_1877: MCP[6] <= 132.5001
- sell_step_rejected_1878: MCP[6] <= 132.4901
- sell_step_rejected_1879: MCP[6] <= 132.0801
- sell_step_rejected_1880: MCP[6] <= 132.0001
- normal_step_partially_accepted_lower_1881: MCP[6] >= 131.0899
- normal_step_partially_accepted_upper_1881: MCP[6] <= 131.0901
+ normal_step_partially_accepted_lower_1851: MCP[6] >= 164.0199
+ normal_step_partially_accepted_upper_1851: MCP[6] <= 164.0201
+ sell_normal_step_accepted_1852: MCP[6] >= 163.9299
+ sell_normal_step_accepted_1853: MCP[6] >= 159.9999
+ sell_normal_step_accepted_1854: MCP[6] >= 159.6999
+ sell_normal_step_accepted_1855: MCP[6] >= 159.4999
+ sell_normal_step_accepted_1856: MCP[6] >= 158.7199
+ sell_normal_step_accepted_1857: MCP[6] >= 154.9999
+ sell_normal_step_accepted_1858: MCP[6] >= 149.9999
+ sell_normal_step_accepted_1859: MCP[6] >= 145.0999
+ sell_normal_step_accepted_1860: MCP[6] >= 144.9999
+ sell_normal_step_accepted_1861: MCP[6] >= 144.9299
+ sell_normal_step_accepted_1862: MCP[6] >= 143.9999
+ sell_normal_step_accepted_1863: MCP[6] >= 142.8999
+ sell_normal_step_accepted_1864: MCP[6] >= 141.8699
+ sell_normal_step_accepted_1865: MCP[6] >= 139.9999
+ sell_normal_step_accepted_1866: MCP[6] >= 139.1999
+ sell_normal_step_accepted_1867: MCP[6] >= 138.9999
+ sell_normal_step_accepted_1868: MCP[6] >= 138.0999
+ sell_normal_step_accepted_1869: MCP[6] >= 138.0699
+ sell_normal_step_accepted_1870: MCP[6] >= 137.3999
+ sell_normal_step_accepted_1871: MCP[6] >= 135.2399
+ sell_normal_step_accepted_1872: MCP[6] >= 134.9999
+ sell_normal_step_accepted_1873: MCP[6] >= 133.8499
+ sell_normal_step_accepted_1874: MCP[6] >= 133.3999
+ sell_normal_step_accepted_1875: MCP[6] >= 133.2499
+ sell_normal_step_accepted_1876: MCP[6] >= 133.0599
+ sell_normal_step_accepted_1877: MCP[6] >= 132.4999
+ sell_normal_step_accepted_1878: MCP[6] >= 132.4899
+ sell_normal_step_accepted_1879: MCP[6] >= 132.0799
+ sell_normal_step_accepted_1880: MCP[6] >= 131.9999
+ sell_normal_step_accepted_1881: MCP[6] >= 131.0899
  sell_normal_step_accepted_1882: MCP[6] >= 130.2199
  sell_normal_step_accepted_1883: MCP[6] >= 129.9999
  sell_normal_step_accepted_1884: MCP[6] >= 128.4999
@@ -2110,8 +2110,8 @@ Subject To
  buy_normal_step_accepted_2088: MCP[6] <= 169.3401
  buy_normal_step_accepted_2089: MCP[6] <= 165.9201
  buy_normal_step_accepted_2090: MCP[6] <= 165.0001
- buy_normal_step_accepted_2091: MCP[6] <= 137.0001
- buy_normal_step_accepted_2092: MCP[6] <= 135.9201
+ buy_step_rejected_2091: MCP[6] >= 136.9999
+ buy_step_rejected_2092: MCP[6] >= 135.9199
  buy_step_rejected_2093: MCP[6] >= 121.9999
  buy_step_rejected_2094: MCP[6] >= 118.0099
  buy_step_rejected_2095: MCP[6] >= 117.9999
@@ -2215,21 +2215,21 @@ Subject To
  sell_step_rejected_2193: MCP[7] <= 190.0001
  sell_step_rejected_2194: MCP[7] <= 187.1701
  sell_step_rejected_2195: MCP[7] <= 186.5001
- sell_step_rejected_2196: MCP[7] <= 185.0001
- sell_step_rejected_2197: MCP[7] <= 184.8901
- sell_step_rejected_2198: MCP[7] <= 182.5001
- sell_step_rejected_2199: MCP[7] <= 181.8501
- sell_step_rejected_2200: MCP[7] <= 180.9201
- sell_step_rejected_2201: MCP[7] <= 180.5001
- sell_step_rejected_2202: MCP[7] <= 179.3201
- sell_step_rejected_2203: MCP[7] <= 176.8501
- sell_step_rejected_2204: MCP[7] <= 176.5001
- sell_step_rejected_2205: MCP[7] <= 173.4701
- sell_step_rejected_2206: MCP[7] <= 172.9401
- sell_step_rejected_2207: MCP[7] <= 170.0001
- sell_step_rejected_2208: MCP[7] <= 168.5701
- normal_step_partially_accepted_lower_2209: MCP[7] >= 166.5399
- normal_step_partially_accepted_upper_2209: MCP[7] <= 166.5401
+ normal_step_partially_accepted_lower_2196: MCP[7] >= 184.9999
+ normal_step_partially_accepted_upper_2196: MCP[7] <= 185.0001
+ sell_normal_step_accepted_2197: MCP[7] >= 184.8899
+ sell_normal_step_accepted_2198: MCP[7] >= 182.4999
+ sell_normal_step_accepted_2199: MCP[7] >= 181.8499
+ sell_normal_step_accepted_2200: MCP[7] >= 180.9199
+ sell_normal_step_accepted_2201: MCP[7] >= 180.4999
+ sell_normal_step_accepted_2202: MCP[7] >= 179.3199
+ sell_normal_step_accepted_2203: MCP[7] >= 176.8499
+ sell_normal_step_accepted_2204: MCP[7] >= 176.4999
+ sell_normal_step_accepted_2205: MCP[7] >= 173.4699
+ sell_normal_step_accepted_2206: MCP[7] >= 172.9399
+ sell_normal_step_accepted_2207: MCP[7] >= 169.9999
+ sell_normal_step_accepted_2208: MCP[7] >= 168.5699
+ sell_normal_step_accepted_2209: MCP[7] >= 166.5399
  sell_normal_step_accepted_2210: MCP[7] >= 164.9999
  sell_normal_step_accepted_2211: MCP[7] >= 164.4799
  sell_normal_step_accepted_2212: MCP[7] >= 163.4499
@@ -2474,7 +2474,7 @@ Subject To
  buy_normal_step_accepted_2451: MCP[7] <= 195.4601
  buy_normal_step_accepted_2452: MCP[7] <= 190.0001
  buy_normal_step_accepted_2453: MCP[7] <= 186.5001
- buy_normal_step_accepted_2454: MCP[7] <= 179.5001
+ buy_step_rejected_2454: MCP[7] >= 179.4999
  buy_step_rejected_2455: MCP[7] >= 162.9999
  buy_step_rejected_2456: MCP[7] >= 159.5999
  buy_step_rejected_2457: MCP[7] >= 156.4999
@@ -2565,31 +2565,31 @@ Subject To
  sell_step_rejected_2542: MCP[8] <= 229.0001
  sell_step_rejected_2543: MCP[8] <= 228.0001
  sell_step_rejected_2544: MCP[8] <= 226.1001
- sell_step_rejected_2545: MCP[8] <= 221.0001
- sell_step_rejected_2546: MCP[8] <= 220.0001
- sell_step_rejected_2547: MCP[8] <= 216.1001
- sell_step_rejected_2548: MCP[8] <= 210.0001
- sell_step_rejected_2549: MCP[8] <= 208.0001
- sell_step_rejected_2550: MCP[8] <= 207.7201
- sell_step_rejected_2551: MCP[8] <= 206.1001
- sell_step_rejected_2552: MCP[8] <= 200.6201
- sell_step_rejected_2553: MCP[8] <= 200.5201
- sell_step_rejected_2554: MCP[8] <= 200.0301
- sell_step_rejected_2555: MCP[8] <= 200.0001
- sell_step_rejected_2556: MCP[8] <= 196.1001
- sell_step_rejected_2557: MCP[8] <= 195.0001
- sell_step_rejected_2558: MCP[8] <= 190.0001
- sell_step_rejected_2559: MCP[8] <= 187.1701
- sell_step_rejected_2560: MCP[8] <= 186.1001
- sell_step_rejected_2561: MCP[8] <= 185.9001
- sell_step_rejected_2562: MCP[8] <= 185.0001
- sell_step_rejected_2563: MCP[8] <= 184.8901
- sell_step_rejected_2564: MCP[8] <= 181.8501
- sell_step_rejected_2565: MCP[8] <= 180.9201
- sell_step_rejected_2566: MCP[8] <= 179.3201
- sell_step_rejected_2567: MCP[8] <= 177.0001
- normal_step_partially_accepted_lower_2568: MCP[8] >= 176.8499
- normal_step_partially_accepted_upper_2568: MCP[8] <= 176.8501
+ normal_step_partially_accepted_lower_2545: MCP[8] >= 220.9999
+ normal_step_partially_accepted_upper_2545: MCP[8] <= 221.0001
+ sell_normal_step_accepted_2546: MCP[8] >= 219.9999
+ sell_normal_step_accepted_2547: MCP[8] >= 216.0999
+ sell_normal_step_accepted_2548: MCP[8] >= 209.9999
+ sell_normal_step_accepted_2549: MCP[8] >= 207.9999
+ sell_normal_step_accepted_2550: MCP[8] >= 207.7199
+ sell_normal_step_accepted_2551: MCP[8] >= 206.0999
+ sell_normal_step_accepted_2552: MCP[8] >= 200.6199
+ sell_normal_step_accepted_2553: MCP[8] >= 200.5199
+ sell_normal_step_accepted_2554: MCP[8] >= 200.0299
+ sell_normal_step_accepted_2555: MCP[8] >= 199.9999
+ sell_normal_step_accepted_2556: MCP[8] >= 196.0999
+ sell_normal_step_accepted_2557: MCP[8] >= 194.9999
+ sell_normal_step_accepted_2558: MCP[8] >= 189.9999
+ sell_normal_step_accepted_2559: MCP[8] >= 187.1699
+ sell_normal_step_accepted_2560: MCP[8] >= 186.0999
+ sell_normal_step_accepted_2561: MCP[8] >= 185.8999
+ sell_normal_step_accepted_2562: MCP[8] >= 184.9999
+ sell_normal_step_accepted_2563: MCP[8] >= 184.8899
+ sell_normal_step_accepted_2564: MCP[8] >= 181.8499
+ sell_normal_step_accepted_2565: MCP[8] >= 180.9199
+ sell_normal_step_accepted_2566: MCP[8] >= 179.3199
+ sell_normal_step_accepted_2567: MCP[8] >= 176.9999
+ sell_normal_step_accepted_2568: MCP[8] >= 176.8499
  sell_normal_step_accepted_2569: MCP[8] >= 176.6599
  sell_normal_step_accepted_2570: MCP[8] >= 173.4699
  sell_normal_step_accepted_2571: MCP[8] >= 173.3299
@@ -2845,16 +2845,16 @@ Subject To
  buy_normal_step_accepted_2821: MCP[8] <= 241.5201
  buy_normal_step_accepted_2822: MCP[8] <= 234.1901
  buy_normal_step_accepted_2823: MCP[8] <= 225.0001
- buy_normal_step_accepted_2824: MCP[8] <= 211.8801
- buy_normal_step_accepted_2825: MCP[8] <= 209.4201
- buy_normal_step_accepted_2826: MCP[8] <= 208.3101
- buy_normal_step_accepted_2827: MCP[8] <= 200.0201
- buy_normal_step_accepted_2828: MCP[8] <= 200.0101
- buy_normal_step_accepted_2829: MCP[8] <= 200.0001
- buy_normal_step_accepted_2830: MCP[8] <= 190.0001
- buy_normal_step_accepted_2831: MCP[8] <= 187.0001
- buy_normal_step_accepted_2832: MCP[8] <= 185.9001
- buy_normal_step_accepted_2833: MCP[8] <= 179.4201
+ buy_step_rejected_2824: MCP[8] >= 211.8799
+ buy_step_rejected_2825: MCP[8] >= 209.4199
+ buy_step_rejected_2826: MCP[8] >= 208.3099
+ buy_step_rejected_2827: MCP[8] >= 200.0199
+ buy_step_rejected_2828: MCP[8] >= 200.0099
+ buy_step_rejected_2829: MCP[8] >= 199.9999
+ buy_step_rejected_2830: MCP[8] >= 189.9999
+ buy_step_rejected_2831: MCP[8] >= 186.9999
+ buy_step_rejected_2832: MCP[8] >= 185.8999
+ buy_step_rejected_2833: MCP[8] >= 179.4199
  buy_step_rejected_2834: MCP[8] >= 174.4199
  buy_step_rejected_2835: MCP[8] >= 171.4199
  buy_step_rejected_2836: MCP[8] >= 163.5799
@@ -2938,28 +2938,28 @@ Subject To
  sell_step_rejected_2914: MCP[9] <= 231.6001
  sell_step_rejected_2915: MCP[9] <= 229.0001
  sell_step_rejected_2916: MCP[9] <= 228.0001
- sell_step_rejected_2917: MCP[9] <= 221.0001
- sell_step_rejected_2918: MCP[9] <= 220.0001
- sell_step_rejected_2919: MCP[9] <= 210.0001
- sell_step_rejected_2920: MCP[9] <= 207.7201
- sell_step_rejected_2921: MCP[9] <= 200.5201
- sell_step_rejected_2922: MCP[9] <= 200.4201
- sell_step_rejected_2923: MCP[9] <= 200.0301
- sell_step_rejected_2924: MCP[9] <= 200.0001
- sell_step_rejected_2925: MCP[9] <= 195.0001
- sell_step_rejected_2926: MCP[9] <= 190.0001
- sell_step_rejected_2927: MCP[9] <= 187.1701
- sell_step_rejected_2928: MCP[9] <= 185.0001
- sell_step_rejected_2929: MCP[9] <= 184.8901
- sell_step_rejected_2930: MCP[9] <= 183.3201
- sell_step_rejected_2931: MCP[9] <= 181.8501
- sell_step_rejected_2932: MCP[9] <= 181.0001
- sell_step_rejected_2933: MCP[9] <= 180.9201
- sell_step_rejected_2934: MCP[9] <= 177.8801
- sell_step_rejected_2935: MCP[9] <= 177.4701
- sell_step_rejected_2936: MCP[9] <= 176.9401
- normal_step_partially_accepted_lower_2937: MCP[9] >= 176.8499
- normal_step_partially_accepted_upper_2937: MCP[9] <= 176.8501
+ normal_step_partially_accepted_lower_2917: MCP[9] >= 220.9999
+ normal_step_partially_accepted_upper_2917: MCP[9] <= 221.0001
+ sell_normal_step_accepted_2918: MCP[9] >= 219.9999
+ sell_normal_step_accepted_2919: MCP[9] >= 209.9999
+ sell_normal_step_accepted_2920: MCP[9] >= 207.7199
+ sell_normal_step_accepted_2921: MCP[9] >= 200.5199
+ sell_normal_step_accepted_2922: MCP[9] >= 200.4199
+ sell_normal_step_accepted_2923: MCP[9] >= 200.0299
+ sell_normal_step_accepted_2924: MCP[9] >= 199.9999
+ sell_normal_step_accepted_2925: MCP[9] >= 194.9999
+ sell_normal_step_accepted_2926: MCP[9] >= 189.9999
+ sell_normal_step_accepted_2927: MCP[9] >= 187.1699
+ sell_normal_step_accepted_2928: MCP[9] >= 184.9999
+ sell_normal_step_accepted_2929: MCP[9] >= 184.8899
+ sell_normal_step_accepted_2930: MCP[9] >= 183.3199
+ sell_normal_step_accepted_2931: MCP[9] >= 181.8499
+ sell_normal_step_accepted_2932: MCP[9] >= 180.9999
+ sell_normal_step_accepted_2933: MCP[9] >= 180.9199
+ sell_normal_step_accepted_2934: MCP[9] >= 177.8799
+ sell_normal_step_accepted_2935: MCP[9] >= 177.4699
+ sell_normal_step_accepted_2936: MCP[9] >= 176.9399
+ sell_normal_step_accepted_2937: MCP[9] >= 176.8499
  sell_normal_step_accepted_2938: MCP[9] >= 176.6599
  sell_normal_step_accepted_2939: MCP[9] >= 173.3299
  sell_normal_step_accepted_2940: MCP[9] >= 171.3999
@@ -3217,16 +3217,16 @@ Subject To
  buy_normal_step_accepted_3192: MCP[9] <= 227.7701
  buy_normal_step_accepted_3193: MCP[9] <= 225.0001
  buy_normal_step_accepted_3194: MCP[9] <= 221.1601
- buy_normal_step_accepted_3195: MCP[9] <= 212.8801
- buy_normal_step_accepted_3196: MCP[9] <= 206.5001
- buy_normal_step_accepted_3197: MCP[9] <= 203.4901
- buy_normal_step_accepted_3198: MCP[9] <= 200.0201
- buy_normal_step_accepted_3199: MCP[9] <= 200.0101
- buy_normal_step_accepted_3200: MCP[9] <= 200.0001
- buy_normal_step_accepted_3201: MCP[9] <= 191.6001
- buy_normal_step_accepted_3202: MCP[9] <= 190.0001
- buy_normal_step_accepted_3203: MCP[9] <= 183.0001
- buy_normal_step_accepted_3204: MCP[9] <= 177.8801
+ buy_step_rejected_3195: MCP[9] >= 212.8799
+ buy_step_rejected_3196: MCP[9] >= 206.4999
+ buy_step_rejected_3197: MCP[9] >= 203.4899
+ buy_step_rejected_3198: MCP[9] >= 200.0199
+ buy_step_rejected_3199: MCP[9] >= 200.0099
+ buy_step_rejected_3200: MCP[9] >= 199.9999
+ buy_step_rejected_3201: MCP[9] >= 191.5999
+ buy_step_rejected_3202: MCP[9] >= 189.9999
+ buy_step_rejected_3203: MCP[9] >= 182.9999
+ buy_step_rejected_3204: MCP[9] >= 177.8799
  buy_step_rejected_3205: MCP[9] >= 162.7899
  buy_step_rejected_3206: MCP[9] >= 161.5999
  buy_step_rejected_3207: MCP[9] >= 157.9399
@@ -3333,32 +3333,31 @@ Subject To
  sell_step_rejected_3308: MCP[10] <= 172.9401
  sell_step_rejected_3309: MCP[10] <= 170.0001
  sell_step_rejected_3310: MCP[10] <= 168.5701
- sell_step_rejected_3311: MCP[10] <= 166.5701
- sell_step_rejected_3312: MCP[10] <= 166.4301
- sell_step_rejected_3313: MCP[10] <= 165.0001
- sell_step_rejected_3314: MCP[10] <= 164.0901
- sell_step_rejected_3315: MCP[10] <= 163.7201
- sell_step_rejected_3316: MCP[10] <= 163.0501
- sell_step_rejected_3317: MCP[10] <= 160.0001
- sell_step_rejected_3318: MCP[10] <= 158.9501
- sell_step_rejected_3319: MCP[10] <= 158.0801
- sell_step_rejected_3320: MCP[10] <= 156.0501
- sell_step_rejected_3321: MCP[10] <= 155.0001
- sell_step_rejected_3322: MCP[10] <= 152.5001
- sell_step_rejected_3323: MCP[10] <= 152.1401
- sell_step_rejected_3324: MCP[10] <= 150.0001
- sell_step_rejected_3325: MCP[10] <= 145.5001
- sell_step_rejected_3326: MCP[10] <= 145.1001
- sell_step_rejected_3327: MCP[10] <= 145.0001
- sell_step_rejected_3328: MCP[10] <= 144.9301
- sell_step_rejected_3329: MCP[10] <= 144.0001
- sell_step_rejected_3330: MCP[10] <= 143.8501
- sell_step_rejected_3331: MCP[10] <= 143.8201
- sell_step_rejected_3332: MCP[10] <= 141.8701
- sell_step_rejected_3333: MCP[10] <= 140.0001
- sell_step_rejected_3334: MCP[10] <= 139.0001
- normal_step_partially_accepted_lower_3335: MCP[10] >= 138.2799
- normal_step_partially_accepted_upper_3335: MCP[10] <= 138.2801
+ sell_normal_step_accepted_3311: MCP[10] >= 166.5699
+ sell_normal_step_accepted_3312: MCP[10] >= 166.4299
+ sell_normal_step_accepted_3313: MCP[10] >= 164.9999
+ sell_normal_step_accepted_3314: MCP[10] >= 164.0899
+ sell_normal_step_accepted_3315: MCP[10] >= 163.7199
+ sell_normal_step_accepted_3316: MCP[10] >= 163.0499
+ sell_normal_step_accepted_3317: MCP[10] >= 159.9999
+ sell_normal_step_accepted_3318: MCP[10] >= 158.9499
+ sell_normal_step_accepted_3319: MCP[10] >= 158.0799
+ sell_normal_step_accepted_3320: MCP[10] >= 156.0499
+ sell_normal_step_accepted_3321: MCP[10] >= 154.9999
+ sell_normal_step_accepted_3322: MCP[10] >= 152.4999
+ sell_normal_step_accepted_3323: MCP[10] >= 152.1399
+ sell_normal_step_accepted_3324: MCP[10] >= 149.9999
+ sell_normal_step_accepted_3325: MCP[10] >= 145.4999
+ sell_normal_step_accepted_3326: MCP[10] >= 145.0999
+ sell_normal_step_accepted_3327: MCP[10] >= 144.9999
+ sell_normal_step_accepted_3328: MCP[10] >= 144.9299
+ sell_normal_step_accepted_3329: MCP[10] >= 143.9999
+ sell_normal_step_accepted_3330: MCP[10] >= 143.8499
+ sell_normal_step_accepted_3331: MCP[10] >= 143.8199
+ sell_normal_step_accepted_3332: MCP[10] >= 141.8699
+ sell_normal_step_accepted_3333: MCP[10] >= 139.9999
+ sell_normal_step_accepted_3334: MCP[10] >= 138.9999
+ sell_normal_step_accepted_3335: MCP[10] >= 138.2799
  sell_normal_step_accepted_3336: MCP[10] >= 138.0999
  sell_normal_step_accepted_3337: MCP[10] >= 137.6899
  sell_normal_step_accepted_3338: MCP[10] >= 137.6099
@@ -3587,10 +3586,11 @@ Subject To
  buy_normal_step_accepted_3561: MCP[10] <= 189.0901
  buy_normal_step_accepted_3562: MCP[10] <= 186.6801
  buy_normal_step_accepted_3563: MCP[10] <= 180.0001
- buy_normal_step_accepted_3564: MCP[10] <= 166.5701
- buy_normal_step_accepted_3565: MCP[10] <= 156.6801
- buy_normal_step_accepted_3566: MCP[10] <= 141.5701
- buy_normal_step_accepted_3567: MCP[10] <= 140.0001
+ normal_step_partially_accepted_lower_3564: MCP[10] >= 166.5699
+ normal_step_partially_accepted_upper_3564: MCP[10] <= 166.5701
+ buy_step_rejected_3565: MCP[10] >= 156.6799
+ buy_step_rejected_3566: MCP[10] >= 141.5699
+ buy_step_rejected_3567: MCP[10] >= 139.9999
  buy_step_rejected_3568: MCP[10] >= 137.6099
  buy_step_rejected_3569: MCP[10] >= 136.9999
  buy_step_rejected_3570: MCP[10] >= 136.9799
@@ -3711,44 +3711,44 @@ Subject To
  sell_step_rejected_3685: MCP[11] <= 163.6901
  sell_step_rejected_3686: MCP[11] <= 162.9501
  sell_step_rejected_3687: MCP[11] <= 160.0001
- sell_step_rejected_3688: MCP[11] <= 158.9501
- sell_step_rejected_3689: MCP[11] <= 158.1601
- sell_step_rejected_3690: MCP[11] <= 155.0001
- sell_step_rejected_3691: MCP[11] <= 154.1001
- sell_step_rejected_3692: MCP[11] <= 154.0101
- sell_step_rejected_3693: MCP[11] <= 152.1401
- sell_step_rejected_3694: MCP[11] <= 151.5001
- sell_step_rejected_3695: MCP[11] <= 150.0001
- sell_step_rejected_3696: MCP[11] <= 145.1001
- sell_step_rejected_3697: MCP[11] <= 145.0001
- sell_step_rejected_3698: MCP[11] <= 144.9301
- sell_step_rejected_3699: MCP[11] <= 144.0001
- sell_step_rejected_3700: MCP[11] <= 142.1301
- sell_step_rejected_3701: MCP[11] <= 141.8701
- sell_step_rejected_3702: MCP[11] <= 140.4501
- sell_step_rejected_3703: MCP[11] <= 140.0001
- sell_step_rejected_3704: MCP[11] <= 139.0001
- sell_step_rejected_3705: MCP[11] <= 138.1501
- sell_step_rejected_3706: MCP[11] <= 138.1001
- sell_step_rejected_3707: MCP[11] <= 136.9201
- sell_step_rejected_3708: MCP[11] <= 136.3601
- sell_step_rejected_3709: MCP[11] <= 135.0001
- sell_step_rejected_3710: MCP[11] <= 134.3601
- sell_step_rejected_3711: MCP[11] <= 134.2201
- sell_step_rejected_3712: MCP[11] <= 133.8501
- sell_step_rejected_3713: MCP[11] <= 133.6001
- sell_step_rejected_3714: MCP[11] <= 133.2501
- sell_step_rejected_3715: MCP[11] <= 133.0601
- sell_step_rejected_3716: MCP[11] <= 132.4901
- sell_step_rejected_3717: MCP[11] <= 132.0801
- sell_step_rejected_3718: MCP[11] <= 131.0901
- sell_step_rejected_3719: MCP[11] <= 130.2201
- sell_step_rejected_3720: MCP[11] <= 130.0001
- sell_step_rejected_3721: MCP[11] <= 128.2201
- sell_step_rejected_3722: MCP[11] <= 128.0001
- sell_step_rejected_3723: MCP[11] <= 127.1701
- normal_step_partially_accepted_lower_3724: MCP[11] >= 126.5999
- normal_step_partially_accepted_upper_3724: MCP[11] <= 126.6001
+ normal_step_partially_accepted_lower_3688: MCP[11] >= 158.9499
+ normal_step_partially_accepted_upper_3688: MCP[11] <= 158.9501
+ sell_normal_step_accepted_3689: MCP[11] >= 158.1599
+ sell_normal_step_accepted_3690: MCP[11] >= 154.9999
+ sell_normal_step_accepted_3691: MCP[11] >= 154.0999
+ sell_normal_step_accepted_3692: MCP[11] >= 154.0099
+ sell_normal_step_accepted_3693: MCP[11] >= 152.1399
+ sell_normal_step_accepted_3694: MCP[11] >= 151.4999
+ sell_normal_step_accepted_3695: MCP[11] >= 149.9999
+ sell_normal_step_accepted_3696: MCP[11] >= 145.0999
+ sell_normal_step_accepted_3697: MCP[11] >= 144.9999
+ sell_normal_step_accepted_3698: MCP[11] >= 144.9299
+ sell_normal_step_accepted_3699: MCP[11] >= 143.9999
+ sell_normal_step_accepted_3700: MCP[11] >= 142.1299
+ sell_normal_step_accepted_3701: MCP[11] >= 141.8699
+ sell_normal_step_accepted_3702: MCP[11] >= 140.4499
+ sell_normal_step_accepted_3703: MCP[11] >= 139.9999
+ sell_normal_step_accepted_3704: MCP[11] >= 138.9999
+ sell_normal_step_accepted_3705: MCP[11] >= 138.1499
+ sell_normal_step_accepted_3706: MCP[11] >= 138.0999
+ sell_normal_step_accepted_3707: MCP[11] >= 136.9199
+ sell_normal_step_accepted_3708: MCP[11] >= 136.3599
+ sell_normal_step_accepted_3709: MCP[11] >= 134.9999
+ sell_normal_step_accepted_3710: MCP[11] >= 134.3599
+ sell_normal_step_accepted_3711: MCP[11] >= 134.2199
+ sell_normal_step_accepted_3712: MCP[11] >= 133.8499
+ sell_normal_step_accepted_3713: MCP[11] >= 133.5999
+ sell_normal_step_accepted_3714: MCP[11] >= 133.2499
+ sell_normal_step_accepted_3715: MCP[11] >= 133.0599
+ sell_normal_step_accepted_3716: MCP[11] >= 132.4899
+ sell_normal_step_accepted_3717: MCP[11] >= 132.0799
+ sell_normal_step_accepted_3718: MCP[11] >= 131.0899
+ sell_normal_step_accepted_3719: MCP[11] >= 130.2199
+ sell_normal_step_accepted_3720: MCP[11] >= 129.9999
+ sell_normal_step_accepted_3721: MCP[11] >= 128.2199
+ sell_normal_step_accepted_3722: MCP[11] >= 127.9999
+ sell_normal_step_accepted_3723: MCP[11] >= 127.1699
+ sell_normal_step_accepted_3724: MCP[11] >= 126.5999
  sell_normal_step_accepted_3725: MCP[11] >= 126.3599
  sell_normal_step_accepted_3726: MCP[11] >= 126.2199
  sell_normal_step_accepted_3727: MCP[11] >= 125.8399
@@ -3962,13 +3962,13 @@ Subject To
  buy_normal_step_accepted_3935: MCP[11] <= 179.7701
  buy_normal_step_accepted_3936: MCP[11] <= 165.9001
  buy_normal_step_accepted_3937: MCP[11] <= 165.6901
- buy_normal_step_accepted_3938: MCP[11] <= 155.0001
- buy_normal_step_accepted_3939: MCP[11] <= 154.0101
- buy_normal_step_accepted_3940: MCP[11] <= 141.7701
- buy_normal_step_accepted_3941: MCP[11] <= 140.6001
- buy_normal_step_accepted_3942: MCP[11] <= 137.0001
- buy_normal_step_accepted_3943: MCP[11] <= 135.9001
- buy_normal_step_accepted_3944: MCP[11] <= 129.0101
+ buy_step_rejected_3938: MCP[11] >= 154.9999
+ buy_step_rejected_3939: MCP[11] >= 154.0099
+ buy_step_rejected_3940: MCP[11] >= 141.7699
+ buy_step_rejected_3941: MCP[11] >= 140.5999
+ buy_step_rejected_3942: MCP[11] >= 136.9999
+ buy_step_rejected_3943: MCP[11] >= 135.8999
+ buy_step_rejected_3944: MCP[11] >= 129.0099
  buy_step_rejected_3945: MCP[11] >= 123.9899
  buy_step_rejected_3946: MCP[11] >= 121.9999
  buy_step_rejected_3947: MCP[11] >= 113.3999
@@ -4103,28 +4103,28 @@ Subject To
  sell_step_rejected_4076: MCP[12] <= 133.0601
  sell_step_rejected_4077: MCP[12] <= 132.4901
  sell_step_rejected_4078: MCP[12] <= 132.0801
- sell_step_rejected_4079: MCP[12] <= 131.0901
- sell_step_rejected_4080: MCP[12] <= 130.2201
- sell_step_rejected_4081: MCP[12] <= 130.0001
- sell_step_rejected_4082: MCP[12] <= 128.0001
- sell_step_rejected_4083: MCP[12] <= 127.9901
- sell_step_rejected_4084: MCP[12] <= 127.1701
- sell_step_rejected_4085: MCP[12] <= 126.3601
- sell_step_rejected_4086: MCP[12] <= 126.2201
- sell_step_rejected_4087: MCP[12] <= 125.6201
- sell_step_rejected_4088: MCP[12] <= 125.0001
- sell_step_rejected_4089: MCP[12] <= 123.2501
- sell_step_rejected_4090: MCP[12] <= 123.0001
- sell_step_rejected_4091: MCP[12] <= 122.4001
- sell_step_rejected_4092: MCP[12] <= 121.8101
- sell_step_rejected_4093: MCP[12] <= 121.5801
- sell_step_rejected_4094: MCP[12] <= 121.2501
- sell_step_rejected_4095: MCP[12] <= 120.9001
- sell_step_rejected_4096: MCP[12] <= 120.2001
- sell_step_rejected_4097: MCP[12] <= 120.0001
- sell_step_rejected_4098: MCP[12] <= 119.1501
- normal_step_partially_accepted_lower_4099: MCP[12] >= 117.7399
- normal_step_partially_accepted_upper_4099: MCP[12] <= 117.7401
+ normal_step_partially_accepted_lower_4079: MCP[12] >= 131.0899
+ normal_step_partially_accepted_upper_4079: MCP[12] <= 131.0901
+ sell_normal_step_accepted_4080: MCP[12] >= 130.2199
+ sell_normal_step_accepted_4081: MCP[12] >= 129.9999
+ sell_normal_step_accepted_4082: MCP[12] >= 127.9999
+ sell_normal_step_accepted_4083: MCP[12] >= 127.9899
+ sell_normal_step_accepted_4084: MCP[12] >= 127.1699
+ sell_normal_step_accepted_4085: MCP[12] >= 126.3599
+ sell_normal_step_accepted_4086: MCP[12] >= 126.2199
+ sell_normal_step_accepted_4087: MCP[12] >= 125.6199
+ sell_normal_step_accepted_4088: MCP[12] >= 124.9999
+ sell_normal_step_accepted_4089: MCP[12] >= 123.2499
+ sell_normal_step_accepted_4090: MCP[12] >= 122.9999
+ sell_normal_step_accepted_4091: MCP[12] >= 122.3999
+ sell_normal_step_accepted_4092: MCP[12] >= 121.8099
+ sell_normal_step_accepted_4093: MCP[12] >= 121.5799
+ sell_normal_step_accepted_4094: MCP[12] >= 121.2499
+ sell_normal_step_accepted_4095: MCP[12] >= 120.8999
+ sell_normal_step_accepted_4096: MCP[12] >= 120.1999
+ sell_normal_step_accepted_4097: MCP[12] >= 119.9999
+ sell_normal_step_accepted_4098: MCP[12] >= 119.1499
+ sell_normal_step_accepted_4099: MCP[12] >= 117.7399
  sell_normal_step_accepted_4100: MCP[12] >= 117.4399
  sell_normal_step_accepted_4101: MCP[12] >= 117.0599
  sell_normal_step_accepted_4102: MCP[12] >= 115.9999
@@ -4319,9 +4319,9 @@ Subject To
  buy_normal_step_accepted_4291: MCP[12] <= 149.4701
  buy_normal_step_accepted_4292: MCP[12] <= 147.0201
  buy_normal_step_accepted_4293: MCP[12] <= 135.0001
- buy_normal_step_accepted_4294: MCP[12] <= 127.6001
- buy_normal_step_accepted_4295: MCP[12] <= 126.0801
- buy_normal_step_accepted_4296: MCP[12] <= 122.0001
+ buy_step_rejected_4294: MCP[12] >= 127.5999
+ buy_step_rejected_4295: MCP[12] >= 126.0799
+ buy_step_rejected_4296: MCP[12] >= 121.9999
  buy_step_rejected_4297: MCP[12] >= 117.0599
  buy_step_rejected_4298: MCP[12] >= 110.0899
  buy_step_rejected_4299: MCP[12] >= 108.5799
@@ -4478,30 +4478,31 @@ Subject To
  sell_step_rejected_4450: MCP[13] <= 115.3801
  sell_step_rejected_4451: MCP[13] <= 115.2201
  sell_step_rejected_4452: MCP[13] <= 113.5201
- sell_step_rejected_4453: MCP[13] <= 112.2101
- sell_step_rejected_4454: MCP[13] <= 112.0001
- sell_step_rejected_4455: MCP[13] <= 111.1001
- sell_step_rejected_4456: MCP[13] <= 111.0001
- sell_step_rejected_4457: MCP[13] <= 110.0001
- sell_step_rejected_4458: MCP[13] <= 108.0001
- sell_step_rejected_4459: MCP[13] <= 107.9701
- sell_step_rejected_4460: MCP[13] <= 107.5501
- sell_step_rejected_4461: MCP[13] <= 106.6601
- sell_step_rejected_4462: MCP[13] <= 106.6001
- sell_step_rejected_4463: MCP[13] <= 105.0001
- sell_step_rejected_4464: MCP[13] <= 104.2201
- sell_step_rejected_4465: MCP[13] <= 104.0701
- sell_step_rejected_4466: MCP[13] <= 103.7701
- sell_step_rejected_4467: MCP[13] <= 103.7101
- sell_step_rejected_4468: MCP[13] <= 103.0001
- sell_step_rejected_4469: MCP[13] <= 101.3701
- sell_step_rejected_4470: MCP[13] <= 101.0801
- sell_step_rejected_4471: MCP[13] <= 100.0001
- sell_step_rejected_4472: MCP[13] <= 99.6001
- sell_step_rejected_4473: MCP[13] <= 98.0901
- sell_step_rejected_4474: MCP[13] <= 97.6001
- sell_step_rejected_4475: MCP[13] <= 97.5301
- sell_step_rejected_4476: MCP[13] <= 95.0001
+ normal_step_partially_accepted_lower_4453: MCP[13] >= 112.2099
+ normal_step_partially_accepted_upper_4453: MCP[13] <= 112.2101
+ sell_normal_step_accepted_4454: MCP[13] >= 111.9999
+ sell_normal_step_accepted_4455: MCP[13] >= 111.0999
+ sell_normal_step_accepted_4456: MCP[13] >= 110.9999
+ sell_normal_step_accepted_4457: MCP[13] >= 109.9999
+ sell_normal_step_accepted_4458: MCP[13] >= 107.9999
+ sell_normal_step_accepted_4459: MCP[13] >= 107.9699
+ sell_normal_step_accepted_4460: MCP[13] >= 107.5499
+ sell_normal_step_accepted_4461: MCP[13] >= 106.6599
+ sell_normal_step_accepted_4462: MCP[13] >= 106.5999
+ sell_normal_step_accepted_4463: MCP[13] >= 104.9999
+ sell_normal_step_accepted_4464: MCP[13] >= 104.2199
+ sell_normal_step_accepted_4465: MCP[13] >= 104.0699
+ sell_normal_step_accepted_4466: MCP[13] >= 103.7699
+ sell_normal_step_accepted_4467: MCP[13] >= 103.7099
+ sell_normal_step_accepted_4468: MCP[13] >= 102.9999
+ sell_normal_step_accepted_4469: MCP[13] >= 101.3699
+ sell_normal_step_accepted_4470: MCP[13] >= 101.0799
+ sell_normal_step_accepted_4471: MCP[13] >= 99.9999
+ sell_normal_step_accepted_4472: MCP[13] >= 99.5999
+ sell_normal_step_accepted_4473: MCP[13] >= 98.0899
+ sell_normal_step_accepted_4474: MCP[13] >= 97.5999
+ sell_normal_step_accepted_4475: MCP[13] >= 97.5299
+ sell_normal_step_accepted_4476: MCP[13] >= 94.9999
  sell_normal_step_accepted_4477: MCP[13] >= 94.1899
  sell_normal_step_accepted_4478: MCP[13] >= 93.4799
  sell_normal_step_accepted_4479: MCP[13] >= 93.2499
@@ -4675,15 +4676,14 @@ Subject To
  buy_normal_step_accepted_4647: MCP[13] <= 128.0901
  buy_normal_step_accepted_4648: MCP[13] <= 127.1001
  buy_normal_step_accepted_4649: MCP[13] <= 124.9201
- buy_normal_step_accepted_4650: MCP[13] <= 105.8701
- buy_normal_step_accepted_4651: MCP[13] <= 105.0001
- buy_normal_step_accepted_4652: MCP[13] <= 103.7701
- buy_normal_step_accepted_4653: MCP[13] <= 102.4701
- buy_normal_step_accepted_4654: MCP[13] <= 98.0701
- buy_normal_step_accepted_4655: MCP[13] <= 97.0101
- buy_normal_step_accepted_4656: MCP[13] <= 94.9201
- normal_step_partially_accepted_lower_4657: MCP[13] >= 94.5199
- normal_step_partially_accepted_upper_4657: MCP[13] <= 94.5201
+ buy_step_rejected_4650: MCP[13] >= 105.8699
+ buy_step_rejected_4651: MCP[13] >= 104.9999
+ buy_step_rejected_4652: MCP[13] >= 103.7699
+ buy_step_rejected_4653: MCP[13] >= 102.4699
+ buy_step_rejected_4654: MCP[13] >= 98.0699
+ buy_step_rejected_4655: MCP[13] >= 97.0099
+ buy_step_rejected_4656: MCP[13] >= 94.9199
+ buy_step_rejected_4657: MCP[13] >= 94.5199
  buy_step_rejected_4658: MCP[13] >= 90.0299
  buy_step_rejected_4659: MCP[13] >= 89.9999
  buy_step_rejected_4660: MCP[13] >= 88.3699
@@ -4832,31 +4832,32 @@ Subject To
  sell_step_rejected_4803: MCP[14] <= 114.8501
  sell_step_rejected_4804: MCP[14] <= 113.9001
  sell_step_rejected_4805: MCP[14] <= 113.5201
- sell_step_rejected_4806: MCP[14] <= 112.2201
- sell_step_rejected_4807: MCP[14] <= 112.0001
- sell_step_rejected_4808: MCP[14] <= 111.1501
- sell_step_rejected_4809: MCP[14] <= 111.1001
- sell_step_rejected_4810: MCP[14] <= 111.0001
- sell_step_rejected_4811: MCP[14] <= 110.0001
- sell_step_rejected_4812: MCP[14] <= 108.0001
- sell_step_rejected_4813: MCP[14] <= 107.9001
- sell_step_rejected_4814: MCP[14] <= 107.6501
- sell_step_rejected_4815: MCP[14] <= 107.6001
- sell_step_rejected_4816: MCP[14] <= 107.1701
- sell_step_rejected_4817: MCP[14] <= 106.6601
- sell_step_rejected_4818: MCP[14] <= 105.0001
- sell_step_rejected_4819: MCP[14] <= 104.2301
- sell_step_rejected_4820: MCP[14] <= 103.2501
- sell_step_rejected_4821: MCP[14] <= 103.0001
- sell_step_rejected_4822: MCP[14] <= 102.8901
- sell_step_rejected_4823: MCP[14] <= 101.0801
- sell_step_rejected_4824: MCP[14] <= 100.6001
- sell_step_rejected_4825: MCP[14] <= 100.5001
- sell_step_rejected_4826: MCP[14] <= 100.0001
- sell_step_rejected_4827: MCP[14] <= 98.5401
- sell_step_rejected_4828: MCP[14] <= 98.0901
- sell_step_rejected_4829: MCP[14] <= 97.0401
- sell_step_rejected_4830: MCP[14] <= 96.8601
+ normal_step_partially_accepted_lower_4806: MCP[14] >= 112.2199
+ normal_step_partially_accepted_upper_4806: MCP[14] <= 112.2201
+ sell_normal_step_accepted_4807: MCP[14] >= 111.9999
+ sell_normal_step_accepted_4808: MCP[14] >= 111.1499
+ sell_normal_step_accepted_4809: MCP[14] >= 111.0999
+ sell_normal_step_accepted_4810: MCP[14] >= 110.9999
+ sell_normal_step_accepted_4811: MCP[14] >= 109.9999
+ sell_normal_step_accepted_4812: MCP[14] >= 107.9999
+ sell_normal_step_accepted_4813: MCP[14] >= 107.8999
+ sell_normal_step_accepted_4814: MCP[14] >= 107.6499
+ sell_normal_step_accepted_4815: MCP[14] >= 107.5999
+ sell_normal_step_accepted_4816: MCP[14] >= 107.1699
+ sell_normal_step_accepted_4817: MCP[14] >= 106.6599
+ sell_normal_step_accepted_4818: MCP[14] >= 104.9999
+ sell_normal_step_accepted_4819: MCP[14] >= 104.2299
+ sell_normal_step_accepted_4820: MCP[14] >= 103.2499
+ sell_normal_step_accepted_4821: MCP[14] >= 102.9999
+ sell_normal_step_accepted_4822: MCP[14] >= 102.8899
+ sell_normal_step_accepted_4823: MCP[14] >= 101.0799
+ sell_normal_step_accepted_4824: MCP[14] >= 100.5999
+ sell_normal_step_accepted_4825: MCP[14] >= 100.4999
+ sell_normal_step_accepted_4826: MCP[14] >= 99.9999
+ sell_normal_step_accepted_4827: MCP[14] >= 98.5399
+ sell_normal_step_accepted_4828: MCP[14] >= 98.0899
+ sell_normal_step_accepted_4829: MCP[14] >= 97.0399
+ sell_normal_step_accepted_4830: MCP[14] >= 96.8599
  sell_normal_step_accepted_4831: MCP[14] >= 96.5499
  sell_normal_step_accepted_4832: MCP[14] >= 94.9999
  sell_normal_step_accepted_4833: MCP[14] >= 93.4799
@@ -5030,16 +5031,15 @@ Subject To
  buy_normal_step_accepted_5001: MCP[14] <= 125.7501
  buy_normal_step_accepted_5002: MCP[14] <= 122.0001
  buy_normal_step_accepted_5003: MCP[14] <= 117.7601
- buy_normal_step_accepted_5004: MCP[14] <= 107.9001
- buy_normal_step_accepted_5005: MCP[14] <= 105.0001
- buy_normal_step_accepted_5006: MCP[14] <= 103.0001
- buy_normal_step_accepted_5007: MCP[14] <= 102.8901
- buy_normal_step_accepted_5008: MCP[14] <= 101.0001
- buy_normal_step_accepted_5009: MCP[14] <= 100.6001
- buy_normal_step_accepted_5010: MCP[14] <= 99.9601
- buy_normal_step_accepted_5011: MCP[14] <= 97.0001
- normal_step_partially_accepted_lower_5012: MCP[14] >= 96.7499
- normal_step_partially_accepted_upper_5012: MCP[14] <= 96.7501
+ buy_step_rejected_5004: MCP[14] >= 107.8999
+ buy_step_rejected_5005: MCP[14] >= 104.9999
+ buy_step_rejected_5006: MCP[14] >= 102.9999
+ buy_step_rejected_5007: MCP[14] >= 102.8899
+ buy_step_rejected_5008: MCP[14] >= 100.9999
+ buy_step_rejected_5009: MCP[14] >= 100.5999
+ buy_step_rejected_5010: MCP[14] >= 99.9599
+ buy_step_rejected_5011: MCP[14] >= 96.9999
+ buy_step_rejected_5012: MCP[14] >= 96.7499
  buy_step_rejected_5013: MCP[14] >= 94.5199
  buy_step_rejected_5014: MCP[14] >= 94.2199
  buy_step_rejected_5015: MCP[14] >= 89.9999
@@ -5179,30 +5179,29 @@ Subject To
  sell_step_rejected_5149: MCP[15] <= 126.2201
  sell_step_rejected_5150: MCP[15] <= 125.6201
  sell_step_rejected_5151: MCP[15] <= 125.0001
- sell_step_rejected_5152: MCP[15] <= 120.6401
- sell_step_rejected_5153: MCP[15] <= 120.0001
- sell_step_rejected_5154: MCP[15] <= 118.2601
- sell_step_rejected_5155: MCP[15] <= 116.8601
- sell_step_rejected_5156: MCP[15] <= 116.0001
- sell_step_rejected_5157: MCP[15] <= 115.8401
- sell_step_rejected_5158: MCP[15] <= 115.2201
- sell_step_rejected_5159: MCP[15] <= 113.5201
- sell_step_rejected_5160: MCP[15] <= 112.2301
- sell_step_rejected_5161: MCP[15] <= 112.0001
- sell_step_rejected_5162: MCP[15] <= 111.1001
- sell_step_rejected_5163: MCP[15] <= 111.0001
- sell_step_rejected_5164: MCP[15] <= 110.0001
- sell_step_rejected_5165: MCP[15] <= 108.0001
- sell_step_rejected_5166: MCP[15] <= 107.8501
- sell_step_rejected_5167: MCP[15] <= 107.2401
- sell_step_rejected_5168: MCP[15] <= 106.8401
- sell_step_rejected_5169: MCP[15] <= 106.6601
- sell_step_rejected_5170: MCP[15] <= 105.4001
- sell_step_rejected_5171: MCP[15] <= 105.0001
- sell_step_rejected_5172: MCP[15] <= 104.2101
- sell_step_rejected_5173: MCP[15] <= 104.0001
- normal_step_partially_accepted_lower_5174: MCP[15] >= 102.9999
- normal_step_partially_accepted_upper_5174: MCP[15] <= 103.0001
+ sell_normal_step_accepted_5152: MCP[15] >= 120.6399
+ sell_normal_step_accepted_5153: MCP[15] >= 119.9999
+ sell_normal_step_accepted_5154: MCP[15] >= 118.2599
+ sell_normal_step_accepted_5155: MCP[15] >= 116.8599
+ sell_normal_step_accepted_5156: MCP[15] >= 115.9999
+ sell_normal_step_accepted_5157: MCP[15] >= 115.8399
+ sell_normal_step_accepted_5158: MCP[15] >= 115.2199
+ sell_normal_step_accepted_5159: MCP[15] >= 113.5199
+ sell_normal_step_accepted_5160: MCP[15] >= 112.2299
+ sell_normal_step_accepted_5161: MCP[15] >= 111.9999
+ sell_normal_step_accepted_5162: MCP[15] >= 111.0999
+ sell_normal_step_accepted_5163: MCP[15] >= 110.9999
+ sell_normal_step_accepted_5164: MCP[15] >= 109.9999
+ sell_normal_step_accepted_5165: MCP[15] >= 107.9999
+ sell_normal_step_accepted_5166: MCP[15] >= 107.8499
+ sell_normal_step_accepted_5167: MCP[15] >= 107.2399
+ sell_normal_step_accepted_5168: MCP[15] >= 106.8399
+ sell_normal_step_accepted_5169: MCP[15] >= 106.6599
+ sell_normal_step_accepted_5170: MCP[15] >= 105.3999
+ sell_normal_step_accepted_5171: MCP[15] >= 104.9999
+ sell_normal_step_accepted_5172: MCP[15] >= 104.2099
+ sell_normal_step_accepted_5173: MCP[15] >= 103.9999
+ sell_normal_step_accepted_5174: MCP[15] >= 102.9999
  sell_normal_step_accepted_5175: MCP[15] >= 101.0799
  sell_normal_step_accepted_5176: MCP[15] >= 100.4999
  sell_normal_step_accepted_5177: MCP[15] >= 99.9999
@@ -5395,12 +5394,12 @@ Subject To
  buy_normal_step_accepted_5364: MCP[15] <= 132.2801
  buy_normal_step_accepted_5365: MCP[15] <= 130.0001
  buy_normal_step_accepted_5366: MCP[15] <= 128.4401
- buy_normal_step_accepted_5367: MCP[15] <= 122.0001
- buy_normal_step_accepted_5368: MCP[15] <= 113.5801
- buy_normal_step_accepted_5369: MCP[15] <= 109.8601
- buy_normal_step_accepted_5370: MCP[15] <= 107.3001
- buy_normal_step_accepted_5371: MCP[15] <= 107.2401
- buy_normal_step_accepted_5372: MCP[15] <= 105.0001
+ buy_step_rejected_5367: MCP[15] >= 121.9999
+ buy_step_rejected_5368: MCP[15] >= 113.5799
+ buy_step_rejected_5369: MCP[15] >= 109.8599
+ buy_step_rejected_5370: MCP[15] >= 107.2999
+ buy_step_rejected_5371: MCP[15] >= 107.2399
+ buy_step_rejected_5372: MCP[15] >= 104.9999
  buy_step_rejected_5373: MCP[15] >= 98.2999
  buy_step_rejected_5374: MCP[15] >= 95.9999
  buy_step_rejected_5375: MCP[15] >= 94.5199
@@ -5525,34 +5524,33 @@ Subject To
  sell_step_rejected_5494: MCP[16] <= 137.8801
  sell_step_rejected_5495: MCP[16] <= 136.3601
  sell_step_rejected_5496: MCP[16] <= 135.8001
- sell_step_rejected_5497: MCP[16] <= 135.0001
- sell_step_rejected_5498: MCP[16] <= 134.3001
- sell_step_rejected_5499: MCP[16] <= 133.8501
- sell_step_rejected_5500: MCP[16] <= 133.5801
- sell_step_rejected_5501: MCP[16] <= 133.2501
- sell_step_rejected_5502: MCP[16] <= 133.0601
- sell_step_rejected_5503: MCP[16] <= 132.4901
- sell_step_rejected_5504: MCP[16] <= 132.0801
- sell_step_rejected_5505: MCP[16] <= 131.0901
- sell_step_rejected_5506: MCP[16] <= 130.5301
- sell_step_rejected_5507: MCP[16] <= 130.2201
- sell_step_rejected_5508: MCP[16] <= 130.0001
- sell_step_rejected_5509: MCP[16] <= 128.0001
- sell_step_rejected_5510: MCP[16] <= 127.1701
- sell_step_rejected_5511: MCP[16] <= 126.3601
- sell_step_rejected_5512: MCP[16] <= 126.2201
- sell_step_rejected_5513: MCP[16] <= 125.6201
- sell_step_rejected_5514: MCP[16] <= 125.0001
- sell_step_rejected_5515: MCP[16] <= 121.4001
- sell_step_rejected_5516: MCP[16] <= 120.6201
- sell_step_rejected_5517: MCP[16] <= 120.5001
- sell_step_rejected_5518: MCP[16] <= 120.0001
- sell_step_rejected_5519: MCP[16] <= 119.4001
- sell_step_rejected_5520: MCP[16] <= 118.5001
- sell_step_rejected_5521: MCP[16] <= 117.9201
- sell_step_rejected_5522: MCP[16] <= 117.4001
- normal_step_partially_accepted_lower_5523: MCP[16] >= 117.0399
- normal_step_partially_accepted_upper_5523: MCP[16] <= 117.0401
+ sell_normal_step_accepted_5497: MCP[16] >= 134.9999
+ sell_normal_step_accepted_5498: MCP[16] >= 134.2999
+ sell_normal_step_accepted_5499: MCP[16] >= 133.8499
+ sell_normal_step_accepted_5500: MCP[16] >= 133.5799
+ sell_normal_step_accepted_5501: MCP[16] >= 133.2499
+ sell_normal_step_accepted_5502: MCP[16] >= 133.0599
+ sell_normal_step_accepted_5503: MCP[16] >= 132.4899
+ sell_normal_step_accepted_5504: MCP[16] >= 132.0799
+ sell_normal_step_accepted_5505: MCP[16] >= 131.0899
+ sell_normal_step_accepted_5506: MCP[16] >= 130.5299
+ sell_normal_step_accepted_5507: MCP[16] >= 130.2199
+ sell_normal_step_accepted_5508: MCP[16] >= 129.9999
+ sell_normal_step_accepted_5509: MCP[16] >= 127.9999
+ sell_normal_step_accepted_5510: MCP[16] >= 127.1699
+ sell_normal_step_accepted_5511: MCP[16] >= 126.3599
+ sell_normal_step_accepted_5512: MCP[16] >= 126.2199
+ sell_normal_step_accepted_5513: MCP[16] >= 125.6199
+ sell_normal_step_accepted_5514: MCP[16] >= 124.9999
+ sell_normal_step_accepted_5515: MCP[16] >= 121.3999
+ sell_normal_step_accepted_5516: MCP[16] >= 120.6199
+ sell_normal_step_accepted_5517: MCP[16] >= 120.4999
+ sell_normal_step_accepted_5518: MCP[16] >= 119.9999
+ sell_normal_step_accepted_5519: MCP[16] >= 119.3999
+ sell_normal_step_accepted_5520: MCP[16] >= 118.4999
+ sell_normal_step_accepted_5521: MCP[16] >= 117.9199
+ sell_normal_step_accepted_5522: MCP[16] >= 117.3999
+ sell_normal_step_accepted_5523: MCP[16] >= 117.0399
  sell_normal_step_accepted_5524: MCP[16] >= 115.9999
  sell_normal_step_accepted_5525: MCP[16] >= 115.8399
  sell_normal_step_accepted_5526: MCP[16] >= 115.2199
@@ -5754,8 +5752,9 @@ Subject To
  buy_normal_step_accepted_5722: MCP[16] <= 147.7901
  buy_normal_step_accepted_5723: MCP[16] <= 137.0001
  buy_normal_step_accepted_5724: MCP[16] <= 135.8001
- buy_normal_step_accepted_5725: MCP[16] <= 135.0001
- buy_normal_step_accepted_5726: MCP[16] <= 122.0001
+ normal_step_partially_accepted_lower_5725: MCP[16] >= 134.9999
+ normal_step_partially_accepted_upper_5725: MCP[16] <= 135.0001
+ buy_step_rejected_5726: MCP[16] >= 121.9999
  buy_step_rejected_5727: MCP[16] >= 114.0999
  buy_step_rejected_5728: MCP[16] >= 113.9599
  buy_step_rejected_5729: MCP[16] >= 110.7999
@@ -5862,38 +5861,38 @@ Subject To
  sell_step_rejected_5830: MCP[17] <= 165.6201
  sell_step_rejected_5831: MCP[17] <= 165.0001
  sell_step_rejected_5832: MCP[17] <= 163.5501
- sell_step_rejected_5833: MCP[17] <= 162.7301
- sell_step_rejected_5834: MCP[17] <= 160.0001
- sell_step_rejected_5835: MCP[17] <= 159.7901
- sell_step_rejected_5836: MCP[17] <= 158.9601
- sell_step_rejected_5837: MCP[17] <= 155.0001
- sell_step_rejected_5838: MCP[17] <= 152.1401
- sell_step_rejected_5839: MCP[17] <= 152.1001
- sell_step_rejected_5840: MCP[17] <= 150.0001
- sell_step_rejected_5841: MCP[17] <= 145.1001
- sell_step_rejected_5842: MCP[17] <= 145.0001
- sell_step_rejected_5843: MCP[17] <= 144.9301
- sell_step_rejected_5844: MCP[17] <= 144.0001
- sell_step_rejected_5845: MCP[17] <= 141.1301
- sell_step_rejected_5846: MCP[17] <= 140.0001
- sell_step_rejected_5847: MCP[17] <= 139.0001
- sell_step_rejected_5848: MCP[17] <= 138.7801
- sell_step_rejected_5849: MCP[17] <= 137.9301
- sell_step_rejected_5850: MCP[17] <= 136.3601
- sell_step_rejected_5851: MCP[17] <= 135.0001
- sell_step_rejected_5852: MCP[17] <= 134.3501
- sell_step_rejected_5853: MCP[17] <= 134.2201
- sell_step_rejected_5854: MCP[17] <= 133.8501
- sell_step_rejected_5855: MCP[17] <= 133.5101
- sell_step_rejected_5856: MCP[17] <= 133.2501
- sell_step_rejected_5857: MCP[17] <= 132.4901
- sell_step_rejected_5858: MCP[17] <= 132.0801
- sell_step_rejected_5859: MCP[17] <= 131.0901
- sell_step_rejected_5860: MCP[17] <= 130.2201
- sell_step_rejected_5861: MCP[17] <= 130.0001
- sell_step_rejected_5862: MCP[17] <= 128.0001
- normal_step_partially_accepted_lower_5863: MCP[17] >= 127.1699
- normal_step_partially_accepted_upper_5863: MCP[17] <= 127.1701
+ normal_step_partially_accepted_lower_5833: MCP[17] >= 162.7299
+ normal_step_partially_accepted_upper_5833: MCP[17] <= 162.7301
+ sell_normal_step_accepted_5834: MCP[17] >= 159.9999
+ sell_normal_step_accepted_5835: MCP[17] >= 159.7899
+ sell_normal_step_accepted_5836: MCP[17] >= 158.9599
+ sell_normal_step_accepted_5837: MCP[17] >= 154.9999
+ sell_normal_step_accepted_5838: MCP[17] >= 152.1399
+ sell_normal_step_accepted_5839: MCP[17] >= 152.0999
+ sell_normal_step_accepted_5840: MCP[17] >= 149.9999
+ sell_normal_step_accepted_5841: MCP[17] >= 145.0999
+ sell_normal_step_accepted_5842: MCP[17] >= 144.9999
+ sell_normal_step_accepted_5843: MCP[17] >= 144.9299
+ sell_normal_step_accepted_5844: MCP[17] >= 143.9999
+ sell_normal_step_accepted_5845: MCP[17] >= 141.1299
+ sell_normal_step_accepted_5846: MCP[17] >= 139.9999
+ sell_normal_step_accepted_5847: MCP[17] >= 138.9999
+ sell_normal_step_accepted_5848: MCP[17] >= 138.7799
+ sell_normal_step_accepted_5849: MCP[17] >= 137.9299
+ sell_normal_step_accepted_5850: MCP[17] >= 136.3599
+ sell_normal_step_accepted_5851: MCP[17] >= 134.9999
+ sell_normal_step_accepted_5852: MCP[17] >= 134.3499
+ sell_normal_step_accepted_5853: MCP[17] >= 134.2199
+ sell_normal_step_accepted_5854: MCP[17] >= 133.8499
+ sell_normal_step_accepted_5855: MCP[17] >= 133.5099
+ sell_normal_step_accepted_5856: MCP[17] >= 133.2499
+ sell_normal_step_accepted_5857: MCP[17] >= 132.4899
+ sell_normal_step_accepted_5858: MCP[17] >= 132.0799
+ sell_normal_step_accepted_5859: MCP[17] >= 131.0899
+ sell_normal_step_accepted_5860: MCP[17] >= 130.2199
+ sell_normal_step_accepted_5861: MCP[17] >= 129.9999
+ sell_normal_step_accepted_5862: MCP[17] >= 127.9999
+ sell_normal_step_accepted_5863: MCP[17] >= 127.1699
  sell_normal_step_accepted_5864: MCP[17] >= 126.3599
  sell_normal_step_accepted_5865: MCP[17] >= 126.2199
  sell_normal_step_accepted_5866: MCP[17] >= 126.1099
@@ -6101,8 +6100,8 @@ Subject To
  buy_normal_step_accepted_6068: MCP[17] <= 190.0001
  buy_normal_step_accepted_6069: MCP[17] <= 184.3801
  buy_normal_step_accepted_6070: MCP[17] <= 163.1801
- buy_normal_step_accepted_6071: MCP[17] <= 148.0601
- buy_normal_step_accepted_6072: MCP[17] <= 137.0001
+ buy_step_rejected_6071: MCP[17] >= 148.0599
+ buy_step_rejected_6072: MCP[17] >= 136.9999
  buy_step_rejected_6073: MCP[17] >= 124.3999
  buy_step_rejected_6074: MCP[17] >= 121.9999
  buy_step_rejected_6075: MCP[17] >= 119.9999
@@ -6221,40 +6220,40 @@ Subject To
  sell_step_rejected_6188: MCP[18] <= 160.0001
  sell_step_rejected_6189: MCP[18] <= 159.5601
  sell_step_rejected_6190: MCP[18] <= 159.1001
- sell_step_rejected_6191: MCP[18] <= 158.9601
- sell_step_rejected_6192: MCP[18] <= 157.3001
- sell_step_rejected_6193: MCP[18] <= 156.5001
- sell_step_rejected_6194: MCP[18] <= 155.0001
- sell_step_rejected_6195: MCP[18] <= 152.1401
- sell_step_rejected_6196: MCP[18] <= 150.0001
- sell_step_rejected_6197: MCP[18] <= 145.1001
- sell_step_rejected_6198: MCP[18] <= 145.0001
- sell_step_rejected_6199: MCP[18] <= 144.9301
- sell_step_rejected_6200: MCP[18] <= 144.0001
- sell_step_rejected_6201: MCP[18] <= 142.3501
- sell_step_rejected_6202: MCP[18] <= 141.1301
- sell_step_rejected_6203: MCP[18] <= 140.4001
- sell_step_rejected_6204: MCP[18] <= 140.0001
- sell_step_rejected_6205: MCP[18] <= 139.0001
- sell_step_rejected_6206: MCP[18] <= 138.1101
- sell_step_rejected_6207: MCP[18] <= 138.1001
- sell_step_rejected_6208: MCP[18] <= 138.0201
- sell_step_rejected_6209: MCP[18] <= 136.3601
- sell_step_rejected_6210: MCP[18] <= 135.0001
- sell_step_rejected_6211: MCP[18] <= 134.3501
- sell_step_rejected_6212: MCP[18] <= 134.2201
- sell_step_rejected_6213: MCP[18] <= 133.8501
- sell_step_rejected_6214: MCP[18] <= 133.5101
- sell_step_rejected_6215: MCP[18] <= 133.2501
- sell_step_rejected_6216: MCP[18] <= 132.4901
- sell_step_rejected_6217: MCP[18] <= 132.0801
- sell_step_rejected_6218: MCP[18] <= 131.7001
- sell_step_rejected_6219: MCP[18] <= 131.0901
- sell_step_rejected_6220: MCP[18] <= 130.8601
- sell_step_rejected_6221: MCP[18] <= 130.5201
- sell_step_rejected_6222: MCP[18] <= 130.2201
- normal_step_partially_accepted_lower_6223: MCP[18] >= 129.9999
- normal_step_partially_accepted_upper_6223: MCP[18] <= 130.0001
+ normal_step_partially_accepted_lower_6191: MCP[18] >= 158.9599
+ normal_step_partially_accepted_upper_6191: MCP[18] <= 158.9601
+ sell_normal_step_accepted_6192: MCP[18] >= 157.2999
+ sell_normal_step_accepted_6193: MCP[18] >= 156.4999
+ sell_normal_step_accepted_6194: MCP[18] >= 154.9999
+ sell_normal_step_accepted_6195: MCP[18] >= 152.1399
+ sell_normal_step_accepted_6196: MCP[18] >= 149.9999
+ sell_normal_step_accepted_6197: MCP[18] >= 145.0999
+ sell_normal_step_accepted_6198: MCP[18] >= 144.9999
+ sell_normal_step_accepted_6199: MCP[18] >= 144.9299
+ sell_normal_step_accepted_6200: MCP[18] >= 143.9999
+ sell_normal_step_accepted_6201: MCP[18] >= 142.3499
+ sell_normal_step_accepted_6202: MCP[18] >= 141.1299
+ sell_normal_step_accepted_6203: MCP[18] >= 140.3999
+ sell_normal_step_accepted_6204: MCP[18] >= 139.9999
+ sell_normal_step_accepted_6205: MCP[18] >= 138.9999
+ sell_normal_step_accepted_6206: MCP[18] >= 138.1099
+ sell_normal_step_accepted_6207: MCP[18] >= 138.0999
+ sell_normal_step_accepted_6208: MCP[18] >= 138.0199
+ sell_normal_step_accepted_6209: MCP[18] >= 136.3599
+ sell_normal_step_accepted_6210: MCP[18] >= 134.9999
+ sell_normal_step_accepted_6211: MCP[18] >= 134.3499
+ sell_normal_step_accepted_6212: MCP[18] >= 134.2199
+ sell_normal_step_accepted_6213: MCP[18] >= 133.8499
+ sell_normal_step_accepted_6214: MCP[18] >= 133.5099
+ sell_normal_step_accepted_6215: MCP[18] >= 133.2499
+ sell_normal_step_accepted_6216: MCP[18] >= 132.4899
+ sell_normal_step_accepted_6217: MCP[18] >= 132.0799
+ sell_normal_step_accepted_6218: MCP[18] >= 131.6999
+ sell_normal_step_accepted_6219: MCP[18] >= 131.0899
+ sell_normal_step_accepted_6220: MCP[18] >= 130.8599
+ sell_normal_step_accepted_6221: MCP[18] >= 130.5199
+ sell_normal_step_accepted_6222: MCP[18] >= 130.2199
+ sell_normal_step_accepted_6223: MCP[18] >= 129.9999
  sell_normal_step_accepted_6224: MCP[18] >= 128.2199
  sell_normal_step_accepted_6225: MCP[18] >= 127.9999
  sell_normal_step_accepted_6226: MCP[18] >= 127.1699
@@ -6477,10 +6476,10 @@ Subject To
  buy_normal_step_accepted_6443: MCP[18] <= 180.0001
  buy_normal_step_accepted_6444: MCP[18] <= 172.6501
  buy_normal_step_accepted_6445: MCP[18] <= 165.1401
- buy_normal_step_accepted_6446: MCP[18] <= 137.0001
- buy_normal_step_accepted_6447: MCP[18] <= 135.1401
- buy_normal_step_accepted_6448: MCP[18] <= 133.6701
- buy_normal_step_accepted_6449: MCP[18] <= 130.5201
+ buy_step_rejected_6446: MCP[18] >= 136.9999
+ buy_step_rejected_6447: MCP[18] >= 135.1399
+ buy_step_rejected_6448: MCP[18] >= 133.6699
+ buy_step_rejected_6449: MCP[18] >= 130.5199
  buy_step_rejected_6450: MCP[18] >= 122.8599
  buy_step_rejected_6451: MCP[18] >= 122.0299
  buy_step_rejected_6452: MCP[18] >= 121.9999
@@ -6577,30 +6576,30 @@ Subject To
  sell_step_rejected_6543: MCP[19] <= 220.0001
  sell_step_rejected_6544: MCP[19] <= 210.0001
  sell_step_rejected_6545: MCP[19] <= 207.7201
- sell_step_rejected_6546: MCP[19] <= 204.0001
- sell_step_rejected_6547: MCP[19] <= 200.5001
- sell_step_rejected_6548: MCP[19] <= 200.0301
- sell_step_rejected_6549: MCP[19] <= 200.0001
- sell_step_rejected_6550: MCP[19] <= 199.1901
- sell_step_rejected_6551: MCP[19] <= 199.0901
- sell_step_rejected_6552: MCP[19] <= 195.0001
- sell_step_rejected_6553: MCP[19] <= 190.0001
- sell_step_rejected_6554: MCP[19] <= 187.1701
- sell_step_rejected_6555: MCP[19] <= 184.8901
- sell_step_rejected_6556: MCP[19] <= 182.2001
- sell_step_rejected_6557: MCP[19] <= 181.8501
- sell_step_rejected_6558: MCP[19] <= 180.9201
- sell_step_rejected_6559: MCP[19] <= 179.3201
- sell_step_rejected_6560: MCP[19] <= 176.8501
- sell_step_rejected_6561: MCP[19] <= 173.4701
- sell_step_rejected_6562: MCP[19] <= 172.9401
- sell_step_rejected_6563: MCP[19] <= 170.5001
- sell_step_rejected_6564: MCP[19] <= 170.0001
- sell_step_rejected_6565: MCP[19] <= 168.5701
- sell_step_rejected_6566: MCP[19] <= 167.3001
- sell_step_rejected_6567: MCP[19] <= 166.4301
- normal_step_partially_accepted_lower_6568: MCP[19] >= 165.4599
- normal_step_partially_accepted_upper_6568: MCP[19] <= 165.4601
+ normal_step_partially_accepted_lower_6546: MCP[19] >= 203.9999
+ normal_step_partially_accepted_upper_6546: MCP[19] <= 204.0001
+ sell_normal_step_accepted_6547: MCP[19] >= 200.4999
+ sell_normal_step_accepted_6548: MCP[19] >= 200.0299
+ sell_normal_step_accepted_6549: MCP[19] >= 199.9999
+ sell_normal_step_accepted_6550: MCP[19] >= 199.1899
+ sell_normal_step_accepted_6551: MCP[19] >= 199.0899
+ sell_normal_step_accepted_6552: MCP[19] >= 194.9999
+ sell_normal_step_accepted_6553: MCP[19] >= 189.9999
+ sell_normal_step_accepted_6554: MCP[19] >= 187.1699
+ sell_normal_step_accepted_6555: MCP[19] >= 184.8899
+ sell_normal_step_accepted_6556: MCP[19] >= 182.1999
+ sell_normal_step_accepted_6557: MCP[19] >= 181.8499
+ sell_normal_step_accepted_6558: MCP[19] >= 180.9199
+ sell_normal_step_accepted_6559: MCP[19] >= 179.3199
+ sell_normal_step_accepted_6560: MCP[19] >= 176.8499
+ sell_normal_step_accepted_6561: MCP[19] >= 173.4699
+ sell_normal_step_accepted_6562: MCP[19] >= 172.9399
+ sell_normal_step_accepted_6563: MCP[19] >= 170.4999
+ sell_normal_step_accepted_6564: MCP[19] >= 169.9999
+ sell_normal_step_accepted_6565: MCP[19] >= 168.5699
+ sell_normal_step_accepted_6566: MCP[19] >= 167.2999
+ sell_normal_step_accepted_6567: MCP[19] >= 166.4299
+ sell_normal_step_accepted_6568: MCP[19] >= 165.4599
  sell_normal_step_accepted_6569: MCP[19] >= 164.9999
  sell_normal_step_accepted_6570: MCP[19] >= 163.4899
  sell_normal_step_accepted_6571: MCP[19] >= 162.9599
@@ -6854,10 +6853,10 @@ Subject To
  buy_normal_step_accepted_6819: MCP[19] <= 226.0001
  buy_normal_step_accepted_6820: MCP[19] <= 225.0001
  buy_normal_step_accepted_6821: MCP[19] <= 205.9401
- buy_normal_step_accepted_6822: MCP[19] <= 200.0001
- buy_normal_step_accepted_6823: MCP[19] <= 191.5501
- buy_normal_step_accepted_6824: MCP[19] <= 190.0001
- buy_normal_step_accepted_6825: MCP[19] <= 180.0001
+ buy_step_rejected_6822: MCP[19] >= 199.9999
+ buy_step_rejected_6823: MCP[19] >= 191.5499
+ buy_step_rejected_6824: MCP[19] >= 189.9999
+ buy_step_rejected_6825: MCP[19] >= 179.9999
  buy_step_rejected_6826: MCP[19] >= 161.5499
  buy_step_rejected_6827: MCP[19] >= 148.3199
  buy_step_rejected_6828: MCP[19] >= 148.0599
@@ -6932,22 +6931,23 @@ Subject To
  sell_step_rejected_6897: MCP[20] <= 256.9001
  sell_step_rejected_6898: MCP[20] <= 256.0001
  sell_step_rejected_6899: MCP[20] <= 255.6001
- sell_step_rejected_6900: MCP[20] <= 255.0001
- sell_step_rejected_6901: MCP[20] <= 254.2001
- sell_step_rejected_6902: MCP[20] <= 253.7901
- sell_step_rejected_6903: MCP[20] <= 253.1501
- sell_step_rejected_6904: MCP[20] <= 251.5401
- sell_step_rejected_6905: MCP[20] <= 251.3001
- sell_step_rejected_6906: MCP[20] <= 248.6101
- sell_step_rejected_6907: MCP[20] <= 245.2001
- sell_step_rejected_6908: MCP[20] <= 245.0001
- sell_step_rejected_6909: MCP[20] <= 243.9701
- sell_step_rejected_6910: MCP[20] <= 241.3001
- sell_step_rejected_6911: MCP[20] <= 240.0001
- sell_step_rejected_6912: MCP[20] <= 237.1901
- sell_step_rejected_6913: MCP[20] <= 231.6001
- sell_step_rejected_6914: MCP[20] <= 231.3001
- sell_step_rejected_6915: MCP[20] <= 229.0001
+ normal_step_partially_accepted_lower_6900: MCP[20] >= 254.9999
+ normal_step_partially_accepted_upper_6900: MCP[20] <= 255.0001
+ sell_normal_step_accepted_6901: MCP[20] >= 254.1999
+ sell_normal_step_accepted_6902: MCP[20] >= 253.7899
+ sell_normal_step_accepted_6903: MCP[20] >= 253.1499
+ sell_normal_step_accepted_6904: MCP[20] >= 251.5399
+ sell_normal_step_accepted_6905: MCP[20] >= 251.2999
+ sell_normal_step_accepted_6906: MCP[20] >= 248.6099
+ sell_normal_step_accepted_6907: MCP[20] >= 245.1999
+ sell_normal_step_accepted_6908: MCP[20] >= 244.9999
+ sell_normal_step_accepted_6909: MCP[20] >= 243.9699
+ sell_normal_step_accepted_6910: MCP[20] >= 241.2999
+ sell_normal_step_accepted_6911: MCP[20] >= 239.9999
+ sell_normal_step_accepted_6912: MCP[20] >= 237.1899
+ sell_normal_step_accepted_6913: MCP[20] >= 231.5999
+ sell_normal_step_accepted_6914: MCP[20] >= 231.2999
+ sell_normal_step_accepted_6915: MCP[20] >= 228.9999
  sell_normal_step_accepted_6916: MCP[20] >= 227.9999
  sell_normal_step_accepted_6917: MCP[20] >= 223.9999
  sell_normal_step_accepted_6918: MCP[20] >= 221.2999
@@ -7225,11 +7225,10 @@ Subject To
  buy_normal_step_accepted_7190: MCP[20] <= 275.0001
  buy_normal_step_accepted_7191: MCP[20] <= 268.1801
  buy_normal_step_accepted_7192: MCP[20] <= 259.3701
- buy_normal_step_accepted_7193: MCP[20] <= 250.0001
- buy_normal_step_accepted_7194: MCP[20] <= 240.0001
- buy_normal_step_accepted_7195: MCP[20] <= 234.9101
- normal_step_partially_accepted_lower_7196: MCP[20] >= 228.4299
- normal_step_partially_accepted_upper_7196: MCP[20] <= 228.4301
+ buy_step_rejected_7193: MCP[20] >= 249.9999
+ buy_step_rejected_7194: MCP[20] >= 239.9999
+ buy_step_rejected_7195: MCP[20] >= 234.9099
+ buy_step_rejected_7196: MCP[20] >= 228.4299
  buy_step_rejected_7197: MCP[20] >= 224.9999
  buy_step_rejected_7198: MCP[20] >= 205.9999
  buy_step_rejected_7199: MCP[20] >= 199.9999
@@ -7305,18 +7304,18 @@ Subject To
  sell_step_rejected_7269: MCP[21] <= 257.0001
  sell_step_rejected_7270: MCP[21] <= 256.9001
  sell_step_rejected_7271: MCP[21] <= 256.0001
- sell_step_rejected_7272: MCP[21] <= 255.0001
- sell_step_rejected_7273: MCP[21] <= 254.2001
- sell_step_rejected_7274: MCP[21] <= 253.7901
- sell_step_rejected_7275: MCP[21] <= 253.1501
- sell_step_rejected_7276: MCP[21] <= 252.9301
- sell_step_rejected_7277: MCP[21] <= 248.6101
- sell_step_rejected_7278: MCP[21] <= 245.2001
- sell_step_rejected_7279: MCP[21] <= 245.0001
- sell_step_rejected_7280: MCP[21] <= 243.9701
- sell_step_rejected_7281: MCP[21] <= 241.9001
- normal_step_partially_accepted_lower_7282: MCP[21] >= 239.9999
- normal_step_partially_accepted_upper_7282: MCP[21] <= 240.0001
+ normal_step_partially_accepted_lower_7272: MCP[21] >= 254.9999
+ normal_step_partially_accepted_upper_7272: MCP[21] <= 255.0001
+ sell_normal_step_accepted_7273: MCP[21] >= 254.1999
+ sell_normal_step_accepted_7274: MCP[21] >= 253.7899
+ sell_normal_step_accepted_7275: MCP[21] >= 253.1499
+ sell_normal_step_accepted_7276: MCP[21] >= 252.9299
+ sell_normal_step_accepted_7277: MCP[21] >= 248.6099
+ sell_normal_step_accepted_7278: MCP[21] >= 245.1999
+ sell_normal_step_accepted_7279: MCP[21] >= 244.9999
+ sell_normal_step_accepted_7280: MCP[21] >= 243.9699
+ sell_normal_step_accepted_7281: MCP[21] >= 241.8999
+ sell_normal_step_accepted_7282: MCP[21] >= 239.9999
  sell_normal_step_accepted_7283: MCP[21] >= 237.2999
  sell_normal_step_accepted_7284: MCP[21] >= 231.8999
  sell_normal_step_accepted_7285: MCP[21] >= 231.5999
@@ -7600,10 +7599,10 @@ Subject To
  buy_normal_step_accepted_7563: MCP[21] <= 288.0001
  buy_normal_step_accepted_7564: MCP[21] <= 280.0001
  buy_normal_step_accepted_7565: MCP[21] <= 275.0001
- buy_normal_step_accepted_7566: MCP[21] <= 250.0001
- buy_normal_step_accepted_7567: MCP[21] <= 244.8001
- buy_normal_step_accepted_7568: MCP[21] <= 243.5501
- buy_normal_step_accepted_7569: MCP[21] <= 243.3101
+ buy_step_rejected_7566: MCP[21] >= 249.9999
+ buy_step_rejected_7567: MCP[21] >= 244.7999
+ buy_step_rejected_7568: MCP[21] >= 243.5499
+ buy_step_rejected_7569: MCP[21] >= 243.3099
  buy_step_rejected_7570: MCP[21] >= 239.9999
  buy_step_rejected_7571: MCP[21] >= 236.3599
  buy_step_rejected_7572: MCP[21] >= 235.5299
@@ -7698,36 +7697,36 @@ Subject To
  sell_step_rejected_7661: MCP[22] <= 245.2001
  sell_step_rejected_7662: MCP[22] <= 245.0001
  sell_step_rejected_7663: MCP[22] <= 243.9701
- sell_step_rejected_7664: MCP[22] <= 240.0001
- sell_step_rejected_7665: MCP[22] <= 237.3201
- sell_step_rejected_7666: MCP[22] <= 232.0001
- sell_step_rejected_7667: MCP[22] <= 231.6001
- sell_step_rejected_7668: MCP[22] <= 229.0001
- sell_step_rejected_7669: MCP[22] <= 228.0001
- sell_step_rejected_7670: MCP[22] <= 222.0001
- sell_step_rejected_7671: MCP[22] <= 221.0001
- sell_step_rejected_7672: MCP[22] <= 220.0001
- sell_step_rejected_7673: MCP[22] <= 212.0001
- sell_step_rejected_7674: MCP[22] <= 210.0001
- sell_step_rejected_7675: MCP[22] <= 207.7201
- sell_step_rejected_7676: MCP[22] <= 202.0001
- sell_step_rejected_7677: MCP[22] <= 200.1501
- sell_step_rejected_7678: MCP[22] <= 200.0501
- sell_step_rejected_7679: MCP[22] <= 200.0301
- sell_step_rejected_7680: MCP[22] <= 200.0001
- sell_step_rejected_7681: MCP[22] <= 195.0001
- sell_step_rejected_7682: MCP[22] <= 192.0001
- sell_step_rejected_7683: MCP[22] <= 190.0001
- sell_step_rejected_7684: MCP[22] <= 187.1701
- sell_step_rejected_7685: MCP[22] <= 185.0001
- sell_step_rejected_7686: MCP[22] <= 184.8901
- sell_step_rejected_7687: MCP[22] <= 182.0001
- sell_step_rejected_7688: MCP[22] <= 181.8501
- sell_step_rejected_7689: MCP[22] <= 180.9201
- sell_step_rejected_7690: MCP[22] <= 179.3201
- sell_step_rejected_7691: MCP[22] <= 176.8501
- normal_step_partially_accepted_lower_7692: MCP[22] >= 173.4699
- normal_step_partially_accepted_upper_7692: MCP[22] <= 173.4701
+ normal_step_partially_accepted_lower_7664: MCP[22] >= 239.9999
+ normal_step_partially_accepted_upper_7664: MCP[22] <= 240.0001
+ sell_normal_step_accepted_7665: MCP[22] >= 237.3199
+ sell_normal_step_accepted_7666: MCP[22] >= 231.9999
+ sell_normal_step_accepted_7667: MCP[22] >= 231.5999
+ sell_normal_step_accepted_7668: MCP[22] >= 228.9999
+ sell_normal_step_accepted_7669: MCP[22] >= 227.9999
+ sell_normal_step_accepted_7670: MCP[22] >= 221.9999
+ sell_normal_step_accepted_7671: MCP[22] >= 220.9999
+ sell_normal_step_accepted_7672: MCP[22] >= 219.9999
+ sell_normal_step_accepted_7673: MCP[22] >= 211.9999
+ sell_normal_step_accepted_7674: MCP[22] >= 209.9999
+ sell_normal_step_accepted_7675: MCP[22] >= 207.7199
+ sell_normal_step_accepted_7676: MCP[22] >= 201.9999
+ sell_normal_step_accepted_7677: MCP[22] >= 200.1499
+ sell_normal_step_accepted_7678: MCP[22] >= 200.0499
+ sell_normal_step_accepted_7679: MCP[22] >= 200.0299
+ sell_normal_step_accepted_7680: MCP[22] >= 199.9999
+ sell_normal_step_accepted_7681: MCP[22] >= 194.9999
+ sell_normal_step_accepted_7682: MCP[22] >= 191.9999
+ sell_normal_step_accepted_7683: MCP[22] >= 189.9999
+ sell_normal_step_accepted_7684: MCP[22] >= 187.1699
+ sell_normal_step_accepted_7685: MCP[22] >= 184.9999
+ sell_normal_step_accepted_7686: MCP[22] >= 184.8899
+ sell_normal_step_accepted_7687: MCP[22] >= 181.9999
+ sell_normal_step_accepted_7688: MCP[22] >= 181.8499
+ sell_normal_step_accepted_7689: MCP[22] >= 180.9199
+ sell_normal_step_accepted_7690: MCP[22] >= 179.3199
+ sell_normal_step_accepted_7691: MCP[22] >= 176.8499
+ sell_normal_step_accepted_7692: MCP[22] >= 173.4699
  sell_normal_step_accepted_7693: MCP[22] >= 172.9399
  sell_normal_step_accepted_7694: MCP[22] >= 169.9999
  sell_normal_step_accepted_7695: MCP[22] >= 168.5699
@@ -7977,19 +7976,19 @@ Subject To
  buy_normal_step_accepted_7939: MCP[22] <= 280.0001
  buy_normal_step_accepted_7940: MCP[22] <= 275.0001
  buy_normal_step_accepted_7941: MCP[22] <= 250.0001
- buy_normal_step_accepted_7942: MCP[22] <= 237.8801
- buy_normal_step_accepted_7943: MCP[22] <= 228.0001
- buy_normal_step_accepted_7944: MCP[22] <= 226.4501
- buy_normal_step_accepted_7945: MCP[22] <= 224.8001
- buy_normal_step_accepted_7946: MCP[22] <= 224.4601
- buy_normal_step_accepted_7947: MCP[22] <= 219.0501
- buy_normal_step_accepted_7948: MCP[22] <= 212.7601
- buy_normal_step_accepted_7949: MCP[22] <= 207.3901
- buy_normal_step_accepted_7950: MCP[22] <= 200.0201
- buy_normal_step_accepted_7951: MCP[22] <= 200.0101
- buy_normal_step_accepted_7952: MCP[22] <= 200.0001
- buy_normal_step_accepted_7953: MCP[22] <= 190.2701
- buy_normal_step_accepted_7954: MCP[22] <= 190.0001
+ buy_step_rejected_7942: MCP[22] >= 237.8799
+ buy_step_rejected_7943: MCP[22] >= 227.9999
+ buy_step_rejected_7944: MCP[22] >= 226.4499
+ buy_step_rejected_7945: MCP[22] >= 224.7999
+ buy_step_rejected_7946: MCP[22] >= 224.4599
+ buy_step_rejected_7947: MCP[22] >= 219.0499
+ buy_step_rejected_7948: MCP[22] >= 212.7599
+ buy_step_rejected_7949: MCP[22] >= 207.3899
+ buy_step_rejected_7950: MCP[22] >= 200.0199
+ buy_step_rejected_7951: MCP[22] >= 200.0099
+ buy_step_rejected_7952: MCP[22] >= 199.9999
+ buy_step_rejected_7953: MCP[22] >= 190.2699
+ buy_step_rejected_7954: MCP[22] >= 189.9999
  buy_step_rejected_7955: MCP[22] >= 164.9999
  buy_step_rejected_7956: MCP[22] >= 160.2699
  buy_step_rejected_7957: MCP[22] >= 139.4999
@@ -8093,23 +8092,23 @@ Subject To
  sell_step_rejected_8055: MCP[23] <= 200.0001
  sell_step_rejected_8056: MCP[23] <= 195.0001
  sell_step_rejected_8057: MCP[23] <= 190.0001
- sell_step_rejected_8058: MCP[23] <= 187.1701
- sell_step_rejected_8059: MCP[23] <= 185.0001
- sell_step_rejected_8060: MCP[23] <= 184.8901
- sell_step_rejected_8061: MCP[23] <= 181.8501
- sell_step_rejected_8062: MCP[23] <= 180.9201
- sell_step_rejected_8063: MCP[23] <= 180.3301
- sell_step_rejected_8064: MCP[23] <= 179.3201
- sell_step_rejected_8065: MCP[23] <= 176.8501
- sell_step_rejected_8066: MCP[23] <= 173.9001
- sell_step_rejected_8067: MCP[23] <= 173.4701
- sell_step_rejected_8068: MCP[23] <= 172.9401
- sell_step_rejected_8069: MCP[23] <= 170.0001
- sell_step_rejected_8070: MCP[23] <= 168.5701
- sell_step_rejected_8071: MCP[23] <= 166.5501
- sell_step_rejected_8072: MCP[23] <= 165.0001
- normal_step_partially_accepted_lower_8073: MCP[23] >= 163.7699
- normal_step_partially_accepted_upper_8073: MCP[23] <= 163.7701
+ normal_step_partially_accepted_lower_8058: MCP[23] >= 187.1699
+ normal_step_partially_accepted_upper_8058: MCP[23] <= 187.1701
+ sell_normal_step_accepted_8059: MCP[23] >= 184.9999
+ sell_normal_step_accepted_8060: MCP[23] >= 184.8899
+ sell_normal_step_accepted_8061: MCP[23] >= 181.8499
+ sell_normal_step_accepted_8062: MCP[23] >= 180.9199
+ sell_normal_step_accepted_8063: MCP[23] >= 180.3299
+ sell_normal_step_accepted_8064: MCP[23] >= 179.3199
+ sell_normal_step_accepted_8065: MCP[23] >= 176.8499
+ sell_normal_step_accepted_8066: MCP[23] >= 173.8999
+ sell_normal_step_accepted_8067: MCP[23] >= 173.4699
+ sell_normal_step_accepted_8068: MCP[23] >= 172.9399
+ sell_normal_step_accepted_8069: MCP[23] >= 169.9999
+ sell_normal_step_accepted_8070: MCP[23] >= 168.5699
+ sell_normal_step_accepted_8071: MCP[23] >= 166.5499
+ sell_normal_step_accepted_8072: MCP[23] >= 164.9999
+ sell_normal_step_accepted_8073: MCP[23] >= 163.7699
  sell_normal_step_accepted_8074: MCP[23] >= 163.7599
  sell_normal_step_accepted_8075: MCP[23] >= 163.3199
  sell_normal_step_accepted_8076: MCP[23] >= 159.9999
@@ -8345,7 +8344,7 @@ Subject To
  buy_normal_step_accepted_8306: MCP[23] <= 199.9301
  buy_normal_step_accepted_8307: MCP[23] <= 190.4901
  buy_normal_step_accepted_8308: MCP[23] <= 190.0001
- buy_normal_step_accepted_8309: MCP[23] <= 186.0601
+ buy_step_rejected_8309: MCP[23] >= 186.0599
  buy_step_rejected_8310: MCP[23] >= 156.7399
  buy_step_rejected_8311: MCP[23] >= 156.0599
  buy_step_rejected_8312: MCP[23] >= 155.9999
@@ -8455,27 +8454,27 @@ Subject To
  sell_step_rejected_8416: MCP[24] <= 179.3201
  sell_step_rejected_8417: MCP[24] <= 176.8501
  sell_step_rejected_8418: MCP[24] <= 173.4701
- sell_step_rejected_8419: MCP[24] <= 172.9401
- sell_step_rejected_8420: MCP[24] <= 170.5001
- sell_step_rejected_8421: MCP[24] <= 170.2001
- sell_step_rejected_8422: MCP[24] <= 170.0001
- sell_step_rejected_8423: MCP[24] <= 168.5701
- sell_step_rejected_8424: MCP[24] <= 166.5501
- sell_step_rejected_8425: MCP[24] <= 165.0001
- sell_step_rejected_8426: MCP[24] <= 163.8301
- sell_step_rejected_8427: MCP[24] <= 163.7601
- sell_step_rejected_8428: MCP[24] <= 163.3601
- sell_step_rejected_8429: MCP[24] <= 160.0001
- sell_step_rejected_8430: MCP[24] <= 158.9601
- sell_step_rejected_8431: MCP[24] <= 158.4601
- sell_step_rejected_8432: MCP[24] <= 157.3001
- sell_step_rejected_8433: MCP[24] <= 155.0001
- sell_step_rejected_8434: MCP[24] <= 152.1401
- sell_step_rejected_8435: MCP[24] <= 150.0001
- sell_step_rejected_8436: MCP[24] <= 147.4001
- sell_step_rejected_8437: MCP[24] <= 145.1301
- normal_step_partially_accepted_lower_8438: MCP[24] >= 145.0999
- normal_step_partially_accepted_upper_8438: MCP[24] <= 145.1001
+ normal_step_partially_accepted_lower_8419: MCP[24] >= 172.9399
+ normal_step_partially_accepted_upper_8419: MCP[24] <= 172.9401
+ sell_normal_step_accepted_8420: MCP[24] >= 170.4999
+ sell_normal_step_accepted_8421: MCP[24] >= 170.1999
+ sell_normal_step_accepted_8422: MCP[24] >= 169.9999
+ sell_normal_step_accepted_8423: MCP[24] >= 168.5699
+ sell_normal_step_accepted_8424: MCP[24] >= 166.5499
+ sell_normal_step_accepted_8425: MCP[24] >= 164.9999
+ sell_normal_step_accepted_8426: MCP[24] >= 163.8299
+ sell_normal_step_accepted_8427: MCP[24] >= 163.7599
+ sell_normal_step_accepted_8428: MCP[24] >= 163.3599
+ sell_normal_step_accepted_8429: MCP[24] >= 159.9999
+ sell_normal_step_accepted_8430: MCP[24] >= 158.9599
+ sell_normal_step_accepted_8431: MCP[24] >= 158.4599
+ sell_normal_step_accepted_8432: MCP[24] >= 157.2999
+ sell_normal_step_accepted_8433: MCP[24] >= 154.9999
+ sell_normal_step_accepted_8434: MCP[24] >= 152.1399
+ sell_normal_step_accepted_8435: MCP[24] >= 149.9999
+ sell_normal_step_accepted_8436: MCP[24] >= 147.3999
+ sell_normal_step_accepted_8437: MCP[24] >= 145.1299
+ sell_normal_step_accepted_8438: MCP[24] >= 145.0999
  sell_normal_step_accepted_8439: MCP[24] >= 144.9999
  sell_normal_step_accepted_8440: MCP[24] >= 144.9299
  sell_normal_step_accepted_8441: MCP[24] >= 143.9999
@@ -8703,8 +8702,8 @@ Subject To
  buy_normal_step_accepted_8663: MCP[24] <= 190.0001
  buy_normal_step_accepted_8664: MCP[24] <= 185.2101
  buy_normal_step_accepted_8665: MCP[24] <= 180.0001
- buy_normal_step_accepted_8666: MCP[24] <= 168.6001
- buy_normal_step_accepted_8667: MCP[24] <= 153.0001
+ buy_step_rejected_8666: MCP[24] >= 168.5999
+ buy_step_rejected_8667: MCP[24] >= 152.9999
  buy_step_rejected_8668: MCP[24] >= 138.5999
  buy_step_rejected_8669: MCP[24] >= 136.9999
  buy_step_rejected_8670: MCP[24] >= 126.3999
@@ -8762,549 +8761,525 @@ Subject To
  buy_step_rejected_8722: MCP[24] >= -273.5001
  buy_step_rejected_8723: MCP[24] >= -499.0001
  buy_step_rejected_8724: MCP[24] >= -500.0001
- PLO_partially_accepted_lower_1: 0.01 MCP[1] <= -3.991378332523839
- PLO_partially_accepted_upper_1: 0.01 MCP[1] >= -3.991578332523839
- PLO_partially_accepted_lower_2: 0.3174603174603169 MCP[1]
-   <= 80.35775414859815
- PLO_partially_accepted_upper_2: 0.3174603174603169 MCP[1]
-   >= 80.35755414859814
- PLO_partially_accepted_lower_3: 1.818181818181875 MCP[1]
-   <= 461.2656500945113
- PLO_partially_accepted_upper_3: 1.818181818181875 MCP[1]
-   >= 461.2654500945114
- PLO_partially_accepted_lower_4: 11.11111111111069 MCP[1]
-   <= 2819.862020993765
- PLO_partially_accepted_upper_4: 11.11111111111069 MCP[1]
-   >= 2819.861820993765
- PLO_partially_accepted_lower_5: 3.703703703703563 MCP[1]
-   <= 940.9512806485338
- PLO_partially_accepted_upper_5: 3.703703703703563 MCP[1]
-   >= 940.9510806485339
- PLO_partially_accepted_lower_6: 7.142857142857839 MCP[1]
-   <= 1815.695018222354
- PLO_partially_accepted_upper_6: 7.142857142857839 MCP[1]
-   >= 1815.694818222354
- PLO_partially_accepted_lower_7: 1.25 MCP[1] <= 318.7441993462402
- PLO_partially_accepted_upper_7: 1.25 MCP[1] >= 318.7439993462402
- PLO_partially_accepted_lower_8: MCP[1] <= 255.9946223252749
- PLO_partially_accepted_upper_8: MCP[1] >= 255.9944223252749
- PLO_partially_accepted_lower_9: 1.111111111111139 MCP[1]
-   <= 285.4389143265766
- PLO_partially_accepted_upper_9: 1.111111111111139 MCP[1]
-   >= 285.4387143265766
- PLO_partially_accepted_lower_10: 10 MCP[1] <= 2569.975156716317
- PLO_partially_accepted_upper_10: 10 MCP[1] >= 2569.974956716316
- PLO_partially_accepted_lower_11: MCP[1] <= 257.994647176716
- PLO_partially_accepted_upper_11: MCP[1] >= 257.9944471767161
- PLO_partially_accepted_lower_12: MCP[1] <= 258.9946596199957
- PLO_partially_accepted_upper_12: MCP[1] >= 258.9944596199958
- PLO_partially_accepted_lower_13: MCP[1] <= 259.9946720749503
- PLO_partially_accepted_upper_13: MCP[1] >= 259.9944720749504
- PLO_partially_accepted_lower_14: MCP[1] <= 260.9946845415561
- PLO_partially_accepted_upper_14: MCP[1] >= 260.9944845415561
- PLO_partially_accepted_lower_15: 2 MCP[1] <= 522.992537662314
- PLO_partially_accepted_upper_15: 2 MCP[1] >= 522.9923376623141
- PLO_partially_accepted_lower_16: 2 MCP[1] <= 523.9925411808653
- PLO_partially_accepted_upper_16: 2 MCP[1] >= 523.9923411808653
- PLO_partially_accepted_lower_17: 0.588235294117651 MCP[1]
-   <= 155.112317647555
- PLO_partially_accepted_upper_17: 0.588235294117651 MCP[1]
-   >= 155.112117647555
- PLO_partially_accepted_lower_18: 0.095057034220532 MCP[1]
-   <= 26.0527265284468
- PLO_partially_accepted_upper_18: 0.095057034220532 MCP[1]
-   >= 26.0525265284468
- PLO_partially_accepted_lower_19: 1.282051282051327 MCP[1]
-   <= 352.5584464599402
- PLO_partially_accepted_upper_19: 1.282051282051327 MCP[1]
-   >= 352.5582464599402
- PLO_partially_accepted_lower_20: 0.2 MCP[1] <= 55.9916037397698
- PLO_partially_accepted_upper_20: 0.2 MCP[1] >= 55.99140373976979
- PLO_partially_accepted_lower_21: 0.125 MCP[1] <= 35.98614178495903
- PLO_partially_accepted_upper_21: 0.125 MCP[1] >= 35.98594178495902
- PLO_partially_accepted_lower_22: 0.1745200698080274 MCP[1]
-   <= 51.25265801479203
- PLO_partially_accepted_upper_22: 0.1745200698080274 MCP[1]
-   >= 51.25245801479202
- PLO_partially_accepted_lower_23: 0.2717391304347821 MCP[1]
-   <= 80.81068948350266
- PLO_partially_accepted_upper_23: 0.2717391304347821 MCP[1]
-   >= 80.81048948350265
- PLO_partially_accepted_lower_24: 0.3861003861003898 MCP[1]
-   <= 115.8244354812679
- PLO_partially_accepted_upper_24: 0.3861003861003898 MCP[1]
-   >= 115.8242354812679
- buy_PLO_rejected_25: MCP[1] >= 1049.9999
- PLO_partially_accepted_lower_26: 0.00666666666666667 MCP[1]
-   <= 22.66636713978621
- PLO_partially_accepted_upper_26: 0.00666666666666667 MCP[1]
-   >= 22.66616713978621
- buy_PLO_rejected_27: MCP[2] >= -400.0001
- sell_PLO_accepted_28: MCP[2] >= 769.9999
- PLO_partially_accepted_lower_29: 0.01 MCP[2] <= 22.9901194581197
- PLO_partially_accepted_upper_29: 0.01 MCP[2] >= 22.9899194581197
- buy_PLO_accepted_30: MCP[2] <= 3400.0001
- PLO_partially_accepted_lower_31: 0.3174603174603169 MCP[5]
-   <= 80.36020030005604
- PLO_partially_accepted_upper_31: 0.3174603174603169 MCP[5]
-   >= 80.36000030005603
- PLO_partially_accepted_lower_32: 1.5625 MCP[5] <= 396.5367764823819
- PLO_partially_accepted_upper_32: 1.5625 MCP[5] >= 396.5365764823819
- PLO_partially_accepted_lower_33: 2.439024390243923 MCP[5]
-   <= 619.9857235295658
- PLO_partially_accepted_upper_33: 2.439024390243923 MCP[5]
-   >= 619.9855235295659
- PLO_partially_accepted_lower_34: 9.090909090907964 MCP[5]
-   <= 2311.87027544637
- PLO_partially_accepted_upper_34: 9.090909090907964 MCP[5]
-   >= 2311.87007544637
- PLO_partially_accepted_lower_35: 1.449275362318845 MCP[5]
-   <= 369.5556910767808
- PLO_partially_accepted_upper_35: 1.449275362318845 MCP[5]
-   >= 369.5554910767809
- PLO_partially_accepted_lower_36: MCP[5] <= 255.9927689168616
- PLO_partially_accepted_upper_36: MCP[5] >= 255.9925689168616
- PLO_partially_accepted_lower_37: 1.428571428571452 MCP[5]
-   <= 366.704871646088
- PLO_partially_accepted_upper_37: 1.428571428571452 MCP[5]
-   >= 366.7046716460881
- PLO_partially_accepted_lower_38: 5 MCP[5] <= 1284.475238716122
- PLO_partially_accepted_upper_38: 5 MCP[5] >= 1284.475038716122
- PLO_partially_accepted_lower_39: 10 MCP[5] <= 2569.958264537733
- PLO_partially_accepted_upper_39: 10 MCP[5] >= 2569.958064537732
- PLO_partially_accepted_lower_40: MCP[5] <= 257.9927833044588
- PLO_partially_accepted_upper_40: MCP[5] >= 257.9925833044588
- PLO_partially_accepted_lower_41: MCP[5] <= 258.9927905066943
- PLO_partially_accepted_upper_41: MCP[5] >= 258.9925905066943
- PLO_partially_accepted_lower_42: MCP[5] <= 259.9927977145583
- PLO_partially_accepted_upper_42: MCP[5] >= 259.9925977145583
- PLO_partially_accepted_lower_43: MCP[5] <= 260.9928049280538
- PLO_partially_accepted_upper_43: MCP[5] >= 260.9926049280539
- PLO_partially_accepted_lower_44: 2 MCP[5] <= 522.9877859533062
- PLO_partially_accepted_upper_44: 2 MCP[5] >= 522.9875859533063
- PLO_partially_accepted_lower_45: 2 MCP[5] <= 523.9877870771701
- PLO_partially_accepted_upper_45: 2 MCP[5] >= 523.9875870771701
- PLO_partially_accepted_lower_46: 0.3125 MCP[5] <= 82.87032598195088
- PLO_partially_accepted_upper_46: 0.3125 MCP[5] >= 82.87012598195088
- PLO_partially_accepted_lower_47: 0.4347826086956501 MCP[5]
-   <= 116.2997178413591
- PLO_partially_accepted_upper_47: 0.4347826086956501 MCP[5]
-   >= 116.2995178413591
- PLO_partially_accepted_lower_48: 7.692307692307962 MCP[5]
-   <= 2058.657941518421
- PLO_partially_accepted_upper_48: 7.692307692307962 MCP[5]
-   >= 2058.657741518421
- PLO_partially_accepted_lower_49: 0.1356852103120759 MCP[5]
-   <= 37.30617110130848
- PLO_partially_accepted_upper_49: 0.1356852103120759 MCP[5]
-   >= 37.30597110130847
- PLO_partially_accepted_lower_50: 0.3086419753086411 MCP[5]
-   <= 85.87210304077871
- PLO_partially_accepted_upper_50: 0.3086419753086411 MCP[5]
-   >= 85.8719030407787
- PLO_partially_accepted_lower_51: 0.5681818181818211 MCP[5]
-   <= 159.0860015956974
- PLO_partially_accepted_upper_51: 0.5681818181818211 MCP[5]
-   >= 159.0858015956974
- PLO_partially_accepted_lower_52: 0.125 MCP[5] <= 35.99257588260037
- PLO_partially_accepted_upper_52: 0.125 MCP[5] >= 35.99237588260036
- PLO_partially_accepted_lower_53: 0.0833333333333333 MCP[5]
-   <= 24.99004032260669
- PLO_partially_accepted_upper_53: 0.0833333333333333 MCP[5]
-   >= 24.98984032260669
- PLO_partially_accepted_lower_54: 0.05 MCP[5] <= 53.49369589658975
- PLO_partially_accepted_upper_54: 0.05 MCP[5] >= 53.49349589658974
- PLO_partially_accepted_lower_55: 0.005 MCP[5] <= 13.49953896313635
- PLO_partially_accepted_upper_55: 0.005 MCP[5] >= 13.49933896313635
- PLO_partially_accepted_lower_56: 0.01 MCP[7] <= -3.999599722177334
- PLO_partially_accepted_upper_56: 0.01 MCP[7] >= -3.999799722177334
- PLO_partially_accepted_lower_57: 4.761904761904742 MCP[7]
-   <= 239.0864757505018
- PLO_partially_accepted_upper_57: 4.761904761904742 MCP[7]
-   >= 239.0862757505018
- PLO_partially_accepted_lower_58: 0.6896551724137951 MCP[7]
-   <= 35.6273508505528
- PLO_partially_accepted_upper_58: 0.6896551724137951 MCP[7]
-   >= 35.62715085055279
- PLO_partially_accepted_lower_59: 0.9345794392523362 MCP[7]
-   <= 49.27438220381844
- PLO_partially_accepted_upper_59: 0.9345794392523362 MCP[7]
-   >= 49.27418220381843
- PLO_partially_accepted_lower_60: 50 MCP[7] <= 2637.460891300631
- PLO_partially_accepted_upper_60: 50 MCP[7] >= 2637.460691300631
- PLO_partially_accepted_lower_61: 3.448275862068976 MCP[7]
-   <= 182.8885539947122
- PLO_partially_accepted_upper_61: 3.448275862068976 MCP[7]
-   >= 182.8883539947122
- PLO_partially_accepted_lower_62: 0.9523809523809486 MCP[7]
-   <= 51.50801175873664
- PLO_partially_accepted_upper_62: 0.9523809523809486 MCP[7]
-   >= 51.50781175873664
- PLO_partially_accepted_lower_63: 16.66666666666801 MCP[7]
-   <= 902.4820556585594
- PLO_partially_accepted_upper_63: 16.66666666666801 MCP[7]
-   >= 902.4818556585594
- PLO_partially_accepted_lower_64: 0.1862197392923648 MCP[7]
-   <= 11.06580974767613
- PLO_partially_accepted_upper_64: 0.1862197392923648 MCP[7]
-   >= 11.06560974767613
- PLO_partially_accepted_lower_65: 2.083333333333347 MCP[7]
-   <= 124.9921705151524
- PLO_partially_accepted_upper_65: 2.083333333333347 MCP[7]
-   >= 124.9919705151524
- PLO_partially_accepted_lower_66: 0.160513643659711 MCP[7]
-   <= 10.62091997848107
- PLO_partially_accepted_upper_66: 0.160513643659711 MCP[7]
-   >= 10.62071997848108
- PLO_partially_accepted_lower_67: 0.3610108303249103 MCP[7]
-   <= 24.89848086115331
- PLO_partially_accepted_upper_67: 0.3610108303249103 MCP[7]
-   >= 24.89828086115331
- PLO_partially_accepted_lower_68: MCP[7] <= 69.99290154495327
- PLO_partially_accepted_upper_68: MCP[7] >= 69.99270154495326
- PLO_partially_accepted_lower_69: 0.5 MCP[7] <= 35.99303111912902
- PLO_partially_accepted_upper_69: 0.5 MCP[7] >= 35.99283111912901
- PLO_partially_accepted_lower_70: 1.063829787234045 MCP[7]
-   <= 77.58819372214911
- PLO_partially_accepted_upper_70: 1.063829787234045 MCP[7]
-   >= 77.58799372214911
- PLO_partially_accepted_lower_71: 0.4854368932038829 MCP[7]
-   <= 36.39951048053995
- PLO_partially_accepted_upper_71: 0.4854368932038829 MCP[7]
-   >= 36.39931048053995
- buy_PLO_rejected_72: MCP[7] >= 74.9999
- PLO_partially_accepted_lower_73: 0.2493765586034909 MCP[7]
-   <= 19.70275486850769
- PLO_partially_accepted_upper_73: 0.2493765586034909 MCP[7]
-   >= 19.70255486850769
- PLO_partially_accepted_lower_74: 4.166666666666756 MCP[7]
-   <= 330.20014491173
- PLO_partially_accepted_upper_74: 4.166666666666756 MCP[7]
-   >= 330.1999449117301
- PLO_partially_accepted_lower_75: 7.692307692307962 MCP[7]
-   <= 610.6045082097407
- PLO_partially_accepted_upper_75: 7.692307692307962 MCP[7]
-   >= 610.6043082097408
- PLO_partially_accepted_lower_76: 1.61290322580644 MCP[7]
-   <= 129.0243442588062
- PLO_partially_accepted_upper_76: 1.61290322580644 MCP[7]
-   >= 129.0241442588062
- sell_PLO_accepted_77: MCP[7] >= 769.9999
- PLO_partially_accepted_lower_78: 0.02 MCP[7] <= 60.99807416249669
- PLO_partially_accepted_upper_78: 0.02 MCP[7] >= 60.99787416249668
- buy_PLO_rejected_79: MCP[10] >= -400.0001
- buy_PLO_rejected_80: MCP[10] >= 252.1199
- PLO_partially_accepted_lower_81: - 1.136363636363642 MCP[10]
-   <= -287.4917572950654
- PLO_partially_accepted_upper_81: - 1.136363636363642 MCP[10]
-   >= -287.4919572950654
- PLO_partially_accepted_lower_82: - 6.666666666666414 MCP[10]
-   <= -1687.635330132684
- PLO_partially_accepted_upper_82: - 6.666666666666414 MCP[10]
-   >= -1687.635530132684
- PLO_partially_accepted_lower_83: - 1.5625 MCP[10] <= -396.5364442740661
- PLO_partially_accepted_upper_83: - 1.5625 MCP[10] >= -396.536644274066
- PLO_partially_accepted_lower_84: - 2.439024390243923 MCP[10]
-   <= -619.9853302621037
- PLO_partially_accepted_upper_84: - 2.439024390243923 MCP[10]
-   >= -619.9855302621037
- PLO_partially_accepted_lower_85: - 1.25 MCP[10] <= -318.7411782313754
- PLO_partially_accepted_upper_85: - 1.25 MCP[10] >= -318.7413782313754
- PLO_partially_accepted_lower_86: - MCP[10] <= -255.9924870731107
- PLO_partially_accepted_upper_86: - MCP[10] >= -255.9926870731107
- PLO_partially_accepted_lower_87: - 1.111111111111139 MCP[10]
-   <= -285.4363576752867
- PLO_partially_accepted_upper_87: - 1.111111111111139 MCP[10]
-   >= -285.4365576752867
- PLO_partially_accepted_lower_88: - 10 MCP[10] <= -2569.957508194953
- PLO_partially_accepted_upper_88: - 10 MCP[10] >= -2569.957708194953
- PLO_partially_accepted_lower_89: - 2 MCP[10] <= -514.9874120118818
- PLO_partially_accepted_upper_89: - 2 MCP[10] >= -514.9876120118818
- PLO_partially_accepted_lower_90: - 2 MCP[10] <= -515.9874130699461
- PLO_partially_accepted_upper_90: - 2 MCP[10] >= -515.9876130699461
- PLO_partially_accepted_lower_91: - MCP[10] <= -258.9925082985517
- PLO_partially_accepted_upper_91: - MCP[10] >= -258.9927082985516
- PLO_partially_accepted_lower_92: - MCP[10] <= -259.992515384742
- PLO_partially_accepted_upper_92: - MCP[10] >= -259.992715384742
- PLO_partially_accepted_lower_93: - MCP[10] <= -260.9925224764592
- PLO_partially_accepted_upper_93: - MCP[10] >= -260.9927224764592
- PLO_partially_accepted_lower_94: - 2 MCP[10] <= -522.9874204839499
- PLO_partially_accepted_upper_94: - 2 MCP[10] >= -522.9876204839499
- PLO_partially_accepted_lower_95: - 2 MCP[10] <= -523.9874215441732
- PLO_partially_accepted_upper_95: - 2 MCP[10] >= -523.9876215441732
- PLO_partially_accepted_lower_96: - 0.0769230769230769 MCP[10]
-   <= -21.14278816029434
- PLO_partially_accepted_upper_96: - 0.0769230769230769 MCP[10]
-   >= -21.14298816029434
- PLO_partially_accepted_lower_97: - MCP[10] <= -275.9926295175266
- PLO_partially_accepted_upper_97: - MCP[10] >= -275.9928295175266
- PLO_partially_accepted_lower_98: - 0.25 MCP[10] <= -69.99513571979382
- PLO_partially_accepted_upper_98: - 0.25 MCP[10] >= -69.99533571979383
- PLO_partially_accepted_lower_99: - 0.125 MCP[10] <= -35.99249338809297
- PLO_partially_accepted_upper_99: - 0.125 MCP[10] >= -35.99269338809297
- PLO_partially_accepted_lower_100: - 0.9174311926605715 MCP[10]
-   <= -265.2133564477936
- PLO_partially_accepted_upper_100: - 0.9174311926605715 MCP[10]
-   >= -265.2135564477935
- PLO_partially_accepted_lower_101: 0.0255819902788437 MCP[10]
-   <= 6.396037733524447
- PLO_partially_accepted_upper_101: 0.0255819902788437 MCP[10]
-   >= 6.395837733524448
- PLO_partially_accepted_lower_102: 0.02 MCP[10] <= 8.953642367176812
- PLO_partially_accepted_upper_102: 0.02 MCP[10] >= 8.953442367176812
- PLO_partially_accepted_lower_103: 0.01 MCP[10] <= 22.00356090220259
- PLO_partially_accepted_upper_103: 0.01 MCP[10] >= 22.00336090220259
- PLO_partially_accepted_lower_104: 0.00666666666666667 MCP[10]
-   <= 21.67061904827564
- PLO_partially_accepted_upper_104: 0.00666666666666667 MCP[10]
-   >= 21.67041904827564
- sell_PLO_accepted_105: MCP[13] >= 769.9999
- PLO_partially_accepted_lower_106: 0.01 MCP[13] <= 10.70862227634238
- PLO_partially_accepted_upper_106: 0.01 MCP[13] >= 10.70842227634238
- PLO_partially_accepted_lower_107: 0.01 MCP[13] <= 22.99993901182974
- PLO_partially_accepted_upper_107: 0.01 MCP[13] >= 22.99973901182974
- PLO_partially_accepted_lower_108: 2.631578947368452 MCP[16]
-   <= 658.8826051648789
- PLO_partially_accepted_upper_108: 2.631578947368452 MCP[16]
-   >= 658.8824051648789
- PLO_partially_accepted_lower_109: 2.3255813953488 MCP[16]
-   <= 583.268032649812
- PLO_partially_accepted_upper_109: 2.3255813953488 MCP[16]
-   >= 583.267832649812
- PLO_partially_accepted_lower_110: 0.8403361344537831 MCP[16]
-   <= 211.7590534738834
- PLO_partially_accepted_upper_110: 0.8403361344537831 MCP[16]
-   >= 211.7588534738834
- PLO_partially_accepted_lower_111: 0.8695652173913001 MCP[16]
-   <= 220.1247056378897
- PLO_partially_accepted_upper_111: 0.8695652173913001 MCP[16]
-   >= 220.1245056378897
- PLO_partially_accepted_lower_112: 1.5625 MCP[16] <= 396.538669598922
- PLO_partially_accepted_upper_112: 1.5625 MCP[16] >= 396.5384695989221
- PLO_partially_accepted_lower_113: 2.439024390243923 MCP[16]
-   <= 619.9885644921945
- PLO_partially_accepted_upper_113: 2.439024390243923 MCP[16]
-   >= 619.9883644921946
- PLO_partially_accepted_lower_114: 1.25 MCP[16] <= 318.7429673996847
- PLO_partially_accepted_upper_114: 1.25 MCP[16] >= 318.7427673996847
- PLO_partially_accepted_lower_115: MCP[16] <= 255.9938711190972
- PLO_partially_accepted_upper_115: MCP[16] >= 255.9936711190971
- PLO_partially_accepted_lower_116: 1.111111111111139 MCP[16]
-   <= 285.4379328025166
- PLO_partially_accepted_upper_116: 1.111111111111139 MCP[16]
-   >= 285.4377328025166
- PLO_partially_accepted_lower_117: 10 MCP[16] <= 2569.966518383656
- PLO_partially_accepted_upper_117: 10 MCP[16] >= 2569.966318383656
- PLO_partially_accepted_lower_118: MCP[16] <= 257.9938896666314
- PLO_partially_accepted_upper_118: MCP[16] >= 257.9936896666315
- PLO_partially_accepted_lower_119: MCP[16] <= 258.9938989516189
- PLO_partially_accepted_upper_119: MCP[16] >= 258.9936989516189
- PLO_partially_accepted_lower_120: MCP[16] <= 259.9939082440843
- PLO_partially_accepted_upper_120: MCP[16] >= 259.9937082440844
- PLO_partially_accepted_lower_121: MCP[16] <= 260.9939175440261
- PLO_partially_accepted_upper_121: MCP[16] >= 260.9937175440262
- PLO_partially_accepted_lower_122: 2 MCP[16] <= 522.9901970032129
- PLO_partially_accepted_upper_122: 2 MCP[16] >= 522.9899970032129
- PLO_partially_accepted_lower_123: 2 MCP[16] <= 523.9901991636598
- PLO_partially_accepted_upper_123: 2 MCP[16] >= 523.9899991636598
- PLO_partially_accepted_lower_124: 0.158227848101266 MCP[16]
-   <= 42.44759493620951
- PLO_partially_accepted_upper_124: 0.158227848101266 MCP[16]
-   >= 42.44739493620951
- PLO_partially_accepted_lower_125: 0.1497005988023951 MCP[16]
-   <= 41.1593904929725
- PLO_partially_accepted_upper_125: 0.1497005988023951 MCP[16]
-   >= 41.15919049297249
- PLO_partially_accepted_lower_126: 0.2 MCP[16] <= 55.993064515356
- PLO_partially_accepted_upper_126: 0.2 MCP[16] >= 55.992864515356
- PLO_partially_accepted_lower_127: 0.125 MCP[16] <= 35.9909173629982
- PLO_partially_accepted_upper_127: 0.125 MCP[16] >= 35.9907173629982
- PLO_partially_accepted_lower_128: 0.0833333333333333 MCP[16]
-   <= 24.98629814331404
- PLO_partially_accepted_upper_128: 0.0833333333333333 MCP[16]
-   >= 24.98609814331405
- PLO_partially_accepted_lower_129: 0.093808630393996 MCP[16]
-   <= 41.22094741694677
- PLO_partially_accepted_upper_129: 0.093808630393996 MCP[16]
-   >= 41.22074741694676
- PLO_partially_accepted_lower_130: 0.025419420437214 MCP[16]
-   <= 10.17034053527498
- PLO_partially_accepted_upper_130: 0.025419420437214 MCP[16]
-   >= 10.17014053527498
- sell_PLO_accepted_131: MCP[16] >= 1069.9999
- PLO_partially_accepted_lower_132: 0.005 MCP[16] <= 12.51733138226164
- PLO_partially_accepted_upper_132: 0.005 MCP[16] >= 12.51713138226164
- PLO_partially_accepted_lower_133: 0.01 MCP[20] <= -3.036053465938259
- PLO_partially_accepted_upper_133: 0.01 MCP[20] >= -3.03625346593826
- PLO_partially_accepted_lower_134: 0.00286779466590192 MCP[20]
-   <= 0.7304886821055648
- PLO_partially_accepted_upper_134: 0.00286779466590192 MCP[20]
-   >= 0.7302886821055649
- PLO_partially_accepted_lower_135: - 4.166666666667002 MCP[20]
-   <= -1048.033649806708
- PLO_partially_accepted_upper_135: - 4.166666666667002 MCP[20]
-   >= -1048.033849806708
- PLO_partially_accepted_lower_136: - 0.621118012422355 MCP[20]
-   <= -157.2247708268736
- PLO_partially_accepted_upper_136: - 0.621118012422355 MCP[20]
-   >= -157.2249708268736
- PLO_partially_accepted_lower_137: - 1.5625 MCP[20] <= -396.523173928733
- PLO_partially_accepted_upper_137: - 1.5625 MCP[20] >= -396.523373928733
- PLO_partially_accepted_lower_138: - 2.439024390243923 MCP[20]
-   <= -619.9667386519887
- PLO_partially_accepted_upper_138: - 2.439024390243923 MCP[20]
-   >= -619.9669386519887
- PLO_partially_accepted_lower_139: - 1.25 MCP[20] <= -318.7300644408131
- PLO_partially_accepted_upper_139: - 1.25 MCP[20] >= -318.730264440813
- PLO_partially_accepted_lower_140: - 1.666666666666683 MCP[20]
-   <= -425.9750857712667
- PLO_partially_accepted_upper_140: - 1.666666666666683 MCP[20]
-   >= -425.9752857712666
- PLO_partially_accepted_lower_141: - 2.5 MCP[20] <= -639.9660950528469
- PLO_partially_accepted_upper_141: - 2.5 MCP[20] >= -639.9662950528468
- PLO_partially_accepted_lower_142: - 1.111111111111139 MCP[20]
-   <= -285.426275335282
- PLO_partially_accepted_upper_142: - 1.111111111111139 MCP[20]
-   >= -285.4264753352819
- PLO_partially_accepted_lower_143: - 10 MCP[20] <= -2569.906083181167
- PLO_partially_accepted_upper_143: - 10 MCP[20] >= -2569.906283181167
- PLO_partially_accepted_lower_144: - 2 MCP[20] <= -514.9713548896002
- PLO_partially_accepted_upper_144: - 2 MCP[20] >= -514.9715548896002
- PLO_partially_accepted_lower_145: - 2 MCP[20] <= -515.9713512738701
- PLO_partially_accepted_upper_145: - 2 MCP[20] >= -515.9715512738701
- PLO_partially_accepted_lower_146: - MCP[20] <= -258.983297933933
- PLO_partially_accepted_upper_146: - MCP[20] >= -258.983497933933
- PLO_partially_accepted_lower_147: - 2.702702702702669 MCP[20]
-   <= -700.9640043269483
- PLO_partially_accepted_upper_147: - 2.702702702702669 MCP[20]
-   >= -700.9642043269482
- PLO_partially_accepted_lower_148: - 1.587301587301599 MCP[20]
-   <= -412.674393030875
- PLO_partially_accepted_upper_148: - 1.587301587301599 MCP[20]
-   >= -412.6745930308749
- PLO_partially_accepted_lower_149: - MCP[20] <= -260.9832965673248
- PLO_partially_accepted_upper_149: - MCP[20] >= -260.9834965673248
- PLO_partially_accepted_lower_150: - MCP[20] <= -261.9832958813909
- PLO_partially_accepted_upper_150: - MCP[20] >= -261.9834958813908
- PLO_partially_accepted_lower_151: - 0.1618122977346277 MCP[20]
-   <= -43.3914666804563
- PLO_partially_accepted_upper_151: - 0.1618122977346277 MCP[20]
-   >= -43.3916666804563
- PLO_partially_accepted_lower_152: - 0.32051282051282 MCP[20]
-   <= -86.94904942889151
- PLO_partially_accepted_upper_152: - 0.32051282051282 MCP[20]
-   >= -86.94924942889152
- PLO_partially_accepted_lower_153: - 0.2702702702702711 MCP[20]
-   <= -74.31921609644728
- PLO_partially_accepted_upper_153: - 0.2702702702702711 MCP[20]
-   >= -74.31941609644728
- PLO_partially_accepted_lower_154: - 0.8695652173913215 MCP[20]
-   <= -240.1155349896772
- PLO_partially_accepted_upper_154: - 0.8695652173913215 MCP[20]
-   >= -240.1157349896772
- PLO_partially_accepted_lower_155: - 1.333333333333333 MCP[20]
-   <= -369.1789624074673
- PLO_partially_accepted_upper_155: - 1.333333333333333 MCP[20]
-   >= -369.1791624074672
- PLO_partially_accepted_lower_156: - 0.322580645161288 MCP[20]
-   <= -90.3165374288052
- PLO_partially_accepted_upper_156: - 0.322580645161288 MCP[20]
-   >= -90.31673742880521
- PLO_partially_accepted_lower_157: - 1.92307692307699 MCP[20]
-   <= -539.4335765875796
- PLO_partially_accepted_upper_157: - 1.92307692307699 MCP[20]
-   >= -539.4337765875796
- PLO_partially_accepted_lower_158: - 1.282051282051234 MCP[20]
-   <= -360.6206155021955
- PLO_partially_accepted_upper_158: - 1.282051282051234 MCP[20]
-   >= -360.6208155021955
- PLO_partially_accepted_lower_159: - 0.1492537313432838 MCP[20]
-   <= -42.98215789220534
- PLO_partially_accepted_upper_159: - 0.1492537313432838 MCP[20]
-   >= -42.98235789220534
- PLO_partially_accepted_lower_160: - 0.303030303030302 MCP[20]
-   <= -88.26715284634147
- PLO_partially_accepted_upper_160: - 0.303030303030302 MCP[20]
-   >= -88.26735284634148
- PLO_partially_accepted_lower_161: - 0.1149425287356323 MCP[20]
-   <= -34.48025519080634
- PLO_partially_accepted_upper_161: - 0.1149425287356323 MCP[20]
-   >= -34.48045519080635
- PLO_partially_accepted_lower_162: - 0.7692307692307625 MCP[20]
-   <= -231.7558230717894
- PLO_partially_accepted_upper_162: - 0.7692307692307625 MCP[20]
-   >= -231.7560230717894
- PLO_partially_accepted_lower_163: - 0.0839630562552479 MCP[20]
-   <= -26.29566997185358
- PLO_partially_accepted_upper_163: - 0.0839630562552479 MCP[20]
-   >= -26.29586997185358
- PLO_partially_accepted_lower_164: - 0.3584229390680977 MCP[20]
-   <= -113.2552198495975
- PLO_partially_accepted_upper_164: - 0.3584229390680977 MCP[20]
-   >= -113.2554198495975
- PLO_partially_accepted_lower_165: - 0.25 MCP[20] <= -79.99576460886131
- PLO_partially_accepted_upper_165: - 0.25 MCP[20] >= -79.99596460886131
- PLO_partially_accepted_lower_166: - 0.0670690811535881 MCP[20]
-   <= -22.45982549189876
- PLO_partially_accepted_upper_166: - 0.0670690811535881 MCP[20]
-   >= -22.46002549189876
- PLO_partially_accepted_lower_167: - 0.099403578528827 MCP[20]
-   <= -34.28954565651015
- PLO_partially_accepted_upper_167: - 0.099403578528827 MCP[20]
-   >= -34.28974565651016
- PLO_partially_accepted_lower_168: - 0.1988071570576551 MCP[20]
-   <= -69.57968106063204
- PLO_partially_accepted_upper_168: - 0.1988071570576551 MCP[20]
-   >= -69.57988106063205
- PLO_partially_accepted_lower_169: - 0.0692520775623269 MCP[20]
-   <= -25.23662235716738
- PLO_partially_accepted_upper_169: - 0.0692520775623269 MCP[20]
-   >= -25.23682235716738
- PLO_partially_accepted_lower_170: - 1.785714285714278 MCP[20]
-   <= -651.758747883016
- PLO_partially_accepted_upper_170: - 1.785714285714278 MCP[20]
-   >= -651.7589478830159
- PLO_partially_accepted_lower_171: - 0.2538071065989849 MCP[20]
-   <= -93.6358230678247
- PLO_partially_accepted_upper_171: - 0.2538071065989849 MCP[20]
-   >= -93.63602306782471
- PLO_partially_accepted_lower_172: - 0.165016501650165 MCP[20]
-   <= -61.87930424583804
- PLO_partially_accepted_upper_172: - 0.165016501650165 MCP[20]
-   >= -61.87950424583805
- PLO_partially_accepted_lower_173: - 0.04 MCP[20] <= -15.99815960862623
- PLO_partially_accepted_upper_173: - 0.04 MCP[20] >= -15.99835960862623
- buy_PLO_rejected_174: MCP[20] >= 399.9999
- PLO_partially_accepted_lower_175: - 0.0291800408520572 MCP[20]
-   <= -12.67041225024633
- PLO_partially_accepted_upper_175: - 0.0291800408520572 MCP[20]
-   >= -12.67061225024633
- buy_PLO_rejected_176: MCP[20] >= 444.9699000000001
- PLO_partially_accepted_lower_177: - 0.0181719062329638 MCP[20]
-   <= -9.08429525338139
- PLO_partially_accepted_upper_177: - 0.0181719062329638 MCP[20]
-   >= -9.084495253381389
- PLO_partially_accepted_lower_178: - 7.692307692307962 MCP[20]
-   <= -3847.067964235441
- PLO_partially_accepted_upper_178: - 7.692307692307962 MCP[20]
-   >= -3847.068164235441
- PLO_partially_accepted_lower_179: - 1.149425287356316 MCP[20]
-   <= -575.8428475845432
- PLO_partially_accepted_upper_179: - 1.149425287356316 MCP[20]
-   >= -575.8430475845431
- buy_PLO_rejected_180: MCP[20] >= 552.9999
- buy_PLO_rejected_181: MCP[20] >= 249.9999
- sell_PLO_accepted_182: MCP[20] >= 998.9999
- PLO_partially_accepted_lower_183: MCP[20] <= 999.9998579881379
- PLO_partially_accepted_upper_183: MCP[20] >= 999.999657988138
- sell_PLO_accepted_184: MCP[20] >= 1049.9999
+ buy_PLO_rejected_1: MCP[1] >= -300.0001
+ sell_PLO_rejected_2: MCP[1] <= 250.0001
+ sell_PLO_rejected_3: MCP[1] <= 253.1501
+ sell_PLO_rejected_4: MCP[1] <= 253.7001
+ sell_PLO_rejected_5: MCP[1] <= 253.7901
+ sell_PLO_rejected_6: MCP[1] <= 254.0601
+ sell_PLO_rejected_7: MCP[1] <= 254.2001
+ sell_PLO_rejected_8: MCP[1] <= 255.0001
+ sell_PLO_rejected_9: MCP[1] <= 256.0001
+ sell_PLO_rejected_10: MCP[1] <= 256.9001
+ sell_PLO_rejected_11: MCP[1] <= 257.0001
+ sell_PLO_rejected_12: MCP[1] <= 258.0001
+ sell_PLO_rejected_13: MCP[1] <= 259.0001
+ sell_PLO_rejected_14: MCP[1] <= 260.0001
+ sell_PLO_rejected_15: MCP[1] <= 261.0001
+ sell_PLO_rejected_16: MCP[1] <= 261.5001
+ sell_PLO_rejected_17: MCP[1] <= 262.0001
+ sell_PLO_rejected_18: MCP[1] <= 263.7001
+ sell_PLO_rejected_19: MCP[1] <= 274.2201
+ sell_PLO_rejected_20: MCP[1] <= 275.0001
+ sell_PLO_rejected_21: MCP[1] <= 280.0001
+ sell_PLO_rejected_22: MCP[1] <= 288.0001
+ sell_PLO_rejected_23: MCP[1] <= 293.7301
+ sell_PLO_rejected_24: MCP[1] <= 297.4101
+ buy_PLO_accepted_25: MCP[1] <= 1050.0001
+ buy_PLO_accepted_26: MCP[1] <= 3250.0001
+ buy_PLO_rejected_27: MCP[2] >= -300.0001
+ sell_PLO_rejected_28: MCP[2] <= 700.0001
+ buy_PLO_accepted_29: MCP[2] <= 2200.0001
+ buy_PLO_accepted_30: MCP[2] <= 3250.0001
+ sell_PLO_rejected_31: MCP[5] <= 250.0001
+ sell_PLO_rejected_32: MCP[5] <= 253.1501
+ sell_PLO_rejected_33: MCP[5] <= 253.7901
+ sell_PLO_rejected_34: MCP[5] <= 254.2001
+ sell_PLO_rejected_35: MCP[5] <= 254.3101
+ sell_PLO_rejected_36: MCP[5] <= 255.0001
+ sell_PLO_rejected_37: MCP[5] <= 256.0001
+ sell_PLO_rejected_38: MCP[5] <= 256.7001
+ sell_PLO_rejected_39: MCP[5] <= 256.9001
+ sell_PLO_rejected_40: MCP[5] <= 257.0001
+ sell_PLO_rejected_41: MCP[5] <= 258.0001
+ sell_PLO_rejected_42: MCP[5] <= 259.0001
+ sell_PLO_rejected_43: MCP[5] <= 260.0001
+ sell_PLO_rejected_44: MCP[5] <= 261.0001
+ sell_PLO_rejected_45: MCP[5] <= 261.5001
+ sell_PLO_rejected_46: MCP[5] <= 262.0001
+ sell_PLO_rejected_47: MCP[5] <= 265.2001
+ sell_PLO_rejected_48: MCP[5] <= 267.5001
+ sell_PLO_rejected_49: MCP[5] <= 267.6301
+ sell_PLO_rejected_50: MCP[5] <= 275.0001
+ sell_PLO_rejected_51: MCP[5] <= 278.2401
+ sell_PLO_rejected_52: MCP[5] <= 280.0001
+ sell_PLO_rejected_53: MCP[5] <= 288.0001
+ sell_PLO_rejected_54: MCP[5] <= 1050.0001
+ buy_PLO_accepted_55: MCP[5] <= 2500.0001
+ buy_PLO_rejected_56: MCP[7] >= -300.0001
+ sell_PLO_accepted_57: MCP[7] >= 50.2099
+ sell_PLO_accepted_58: MCP[7] >= 51.6599
+ sell_PLO_accepted_59: MCP[7] >= 52.7299
+ sell_PLO_accepted_60: MCP[7] >= 52.7499
+ sell_PLO_accepted_61: MCP[7] >= 53.0399
+ sell_PLO_accepted_62: MCP[7] >= 54.0899
+ sell_PLO_accepted_63: MCP[7] >= 54.1499
+ sell_PLO_accepted_64: MCP[7] >= 59.5199
+ sell_PLO_accepted_65: MCP[7] >= 59.9999
+ sell_PLO_accepted_66: MCP[7] >= 66.2299
+ sell_PLO_accepted_67: MCP[7] >= 68.9999
+ sell_PLO_accepted_68: MCP[7] >= 69.9999
+ sell_PLO_accepted_69: MCP[7] >= 71.9999
+ sell_PLO_accepted_70: MCP[7] >= 72.9399
+ sell_PLO_accepted_71: MCP[7] >= 74.9999
+ sell_PLO_accepted_73: MCP[7] >= 79.0099
+ sell_PLO_accepted_74: MCP[7] >= 79.2499
+ sell_PLO_accepted_75: MCP[7] >= 79.3799
+ sell_PLO_accepted_76: MCP[7] >= 79.9999
+ sell_PLO_rejected_77: MCP[7] <= 700.0001
+ buy_PLO_accepted_78: MCP[7] <= 3000.0001
+ buy_PLO_rejected_79: MCP[10] >= -300.0001
+ buy_PLO_accepted_80: MCP[10] <= 252.1201
+ buy_PLO_accepted_81: MCP[10] <= 252.1201
+ buy_PLO_accepted_82: MCP[10] <= 253.0001
+ buy_PLO_accepted_83: MCP[10] <= 253.1501
+ buy_PLO_accepted_84: MCP[10] <= 253.7901
+ buy_PLO_accepted_85: MCP[10] <= 254.2001
+ buy_PLO_accepted_86: MCP[10] <= 255.0001
+ buy_PLO_accepted_87: MCP[10] <= 256.0001
+ buy_PLO_accepted_88: MCP[10] <= 256.9001
+ buy_PLO_accepted_89: MCP[10] <= 257.0001
+ buy_PLO_accepted_90: MCP[10] <= 257.5001
+ buy_PLO_accepted_91: MCP[10] <= 258.0001
+ buy_PLO_accepted_92: MCP[10] <= 259.0001
+ buy_PLO_accepted_93: MCP[10] <= 260.0001
+ buy_PLO_accepted_94: MCP[10] <= 261.0001
+ buy_PLO_accepted_95: MCP[10] <= 261.5001
+ buy_PLO_accepted_96: MCP[10] <= 262.0001
+ buy_PLO_accepted_97: MCP[10] <= 275.0001
+ buy_PLO_accepted_98: MCP[10] <= 276.0001
+ buy_PLO_accepted_99: MCP[10] <= 280.0001
+ buy_PLO_accepted_100: MCP[10] <= 288.0001
+ buy_PLO_accepted_101: MCP[10] <= 250.0001
+ sell_PLO_rejected_102: MCP[10] <= 400.0001
+ sell_PLO_rejected_103: MCP[10] <= 2200.0001
+ sell_PLO_rejected_104: MCP[10] <= 3250.0001
+ sell_PLO_rejected_105: MCP[13] <= 700.0001
+ buy_PLO_accepted_106: MCP[13] <= 1000.0001
+ buy_PLO_accepted_107: MCP[13] <= 2200.0001
+ sell_PLO_rejected_108: MCP[16] <= 250.0001
+ sell_PLO_rejected_109: MCP[16] <= 250.3801
+ sell_PLO_rejected_110: MCP[16] <= 250.8101
+ sell_PLO_rejected_111: MCP[16] <= 252.0001
+ sell_PLO_rejected_112: MCP[16] <= 253.1501
+ sell_PLO_rejected_113: MCP[16] <= 253.7901
+ sell_PLO_rejected_114: MCP[16] <= 254.2001
+ sell_PLO_rejected_115: MCP[16] <= 255.0001
+ sell_PLO_rejected_116: MCP[16] <= 256.0001
+ sell_PLO_rejected_117: MCP[16] <= 256.9001
+ sell_PLO_rejected_118: MCP[16] <= 257.0001
+ sell_PLO_rejected_119: MCP[16] <= 258.0001
+ sell_PLO_rejected_120: MCP[16] <= 259.0001
+ sell_PLO_rejected_121: MCP[16] <= 260.0001
+ sell_PLO_rejected_122: MCP[16] <= 261.0001
+ sell_PLO_rejected_123: MCP[16] <= 261.5001
+ sell_PLO_rejected_124: MCP[16] <= 262.0001
+ sell_PLO_rejected_125: MCP[16] <= 268.3201
+ sell_PLO_rejected_126: MCP[16] <= 275.0001
+ sell_PLO_rejected_127: MCP[16] <= 280.0001
+ sell_PLO_rejected_128: MCP[16] <= 288.0001
+ buy_PLO_accepted_129: MCP[16] <= 439.3400999999999
+ buy_PLO_accepted_130: MCP[16] <= 400.0001
+ sell_PLO_rejected_131: MCP[16] <= 1050.0001
+ sell_PLO_rejected_132: MCP[16] <= 2500.0001
+ sell_PLO_accepted_133: MCP[20] >= -300.0001
+ PLO_partially_accepted_lower_134: - 0.00286779466590192 MCP[20]
+   <= -0.7311876398049901
+ PLO_partially_accepted_upper_134: - 0.00286779466590192 MCP[20]
+   >= -0.7313876398049901
+ buy_PLO_rejected_135: MCP[20] >= 251.5399
+ buy_PLO_rejected_136: MCP[20] >= 253.1499
+ buy_PLO_rejected_137: MCP[20] >= 253.7899
+ buy_PLO_rejected_138: MCP[20] >= 254.1999
+ buy_PLO_rejected_139: MCP[20] >= 254.9999
+ buy_PLO_accepted_140: MCP[20] <= 255.0001
+ buy_PLO_accepted_141: MCP[20] <= 255.6001
+ buy_PLO_accepted_142: MCP[20] <= 256.0001
+ buy_PLO_accepted_143: MCP[20] <= 256.9001
+ buy_PLO_accepted_144: MCP[20] <= 257.0001
+ buy_PLO_accepted_145: MCP[20] <= 257.5001
+ buy_PLO_accepted_146: MCP[20] <= 258.0001
+ buy_PLO_accepted_147: MCP[20] <= 259.0001
+ buy_PLO_accepted_148: MCP[20] <= 259.3701
+ buy_PLO_accepted_149: MCP[20] <= 260.0001
+ buy_PLO_accepted_150: MCP[20] <= 261.0001
+ buy_PLO_accepted_151: MCP[20] <= 262.0001
+ buy_PLO_accepted_152: MCP[20] <= 268.1801
+ buy_PLO_accepted_153: MCP[20] <= 271.3001
+ buy_PLO_accepted_154: MCP[20] <= 275.0001
+ buy_PLO_accepted_155: MCP[20] <= 276.1501
+ buy_PLO_accepted_156: MCP[20] <= 276.9001
+ buy_PLO_accepted_157: MCP[20] <= 280.0001
+ buy_PLO_accepted_158: MCP[20] <= 280.5201
+ buy_PLO_accepted_159: MCP[20] <= 281.3001
+ buy_PLO_accepted_160: MCP[20] <= 288.0001
+ buy_PLO_accepted_161: MCP[20] <= 291.3001
+ buy_PLO_accepted_162: MCP[20] <= 300.0001
+ buy_PLO_accepted_163: MCP[20] <= 301.3001
+ buy_PLO_accepted_164: MCP[20] <= 313.2101
+ buy_PLO_accepted_165: MCP[20] <= 316.0001
+ buy_PLO_accepted_166: MCP[20] <= 320.0001
+ buy_PLO_accepted_167: MCP[20] <= 334.9101
+ buy_PLO_accepted_168: MCP[20] <= 344.9701
+ buy_PLO_accepted_169: MCP[20] <= 350.0001
+ buy_PLO_accepted_170: MCP[20] <= 364.4401
+ buy_PLO_accepted_171: MCP[20] <= 365.0001
+ buy_PLO_accepted_172: MCP[20] <= 368.9401
+ buy_PLO_accepted_173: MCP[20] <= 375.0001
+ buy_PLO_accepted_175: MCP[20] <= 400.0001
+ buy_PLO_accepted_176: MCP[20] <= 434.2701
+ buy_PLO_accepted_177: MCP[20] <= 444.9701
+ buy_PLO_accepted_178: MCP[20] <= 500.0001
+ buy_PLO_accepted_179: MCP[20] <= 500.1301
+ buy_PLO_accepted_180: MCP[20] <= 501.0001
+ PLO_partially_accepted_lower_181: - 0.00330033 MCP[20]
+   <= -0.8414841584158416
+ PLO_partially_accepted_upper_181: - 0.00330033 MCP[20]
+   >= -0.8416841584158415
+ sell_PLO_rejected_182: MCP[20] <= 950.0001
+ sell_PLO_rejected_183: MCP[20] <= 999.0001
+ sell_PLO_rejected_184: MCP[20] <= 1000.0001
  sell_PLO_rejected_185: MCP[20] <= 3250.0001
- buy_PLO_accepted_186: MCP[20] <= 3400.0001
- PLO_partially_accepted_lower_187: 0.02 MCP[23] <= -1.981800824959703
- PLO_partially_accepted_upper_187: 0.02 MCP[23] >= -1.982000824959703
- sell_PLO_accepted_188: MCP[23] >= 1069.9999
- PLO_partially_accepted_lower_189: 0.005 MCP[23] <= 13.49976830173524
- PLO_partially_accepted_upper_189: 0.005 MCP[23] >= 13.49956830173524
+ buy_PLO_accepted_186: MCP[20] <= 3250.0001
+ buy_PLO_rejected_187: MCP[23] >= -50.0001
+ sell_PLO_rejected_188: MCP[23] <= 1050.0001
+ buy_PLO_accepted_189: MCP[23] <= 2500.0001
+ buy_block_INM_3: 0.0449172576832151 MCP[1] + 0.0449172576832151 MCP[3]
+   + 0.00945626477541371 MCP[6] + 0.1087470449172577 MCP[8]
+   + 0.1843971631205674 MCP[9] + 0.0803782505910166 MCP[18]
+   + 0.1560283687943262 MCP[19] + 0.0780141843971631 MCP[22]
+   + 0.0685579196217494 MCP[23] + 0.2245862884160756 MCP[24] <= 3959
+ buy_block_INM_4: 0.0313971742543171 MCP[1] + 0.0518053375196232 MCP[2]
+   + 0.097331240188383 MCP[3] + 0.0376766091051805 MCP[4]
+   + 0.1538461538461539 MCP[9] + 0.1240188383045526 MCP[11]
+   + 0.0266875981161695 MCP[12] + 0.1444270015698587 MCP[14]
+   + 0.1287284144427002 MCP[19] + 0.0832025117739403 MCP[23]
+   + 0.1208791208791209 MCP[24] <= 1123
+ sell_block_INM_5: 0.0172413793103448 MCP[5] + 0.0344827586206897 MCP[6]
+   + 0.1875 MCP[9] + 0.0193965517241379 MCP[11]
+   + 0.2112068965517241 MCP[12] + 0.2004310344827586 MCP[14]
+   + 0.1810344827586207 MCP[15] + 0.00646551724137931 MCP[16]
+   + 0.0581896551724138 MCP[17] + 0.084051724137931 MCP[24] >= -241
+ buy_block_INM_7: 0.00218340611353712 MCP[3] + 0.0851528384279476 MCP[4]
+   + 0.0807860262008734 MCP[6] + 0.2161572052401746 MCP[9]
+   + 0.0174672489082969 MCP[10] + 0.0720524017467249 MCP[11]
+   + 0.0567685589519651 MCP[13] + 0.0152838427947598 MCP[16]
+   + 0.1790393013100437 MCP[18] + 0.0458515283842795 MCP[19]
+   + 0.0851528384279476 MCP[20] + 0.0960698689956332 MCP[23]
+   + 0.0480349344978166 MCP[24] <= 2227
+ buy_block_INM_9: 0.0478142076502732 MCP[2] + 0.0519125683060109 MCP[5]
+   + 0.1010928961748634 MCP[6] + 0.0887978142076503 MCP[8]
+   + 0.0150273224043716 MCP[9] + 0.0901639344262295 MCP[10]
+   + 0.0341530054644809 MCP[11] + 0.0136612021857923 MCP[12]
+   + 0.0628415300546448 MCP[13] + 0.0669398907103825 MCP[16]
+   + 0.1270491803278689 MCP[17] + 0.0724043715846995 MCP[18]
+   + 0.00819672131147541 MCP[19] + 0.0655737704918033 MCP[20]
+   + 0.1120218579234973 MCP[22] + 0.0191256830601093 MCP[23]
+   + 0.023224043715847 MCP[24] <= 2109
+ buy_block_INM_10: 0.0845665961945032 MCP[1] + 0.1945031712473573 MCP[5]
+   + 0.1120507399577167 MCP[6] + 0.0951374207188161 MCP[9]
+   + 0.0190274841437632 MCP[10] + 0.00422832980972516 MCP[14]
+   + 0.0443974630021142 MCP[15] + 0.0465116279069767 MCP[16]
+   + 0.1627906976744186 MCP[18] + 0.1987315010570825 MCP[20]
+   + 0.0380549682875264 MCP[23] <= 1190
+ buy_block_INM_18: 0.1222222222222222 MCP[1] + 0.137037037037037 MCP[5]
+   + 0.0351851851851852 MCP[9] + 0.0703703703703704 MCP[10]
+   + 0.1074074074074074 MCP[11] + 0.1666666666666667 MCP[14]
+   + 0.1666666666666667 MCP[15] + 0.0888888888888889 MCP[18]
+   + 0.0777777777777778 MCP[20] + 0.0277777777777778 MCP[21] <= 516
+ buy_block_INM_19: 0.0358024691358025 MCP[1] + 0.0666666666666667 MCP[2]
+   + 0.1185185185185185 MCP[3] + 0.0246913580246914 MCP[4]
+   + 0.1197530864197531 MCP[5] + 0.0938271604938272 MCP[6]
+   + 0.0111111111111111 MCP[8] + 0.062962962962963 MCP[13]
+   + 0.0592592592592593 MCP[14] + 0.0777777777777778 MCP[16]
+   + 0.0617283950617284 MCP[18] + 0.1172839506172839 MCP[20]
+   + 0.0864197530864197 MCP[21] + 0.0641975308641975 MCP[23] <= 239
+ buy_block_INM_21: 0.0885496183206107 MCP[1] + 0.0793893129770992 MCP[2]
+   + 0.0656488549618321 MCP[3] + 0.0229007633587786 MCP[8]
+   + 0.0717557251908397 MCP[10] + 0.116030534351145 MCP[13]
+   + 0.0229007633587786 MCP[14] + 0.0198473282442748 MCP[15]
+   + 0.1404580152671756 MCP[17] + 0.0809160305343511 MCP[19]
+   + 0.100763358778626 MCP[20] + 0.1053435114503817 MCP[21]
+   + 0.0854961832061069 MCP[22] <= 3168
+ buy_block_INM_22: 0.2352941176470588 MCP[3] + 0.173374613003096 MCP[4]
+   + 0.0743034055727554 MCP[8] + 0.1764705882352941 MCP[14]
+   + 0.0588235294117647 MCP[18] + 0.2786377708978328 MCP[19]
+   + 0.00309597523219814 MCP[22] <= 1427
+ buy_block_INM_24: 0.00798403193612774 MCP[2] + 0.0678642714570858 MCP[3]
+   + 0.0998003992015968 MCP[4] + 0.1037924151696607 MCP[7]
+   + 0.1397205588822355 MCP[9] + 0.1536926147704591 MCP[10]
+   + 0.1596806387225549 MCP[12] + 0.0518962075848303 MCP[17]
+   + 0.0698602794411178 MCP[19] + 0.1357285429141716 MCP[20]
+   + 0.00998004 MCP[24] <= 188
+ buy_block_INM_27: 0.1700404858299595 MCP[2] + 0.0465587044534413 MCP[3]
+   + 0.01417004048583 MCP[4] + 0.0991902834008097 MCP[8]
+   + 0.0708502024291498 MCP[10] + 0.1356275303643725 MCP[11]
+   + 0.1052631578947368 MCP[12] + 0.1700404858299595 MCP[14]
+   + 0.1639676113360324 MCP[17] + 0.0161943319838057 MCP[18]
+   + 0.00809716599190283 MCP[22] <= 637
+ buy_block_INM_28: 0.0390625 MCP[1] + 0.115234375 MCP[2]
+   + 0.150390625 MCP[3] + 0.1171875 MCP[4] + 0.001953125 MCP[5]
+   + 0.03125 MCP[8] + 0.0234375 MCP[12] + 0.12109375 MCP[15]
+   + 0.1875 MCP[18] + 0.099609375 MCP[19] + 0.11328125 MCP[20] <= 3439
+ buy_block_INM_30: 0.033112582781457 MCP[3] + 0.1407284768211921 MCP[4]
+   + 0.1225165562913907 MCP[8] + 0.0811258278145695 MCP[10]
+   + 0.1556291390728477 MCP[12] + 0.1009933774834437 MCP[13]
+   + 0.1639072847682119 MCP[14] + 0.00496688741721854 MCP[15]
+   + 0.0264900662251656 MCP[17] + 0.1407284768211921 MCP[19]
+   + 0.0298013245033113 MCP[22] <= 2451
+ buy_block_INM_32: 0.1208226221079691 MCP[3] + 0.0475578406169666 MCP[5]
+   + 0.1002570694087404 MCP[6] + 0.1272493573264781 MCP[8]
+   + 0.0938303341902314 MCP[10] + 0.1118251928020565 MCP[12]
+   + 0.0218508997429306 MCP[13] + 0.0629820051413882 MCP[15]
+   + 0.0501285347043702 MCP[18] + 0.0848329048843188 MCP[19]
+   + 0.1208226221079691 MCP[23] + 0.057840616966581 MCP[24] <= 3325
+ buy_block_INM_33: 0.0536013400335008 MCP[2] + 0.1423785594639866 MCP[4]
+   + 0.1088777219430486 MCP[5] + 0.1273031825795645 MCP[9]
+   + 0.0988274706867672 MCP[10] + 0.1306532663316583 MCP[11]
+   + 0.0418760469011725 MCP[12] + 0.1423785594639866 MCP[15]
+   + 0.016750418760469 MCP[17] + 0.1155778894472362 MCP[20]
+   + 0.0217755443886097 MCP[23] <= 3324
+ buy_block_INM_39: 0.0343283582089552 MCP[2] + 0.0925373134328358 MCP[3]
+   + 0.0671641791044776 MCP[6] + 0.0776119402985075 MCP[8]
+   + 0.1268656716417911 MCP[9] + 0.1208955223880597 MCP[12]
+   + 0.0880597014925373 MCP[15] + 0.00895522388059702 MCP[16]
+   + 0.1268656716417911 MCP[17] + 0.0701492537313433 MCP[18]
+   + 0.1119402985074627 MCP[19] + 0.0313432835820895 MCP[20]
+   + 0.0432835820895522 MCP[22] <= 1664
+ buy_block_INM_40: 0.1614785992217899 MCP[1] + 0.0739299610894942 MCP[2]
+   + 0.0214007782101167 MCP[4] + 0.00972762645914397 MCP[5]
+   + 0.0622568093385214 MCP[6] + 0.0505836575875486 MCP[9]
+   + 0.0875486381322957 MCP[10] + 0.122568093385214 MCP[11]
+   + 0.0953307392996109 MCP[12] + 0.0350194552529183 MCP[13]
+   + 0.1867704280155642 MCP[18] + 0.0505836575875486 MCP[23]
+   + 0.0428015564202335 MCP[24] <= 2898
+ buy_block_INM_42: 0.0734870317002882 MCP[1] + 0.0475504322766571 MCP[4]
+   + 0.0461095100864553 MCP[5] + 0.0864553314121037 MCP[10]
+   + 0.1080691642651297 MCP[11] + 0.0965417867435159 MCP[14]
+   + 0.0475504322766571 MCP[17] + 0.0951008645533141 MCP[18]
+   + 0.1023054755043228 MCP[19] + 0.053314121037464 MCP[20]
+   + 0.1368876080691643 MCP[22] + 0.106628242074928 MCP[24] <= 3280
+ sell_block_INM_43: 0.1263157894736842 MCP[4] + 0.1298245614035088 MCP[5]
+   + 0.1491228070175439 MCP[8] + 0.1175438596491228 MCP[10]
+   + 0.0701754385964912 MCP[12] + 0.1421052631578947 MCP[16]
+   + 0.1333333333333333 MCP[19] + 0.131578947368421 MCP[20] >= -484
+ buy_block_INM_44: 0.0789149198520345 MCP[1] + 0.1146732429099877 MCP[2]
+   + 0.1220715166461159 MCP[3] + 0.030826140567201 MCP[4]
+   + 0.0234278668310728 MCP[8] + 0.1072749691738594 MCP[10]
+   + 0.1196054254007398 MCP[11] + 0.0406905055487053 MCP[13]
+   + 0.0357583230579531 MCP[15] + 0.094944512946979 MCP[16]
+   + 0.0826140567200986 MCP[20] + 0.092478421701603 MCP[22]
+   + 0.0567200986436498 MCP[23] <= 3643
+ sell_block_INM_45: 0.099009900990099 MCP[2] + 0.1414427157001414 MCP[6]
+   + 0.0806223479490806 MCP[8] + 0.1004243281471004 MCP[11]
+   + 0.0367751060820368 MCP[12] + 0.0806223479490806 MCP[15]
+   + 0.0650636492220651 MCP[17] + 0.0155586987270156 MCP[18]
+   + 0.074964639321075 MCP[20] + 0.082036775106082 MCP[21]
+   + 0.14002828854314 MCP[22] + 0.0834512022630835 MCP[24] >= -227
+ buy_block_INM_47: 0.0162337662337662 MCP[1] + 0.0568181818181818 MCP[3]
+   + 0.0941558441558442 MCP[5] + 0.051948051948052 MCP[7]
+   + 0.0324675324675325 MCP[8] + 0.1331168831168831 MCP[10]
+   + 0.00487012987012987 MCP[11] + 0.1071428571428572 MCP[14]
+   + 0.1542207792207792 MCP[17] + 0.0876623376623377 MCP[19]
+   + 0.1055194805194805 MCP[20] + 0.1558441558441558 MCP[23] <= 3093
+ buy_block_INM_48: 0.0996563573883162 MCP[1] + 0.0778923253150057 MCP[2]
+   + 0.0217640320733104 MCP[3] + 0.1099656357388316 MCP[4]
+   + 0.0641466208476518 MCP[6] + 0.0721649484536083 MCP[7]
+   + 0.0446735395189003 MCP[8] + 0.0778923253150057 MCP[9]
+   + 0.0320733104238259 MCP[13] + 0.0194730813287514 MCP[14]
+   + 0.1065292096219931 MCP[16] + 0.0607101947308133 MCP[17]
+   + 0.0492554410080183 MCP[21] + 0.0859106529209622 MCP[23]
+   + 0.0778923253150057 MCP[24] <= 1370
+ buy_block_INM_51: 0.158953722334004 MCP[3] + 0.0543259557344064 MCP[4]
+   + 0.0543259557344064 MCP[6] + 0.1951710261569417 MCP[9]
+   + 0.1629778672032193 MCP[10] + 0.0925553319919517 MCP[13]
+   + 0.1187122736418511 MCP[15] + 0.1629778672032193 MCP[24] <= 3671
+ buy_block_INM_58: 0.0807381776239908 MCP[1] + 0.0426758938869666 MCP[2]
+   + 0.1130334486735871 MCP[3] + 0.0841983852364475 MCP[4]
+   + 0.013840830449827 MCP[5] + 0.0311418685121107 MCP[7]
+   + 0.0991926182237601 MCP[8] + 0.0461361014994233 MCP[9]
+   + 0.0738177623990773 MCP[10] + 0.00115340253748558 MCP[13]
+   + 0.063437139561707 MCP[15] + 0.0899653979238754 MCP[16]
+   + 0.0334486735870819 MCP[17] + 0.0934256055363322 MCP[18]
+   + 0.0715109573241061 MCP[19] + 0.0346020761245675 MCP[20]
+   + 0.027681660899654 MCP[22] <= 447
+ linked_block_positive_family_parent_61: - 25 MCP[1] - 62 MCP[2]
+   - 61 MCP[3] - 53 MCP[4] - 56 MCP[6] - 80 MCP[7] - 175 MCP[8]
+   - 92 MCP[14] - 84 MCP[15] - 83 MCP[18] - 70 MCP[19] - 151 MCP[21]
+   - 84 MCP[23] - 72 MCP[24] >= -3.040332e+06
+ buy_block_INM_62: 0.0534188034188034 MCP[1] + 0.047008547008547 MCP[2]
+   + 0.0384615384615385 MCP[3] + 0.0106837606837607 MCP[6]
+   + 0.0705128205128205 MCP[7] + 0.1773504273504274 MCP[8]
+   + 0.1965811965811966 MCP[14] + 0.1153846153846154 MCP[19]
+   + 0.1111111111111111 MCP[21] + 0.1794871794871795 MCP[23] <= 1209
+ linked_block_positive_leaf_62: - 25 MCP[1] - 22 MCP[2] - 18 MCP[3]
+   - 5 MCP[6] - 33 MCP[7] - 83 MCP[8] - 92 MCP[14] - 54 MCP[19]
+   - 52 MCP[21] - 84 MCP[23] >= -565812
+ linked_block_positive_family_parent_63: - 17 MCP[1] - 44 MCP[2]
+   - 69 MCP[3] - 69 MCP[4] - 77 MCP[5] - 68 MCP[6] - 28 MCP[7] - 125 MCP[9]
+   - 41 MCP[10] - 80 MCP[13] - 76 MCP[14] - 8 MCP[15] - 139 MCP[16]
+   - 4 MCP[17] - 38 MCP[18] - 11 MCP[20] - 52 MCP[21] - 37 MCP[22]
+   - 113 MCP[23] - 82 MCP[24] >= -1.760384e+06
+ buy_block_INM_64: 0.0257575757575758 MCP[1] + 0.0651515151515152 MCP[2]
+   + 0.0621212121212121 MCP[3] + 0.1045454545454545 MCP[4]
+   + 0.103030303030303 MCP[6] + 0.1015151515151515 MCP[9]
+   + 0.0621212121212121 MCP[10] + 0.1151515151515152 MCP[14]
+   + 0.0121212121212121 MCP[15] + 0.1257575757575758 MCP[16]
+   + 0.0787878787878788 MCP[21] + 0.143939393939394 MCP[23] <= 2763
+ linked_block_positive_leaf_64: - 17 MCP[1] - 43 MCP[2] - 41 MCP[3]
+   - 69 MCP[4] - 68 MCP[6] - 67 MCP[9] - 41 MCP[10] - 76 MCP[14]
+   - 8 MCP[15] - 83 MCP[16] - 52 MCP[21] - 95 MCP[23] >= -1.82358e+06
+ linked_block_positive_family_parent_68: - 6 MCP[8] - 68 MCP[11]
+   - 94 MCP[12] - 12 MCP[14] - 38 MCP[15] - 67 MCP[23] - 46 MCP[24]
+   >= -1.106864e+06
+ linked_block_positive_family_parent_72: - 121 MCP[1] - 41 MCP[2]
+   - 134 MCP[3] - 103 MCP[4] - 42 MCP[5] - 149 MCP[6] - 79 MCP[7]
+   - 66 MCP[9] - 23 MCP[10] - 123 MCP[11] - 96 MCP[13] - 92 MCP[14]
+   - 49 MCP[15] - 79 MCP[16] - 133 MCP[17] - 97 MCP[18] - 87 MCP[19]
+   - 82 MCP[20] - 141 MCP[22] - 53 MCP[23] - 80 MCP[24] >= -4.826891e+06
+ buy_block_INM_73: 0.1261127596439169 MCP[3] + 0.0786350148367953 MCP[4]
+   + 0.043026706231454 MCP[5] + 0.0905044510385757 MCP[6]
+   + 0.0979228486646884 MCP[9] + 0.1083086053412463 MCP[11]
+   + 0.043026706231454 MCP[13] + 0.1364985163204748 MCP[14]
+   + 0.1439169139465875 MCP[18] + 0.1320474777448071 MCP[22] <= 2113
+ linked_block_positive_leaf_73: - 85 MCP[3] - 53 MCP[4] - 29 MCP[5]
+   - 61 MCP[6] - 66 MCP[9] - 73 MCP[11] - 29 MCP[13] - 92 MCP[14]
+   - 97 MCP[18] - 89 MCP[22] >= -1.424162e+06
+ buy_block_INM_74: 0.1283422459893048 MCP[1] + 0.0231729055258467 MCP[5]
+   + 0.0802139037433155 MCP[6] + 0.0409982174688057 MCP[10]
+   + 0.089126559714795 MCP[11] + 0.1194295900178253 MCP[13]
+   + 0.1408199643493761 MCP[16] + 0.0588235294117647 MCP[17]
+   + 0.1461675579322638 MCP[20] + 0.0303030303030303 MCP[23]
+   + 0.142602495543672 MCP[24] <= 3264
+ linked_block_positive_leaf_74: - 72 MCP[1] - 13 MCP[5] - 45 MCP[6]
+   - 23 MCP[10] - 50 MCP[11] - 67 MCP[13] - 79 MCP[16] - 33 MCP[17]
+   - 82 MCP[20] - 17 MCP[23] - 80 MCP[24] >= -1.831104e+06
+ linked_block_positive_family_parent_75: - 15 MCP[1] - 78 MCP[2]
+   - 30 MCP[3] - 53 MCP[7] - 53 MCP[12] - 39 MCP[18] - 79 MCP[21]
+   - 56 MCP[23] - 71 MCP[24] >= -1.294968e+06
+ linked_block_positive_family_parent_77: - 7 MCP[1] - 38 MCP[3] - 79 MCP[4]
+   - 17 MCP[5] - 95 MCP[7] - 111 MCP[8] - 19 MCP[9] - 37 MCP[10]
+   - 39 MCP[12] - 55 MCP[13] - 88 MCP[14] - 63 MCP[15] - 121 MCP[16]
+   - 23 MCP[17] - 52 MCP[18] - 47 MCP[19] - 53 MCP[24] >= -1.083344e+06
+ buy_block_INM_78: 0.07421875 MCP[3] + 0.154296875 MCP[4]
+   + 0.033203125 MCP[5] + 0.0703125 MCP[7] + 0.16796875 MCP[8]
+   + 0.037109375 MCP[9] + 0.076171875 MCP[12] + 0.171875 MCP[14]
+   + 0.078125 MCP[16] + 0.044921875 MCP[17] + 0.091796875 MCP[19] <= 382
+ linked_block_positive_leaf_78: - 38 MCP[3] - 79 MCP[4] - 17 MCP[5]
+   - 36 MCP[7] - 86 MCP[8] - 19 MCP[9] - 39 MCP[12] - 88 MCP[14]
+   - 40 MCP[16] - 23 MCP[17] - 47 MCP[19] >= -195584
+ linked_block_positive_family_parent_79: - 24 MCP[1] - 21 MCP[2]
+   - 54 MCP[5] - 53 MCP[12] - 44 MCP[13] - 48 MCP[14] - 47 MCP[15]
+   - 77 MCP[16] - 78 MCP[17] - 65 MCP[18] - 46 MCP[21] - 83 MCP[22]
+   - 16 MCP[23] >= -924304
+ buy_block_INM_81: - 57 MCP[19] <= 2066
+ buy_block_INM_84: - 48 MCP[13] <= 1375
+ buy_block_INM_85: - 80 MCP[14] <= 3415
+ MIC_condition_CO_1: 220 MCP[1] >= 1130
+ MIC_condition_CO_2: 370 MCP[5] >= 1530
+ MIC_condition_CO_3: 460 MCP[10] >= 1420
+ load_gradient_surplus_CO_4: 10 MCP[12] + 20 MCP[13] + 10 MCP[14] >= 360
+ load_gradient_surplus_CO_9: 10 MCP[12] + 20 MCP[13] + 10 MCP[14] >= 130
+ load_gradient_surplus_CO_10: 25 MCP[16] + 50 MCP[17] + 25 MCP[18] >= 875
+ MIC_condition_SCO_1: 220 MCP[1] >= 1360
+ MIC_condition_SCO_2: 370 MCP[5] >= 2890
+ MIC_condition_SCO_3: 460 MCP[10] >= 4520
+ load_gradient_SCO_4: 10 MCP[12] + 20 MCP[13] + 10 MCP[14] >= 360
+ load_gradient_SCO_9: 30 MCP[12] + 60 MCP[13] + 30 MCP[14] >= 390
+ load_gradient_SCO_10: 25 MCP[16] + 50 MCP[17] + 25 MCP[18] >= 875
+ MP_condition_SCO_12: 81 MCP[14] + 170 MCP[16] <= 128905
+ MP_condition_SCO_13: 216 MCP[24] <= 95286
+ load_gradient_SCO_14: - 20 MCP[8] - 20 MCP[10] - 20 MCP[24] >= -78640
+ MP_condition_SCO_15: 341 MCP[20] + 238 MCP[23] <= 1.361868e+06
+ MP_condition_SCO_16: 201 MCP[2] + 83 MCP[3] + 252 MCP[15] + 67 MCP[20]
+   + 193 MCP[21] + 38 MCP[24] <= 1.486551e+06
+ load_gradient_SCO_19: - 10 MCP[4] - 10 MCP[12] >= -55210
+ MP_condition_SCO_20: 131 MCP[5] + 204 MCP[12] + 141 MCP[19] + 144 MCP[20]
+   <= 1.133145e+06
+ load_gradient_SCO_21: - 10 MCP[10] - 10 MCP[12] - 10 MCP[17] - 20 MCP[18]
+   - 10 MCP[19] >= -84420
+ MP_condition_SCO_22: 178 MCP[11] + 81 MCP[12] + 271 MCP[15] + 241 MCP[17]
+   + 19 MCP[24] <= 1.299383e+06
+ load_gradient_SCO_23: - 20 MCP[2] - 20 MCP[5] - 16 MCP[9] - 20 MCP[24]
+   >= -142232
+ MP_condition_SCO_24: 129 MCP[9] + 215 MCP[14] + 121 MCP[21] + 172 MCP[23]
+   <= 1.313011e+06
+ MP_condition_SCO_26: 31 MCP[2] + 247 MCP[4] + 153 MCP[5] + 85 MCP[11]
+   + 268 MCP[22] <= 1.634909e+06
+ load_gradient_SCO_27: - 20 MCP[2] - 20 MCP[10] - 20 MCP[13] - 20 MCP[17]
+   - 20 MCP[18] >= -189220
+ load_gradient_SCO_31: - 217 MCP[3] - 40 MCP[12] - 267 MCP[15]
+   - 121 MCP[22] >= -1.698407e+06
+ MP_condition_SCO_35: 158 MCP[7] + 99 MCP[17] + 84 MCP[20] <= 961124
+ load_gradient_SCO_38: - 260 MCP[3] - 491 MCP[11] - 145 MCP[14]
+   - 91 MCP[19] - 239 MCP[20] >= -3.247371e+06
+ MP_condition_SCO_39: 171 MCP[8] + 123 MCP[17] + 88 MCP[22] <= 637647
+ MP_condition_SCO_42: 163 MCP[3] + 59 MCP[10] <= 246583
+ MP_condition_SCO_43: 148 MCP[3] + 111 MCP[11] + 155 MCP[12] + 196 MCP[24]
+   <= 1.445066e+06
+ MP_condition_SCO_49: 195 MCP[5] + 40 MCP[8] + 166 MCP[9] + 63 MCP[13]
+   + 259 MCP[16] <= 1.708763e+06
+ MP_condition_SCO_52: 44 MCP[5] + 107 MCP[17] <= 248938
+ load_gradient_SCO_54: - 153 MCP[2] - 84 MCP[19] - 103 MCP[20]
+   - 165 MCP[22] >= -708685
+ MP_condition_SCO_55: 120 MCP[2] + 249 MCP[9] <= 742364
+ MP_condition_SCO_57: 215 MCP[1] + 115 MCP[6] + 124 MCP[16] + 190 MCP[21]
+   <= 1.015486e+06
+ MP_condition_SCO_58: 136 MCP[1] + 82.1 MCP[15] + 161 MCP[22]
+   <= 529930.1999999996
+ load_gradient_SCO_59: - 264 MCP[1] - 22 MCP[3] - 290 MCP[11] - 206 MCP[22]
+   >= -2.054876e+06
+ MP_condition_SCO_60: 133 MCP[13] + 95 MCP[22] <= 791316
+ load_gradient_SCO_61: - 100 MCP[6] - 269 MCP[20] >= -920580
+ MP_condition_SCO_63: 266 MCP[9] + 82 MCP[12] + 160 MCP[16] <= 893366
+ MP_condition_SCO_67: 150 MCP[9] + 15 MCP[16] <= 149485
+ load_gradient_SCO_74: - 20 MCP[20] - 20 MCP[24] >= -136120
+ MP_condition_SCO_79: 130 MCP[4] + 133 MCP[16] + 193 MCP[17] + 296 MCP[21]
+   + 28 MCP[22] <= 1.39097e+06
+ load_gradient_SCO_80: - 20 MCP[5] - 20 MCP[10] - 20 MCP[11] - 20 MCP[14]
+   >= -192500
+ load_gradient_SCO_81: - 10 MCP[8] - 10 MCP[14] - 10 MCP[21] - 10 MCP[22]
+   >= -86840
+ MP_condition_SCO_83: 269 MCP[5] + 96 MCP[7] <= 873904
+ MP_condition_SCO_84: 25 MCP[8] + 185 MCP[9] + 94 MCP[12] + 11 MCP[13]
+   + 282 MCP[22] <= 700209
+ load_gradient_SCO_85: - 10 MCP[3] - 10 MCP[20] - 10 MCP[22] >= -47060
+ load_gradient_SCO_86: - 20 MCP[9] - 20 MCP[10] >= -57040
+ load_gradient_SCO_87: - 20 MCP[8] - 20 MCP[10] >= -112460
+ load_gradient_SCO_88: - 68 MCP[2] - 178 MCP[3] >= -401346
+ MP_condition_SCO_89: 265 MCP[1] + 153 MCP[4] + 120 MCP[8] + 156 MCP[16]
+   <= 1.39949e+06
+ load_gradient_SCO_90: - 260 MCP[6] - 55 MCP[8] - 267 MCP[9] - 131 MCP[21]
+   - 220 MCP[22] >= -1.302785e+06
+ load_gradient_SCO_95: - 175 MCP[7] - 32 MCP[13] - 86 MCP[18] >= -440968
+ load_gradient_SCO_97: - 10 MCP[2] - 10 MCP[9] - 10 MCP[12] - 10 MCP[22]
+   - 10 MCP[23] >= -61080
+ load_gradient_SCO_98: - 240 MCP[11] - 15 MCP[13] - 32 MCP[21]
+   - 213 MCP[22] >= -917400
+ load_gradient_SCO_99: - 10 MCP[10] - 10 MCP[13] - 10 MCP[17] >= -56070
+ load_gradient_SCO_102: - 20 MCP[2] - 20 MCP[10] - 40 MCP[11] - 20 MCP[12]
+   - 20 MCP[19] >= -251840
+ load_gradient_SCO_103: - 10 MCP[3] - 10 MCP[11] - 10 MCP[18] - 10 MCP[22]
+   - 10 MCP[23] >= -80180
+ load_gradient_SCO_106: - 10 MCP[6] - 10 MCP[11] - 10 MCP[14] - 10 MCP[23]
+   >= -76270
+ MP_condition_SCO_107: 138 MCP[11] + 155 MCP[14] + 29 MCP[17] <= 684085
+ load_gradient_SCO_108: - 288 MCP[8] - 165 MCP[15] - 505 MCP[23]
+   - 73 MCP[24] >= -2.022041e+06
+ MP_condition_SCO_109: 172 MCP[4] + 205 MCP[5] + 111 MCP[6] + 36 MCP[8]
+   + 261 MCP[19] <= 1.840598e+06
+ load_gradient_SCO_110: - 20 MCP[7] - 20 MCP[9] - 20 MCP[20] - 20 MCP[22]
+   >= -218780
 Bounds
  -500 <= MCP[1] <= 4000
  -500 <= MCP[2] <= 4000
