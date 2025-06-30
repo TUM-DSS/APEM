@@ -16,19 +16,19 @@ output_csv = RAW_DATA_DIR / "omie/OMIE_orderdata_parsed.csv"
 
 # === STEP 2: Read DET file (detail of orders) ===
 det_colspecs = [
-    (0, 10),   # cod_oferta
-    (10, 15),  # version
-    (15, 18),  # periodo
-    (18, 20),  # num_block - 0 for simple order
-    (20, 22),  # num_tramo - 1 for block order
-    (22, 24),  # grupo_excl - exclusive block order group
-    (24, 41),  # precio
-    (41, 48),  # cantidad
-    (48, 55),  # mav
-    (55, 60),  # mar
+    (0, 7),   # cod_oferta
+    (7, 10),  # version
+    (10, 12),  # periodo
+    (12, 14),  # num_block - 0 for simple order
+    #(20, 22),  # num_tramo - 1 for block order
+    #(22, 24),  # grupo_excl - exclusive block order group
+    (31, 48),  # precio
+    (48, 55),  # cantidad
+    (55, 56),  # mav
+    (56, 57),  # mar
 ]
-det_columns = ['cod_oferta', 'version', 'periodo', 'num_block', 'num_tramo',
-               'grupo_excl', 'precio', 'cantidad', 'mav', 'mar']
+det_columns = ['cod_oferta', 'version', 'periodo', 'num_block',
+               'precio', 'cantidad', 'mav', 'mar']
 det_df = pd.read_fwf(det_path, colspecs=det_colspecs, names=det_columns, encoding="latin1")
 
 # === STEP 3: Read CAB file (header metadata) ===
