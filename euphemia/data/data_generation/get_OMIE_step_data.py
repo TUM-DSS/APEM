@@ -1,4 +1,4 @@
-from euphemia.utils.paths import EUPHEMIA_ROOT
+from euphemia.utils.paths import DATA_DIR
 
 import datetime as dt
 from OMIEData.DataImport.omie_supply_demand_curve_importer import OMIESupplyDemandCurvesImporter
@@ -31,7 +31,7 @@ if all_data:
     print(combined_df.head())
     
     # Save to CSV
-    output_path = EUPHEMIA_ROOT / 'data/raw_data/omie/supply_demand.csv'
+    output_path = DATA_DIR / 'omie/raw_data/supply_demand.csv'
     combined_df.to_csv(output_path, index=False)
     print(f"Data saved to {output_path}")
 else:

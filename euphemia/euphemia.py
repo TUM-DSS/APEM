@@ -75,13 +75,12 @@ class Euphemia:
         self.price_lower_bound = -500
         self.price_upper_bound = 4000
         self.delta_PAB = 50
-        self.delta_MIC = 100
-        self.delta_load_gradient = 100
+        self.beta_MIC = 0.1
+        self.delta_load_gradient = 5000
         self.epsilon = 1e-4
-        self.distance_factor = 1e-1
-        self.max_iterations = 2000
+        self.max_iterations = 50
         self.iteration = 0
-        self.objective_lower_bound = 0
+        self.start_time = 0
         self.cutting_strategy = CutType.PB
         self.paths = {
             "alloc": "euphemia_results/allocation",
@@ -118,18 +117,17 @@ class Euphemia:
             - no PAB constraints
             - MIC
         """
-        start_time = time.time()
+        self.start_time = time.time()
 
         add_objective(self)
         add_market_constraints(self)
         add_network_constraints(self)
-        self.max_iterations = self.max_iterations if not self.reinsertion_run else 100
-        self.iteration = 1
+        self.max_iterations = self.max_iterations if not self.reinsertion_run else 10
 
         print("Solving master problem...")
         self.solve_master_problem()
-        self.model.write(os.path.join(self.paths['debug'], f"master_problem.lp"))
-        print(f"Master problem status: {self.model.Status}")
+        self.model.write(os.path.join(EUPHEMIA_ROOT / self.paths['debug'], f"master_problem.lp"))
+        print(f"Master problem status: {self.model.Status}, {self.model.ObjVal}")
         if self.model.Status == GRB.Status.INFEASIBLE:
             print("Master problem is infeasible")
 
@@ -142,13 +140,16 @@ class Euphemia:
 
             # Log metrics for evaluation
             if not self.reinsertion_run:
-                elapsed = time.time() - start_time
+                elapsed = time.time() - self.start_time
                 file_path = EUPHEMIA_ROOT / self.paths['evaluation'] / f"evaluation.txt"
                 with open(file_path, 'a', buffering=1) as file:
                     file.write(f"--- Evaluation: {self.cutting_strategy} on {self.scenario.name} ---\n")
+                    if (self.cutting_strategy == CutType.PB):
+                        file.write(f"- beta_MIC: {self.beta_MIC} ; delta_load_gradient: {self.delta_load_gradient} - \n")
                     file.write(f"Iterations: {self.iteration}\n")
                     file.write(f"Final welfare: {self.current_best_objective}\n")
-                    file.write(f"Time passed: {elapsed:.3f} seconds\n\n")
+                    file.write(f"Time passed: {elapsed:.3f} seconds\n")
+                    file.write(f"Clearing prices {self.prices}\n\n")
                     file.flush()
                     os.fsync(file.fileno())
 
@@ -169,6 +170,18 @@ class Euphemia:
             if self.iteration >= self.max_iterations:
                 print(f"Maximum iterations ({self.max_iterations}) reached. Terminating.")
                 callbackModel.terminate()
+                elapsed = time.time() - self.start_time
+                # Log if no solution could be found
+                file_path = EUPHEMIA_ROOT / self.paths['evaluation'] / f"evaluation.txt"
+                with open(file_path, 'a', buffering=1) as file:
+                    file.write(f"--- Evaluation: {self.cutting_strategy} on {self.scenario.name} ---\n")
+                    if (self.cutting_strategy == CutType.PB):
+                        file.write(
+                            f"- beta_MIC: {self.beta_MIC} ; delta_load_gradient: {self.delta_load_gradient} - \n")
+                    file.write(f"No solution in iteration limit of {self.max_iterations}\n")
+                    file.write(f"Time passed: {elapsed:.3f} seconds\n\n")
+                    file.flush()
+                    os.fsync(file.fileno())
                 return
                 
             # get current solution
@@ -240,10 +253,10 @@ class Euphemia:
                                     elif metadata[0] == OrderType.SCALABLE_COMPLEX:
                                         terms.append(1 - self.accept_scalable[metadata[1]])
 
-                        callbackModel.cbLazy(gp.quicksum(terms) >= 1)
-                        # For security to always invalidate solution
-                        # TODO check if necessary
-                        self.add_no_good_cut(callbackModel=callbackModel)
+                        if terms:
+                            callbackModel.cbLazy(gp.quicksum(terms) >= 1)
+                        else:
+                            self.add_no_good_cut(callbackModel=callbackModel)
 
                     elif self.cutting_strategy == CutType.NG:
                         self.add_no_good_cut(callbackModel=callbackModel)
@@ -406,6 +419,7 @@ class Euphemia:
                 self.add_no_good_cut(callbackModel)
         else:
             print("Something went wrong and in the unconstrained problem no prices could be found")
+            self.add_no_good_cut(callbackModel)
 
 
     def add_price_based_cut_to_block(self, callbackModel, block_order) -> None:
@@ -522,7 +536,7 @@ class Euphemia:
                         res.append(i)
 
         path_key = 'pab' if not threshold else 'block_inm_threshold'
-        file_path = f"{self.paths[path_key]}/iteration_{self.iteration}.txt"
+        file_path = f"{EUPHEMIA_ROOT / self.paths[path_key]}/iteration_{self.iteration}.txt"
 
         with open(file_path, 'w') as file:
             file.writelines(f"{bid}\n" for bid in res)
@@ -552,7 +566,7 @@ class Euphemia:
     def get_MIC_complex_orders(self, threshold: Optional[bool] = False, reinsertion: Optional[bool] = False) -> list:
         """
         If threshold is False, return a list with complex orders that do not have the MIC/MP condition satisfied.
-        If threshold is True, return a list of complex orders that are out-of-the-money by at most delta_MIC.
+        If threshold is True, return a list of complex orders that are out-of-the-money by at least beta_MIC * expected.
         """
         prices = self.prices if not reinsertion else self.prices_reinsertion
 
@@ -588,13 +602,13 @@ class Euphemia:
                 elif i in mp_complex_order_ids and expected < actual:
                     res.append(i)
             else:
-                if i in mic_complex_order_ids and expected - self.delta_MIC > actual:
+                if i in mic_complex_order_ids and expected *(1-self.beta_MIC) > actual:
                     res.append(i)
-                elif i in mp_complex_order_ids and actual > expected + self.delta_MIC:
+                elif i in mp_complex_order_ids and actual > expected * (1+self.beta_MIC):
                     res.append(i)
 
             path_key = 'complex_mic_inm_threshold' if threshold else 'complex_mic'
-            file_path = f"{self.paths[path_key]}/iteration_{self.iteration}.txt"
+            file_path = f"{EUPHEMIA_ROOT / self.paths[path_key]}/iteration_{self.iteration}.txt"
 
             with open(file_path, 'w') as file:
                 file.writelines(f"{bid}\n" for bid in res)
@@ -606,8 +620,8 @@ class Euphemia:
         """
         If threshold is False, return a list with scalable complex orders that do not have the MIC/MP condition
         satisfied.
-        If threshold is True, return a list of scalable complex orders that are out-of-the-money by at most
-        delta_MIC.
+        If threshold is True, return a list of scalable complex orders that are out-of-the-money by at least
+        beta_MIC * expected.
         """
         prices = self.prices if not reinsertion else self.prices_reinsertion
 
@@ -647,13 +661,13 @@ class Euphemia:
                 elif i in mp_scalable_order_ids and expected < actual:
                     res.append(i)
             else:
-                if i in mic_scalable_order_ids and expected - self.delta_MIC > actual:
+                if i in mic_scalable_order_ids and expected *(1-self.beta_MIC)  > actual:
                     res.append(i)
-                elif i in mp_scalable_order_ids and actual > expected + self.delta_MIC:
+                elif i in mp_scalable_order_ids and actual > (1+self.beta_MIC):
                     res.append(i)
 
             path_key = 'scalable_mic_inm_threshold' if threshold else 'scalable_mic'
-            file_path = f"{self.paths[path_key]}/iteration_{self.iteration}.txt"
+            file_path = f"{EUPHEMIA_ROOT / self.paths[path_key]}/iteration_{self.iteration}.txt"
 
             with open(file_path, 'w') as file:
                 file.writelines(f"{bid}\n" for bid in res)

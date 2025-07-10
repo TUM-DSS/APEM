@@ -8,13 +8,13 @@ import random
 from euphemia.enums.cut_types import CutType
 from euphemia.enums.order_types import OrderType
 from euphemia.utils.calculations import calculate_flexible_order_active_period
+from euphemia.utils.paths import EUPHEMIA_ROOT
 
 
 class Price_Subproblem:
     def __init__(self, master_problem):
         self.master_problem = master_problem
         self.M = master_problem.M
-        self.distance_factor = master_problem.distance_factor
         self.solution_dict_df = pd.DataFrame(self.master_problem.current_alloc_solution)
         self.epsilon = master_problem.epsilon
         self.constraint_meta_data = {}
@@ -41,7 +41,7 @@ class Price_Subproblem:
             self.add_scalable_complex_order_constraints()
 
 
-        self.pricing_model.write(f"{self.master_problem.paths['debug']}/pricing_model.lp")
+        self.pricing_model.write(f"{EUPHEMIA_ROOT / self.master_problem.paths['debug']}/pricing_model.lp")
 
         self.pricing_model.optimize()
 
@@ -157,11 +157,11 @@ class Price_Subproblem:
                     if is_sale:
                         # Sales order: INM, if p < avg(MCP)
                         self.pricing_model.addConstr(weighted_mcp >= p, f"sell_block_INM_{block_id}")
-                        self.constraint_meta_data[f"sell_block_INM_{block_id}"] = (OrderType.BLOCK, block_id, CutType.PB)
+                        self.constraint_meta_data[f"sell_block_INM_{block_id}"] = (OrderType.BLOCK, block_id)
                     else:
                         # Purchase order: INM, if p > avg(MCP)
                         self.pricing_model.addConstr(weighted_mcp <= p, f"buy_block_INM_{block_id}")
-                        self.constraint_meta_data[f"buy_block_INM_{block_id}"] = (OrderType.BLOCK, block_id, CutType.PB)
+                        self.constraint_meta_data[f"buy_block_INM_{block_id}"] = (OrderType.BLOCK, block_id)
 
                     # Linked leaf blocks are not allowed to generate negative surplus
                     if block_order['block_type'] == 'linked':
@@ -183,7 +183,7 @@ class Price_Subproblem:
                     self.MCP[t] - child['p']) for _, child in children_df.iterrows()) for t in
             self.master_problem.periods) >= 0,
                                      f'linked_block_positive_family_parent_{parent_id}')
-        self.constraint_meta_data[f'linked_block_positive_family_parent_{parent_id}'] = (OrderType.BLOCK, parent_id, CutType.CB)
+        self.constraint_meta_data[f'linked_block_positive_family_parent_{parent_id}'] = (OrderType.BLOCK, parent_id)
 
     def add_linked_leafs_positive_surplus(self, child_order):
         parent_id = child_order['code_prm']
@@ -193,7 +193,7 @@ class Price_Subproblem:
             gp.quicksum(child_order['acceptance'] * (self.MCP[t] - child_order['p']) * child_order[f'q{t}'] for t in
                         self.master_problem.periods) >= 0,
             f'linked_block_positive_leaf_{child_id}')
-        self.constraint_meta_data[f'linked_block_positive_leaf_{child_id}'] = (OrderType.BLOCK, parent_id, CutType.CB)
+        self.constraint_meta_data[f'linked_block_positive_leaf_{child_id}'] = (OrderType.BLOCK, parent_id)
 
     def add_complex_order_constraints(self):
         for _, order in self.master_problem.complex_orders.iterrows():
@@ -205,7 +205,6 @@ class Price_Subproblem:
 
 
     def add_scalable_complex_order_constraints(self):
-
         for _, order in self.master_problem.scalable_complex_orders.iterrows():
             if order['acceptance'] > self.epsilon and order['condition'] != 'load gradient':
                 self.add_MIC_MP_constraints(order, self.master_problem.scalable_step_orders, OrderType.SCALABLE_COMPLEX)
@@ -236,10 +235,10 @@ class Price_Subproblem:
 
         if order['condition'] == 'MP':
             self.pricing_model.addConstr(actual_value <= expected_value, label_MP)
-            self.constraint_meta_data[label_MP] = (order_type, order_id, CutType.CB)
+            self.constraint_meta_data[label_MP] = (order_type, order_id)
         elif order['condition'] == 'MIC':
             self.pricing_model.addConstr(actual_value >= expected_value, label_MIC)
-            self.constraint_meta_data[label_MIC] = (order_type, order_id, CutType.CB)
+            self.constraint_meta_data[label_MIC] = (order_type, order_id)
 
     def add_load_gradient_constraints(self, order, step_order_df, order_type: OrderType):
         order_id = order['id']
@@ -256,8 +255,6 @@ class Price_Subproblem:
                 surplus_expr += accept * q * (self.MCP[t] - p)
 
         label = f'load_gradient_surplus_CO_{order_id}' if order_type == OrderType.COMPLEX else f'load_gradient_SCO_{order_id}'
-        gurobi_acceptance_var = self.master_problem.accept_complex[order_id] if order_type == OrderType.COMPLEX else \
-        self.master_problem.accept_scalable[order_id]
 
         self.pricing_model.addConstr(surplus_expr >= 0.0, name=label)
-        self.constraint_meta_data[label] = (OrderType.COMPLEX, order_id, CutType.CB)
+        self.constraint_meta_data[label] = (order_type, order_id)

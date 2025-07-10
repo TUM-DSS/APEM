@@ -1,5 +1,5 @@
 import pandas as pd
-from euphemia.utils.paths import EUPHEMIA_ROOT
+from euphemia.utils.paths import DATA_DIR
 
 '''
 --- OMIE ---
@@ -8,7 +8,7 @@ This script can be used to convert parsed OMIE csv data to EUPHEMIA readable for
 '''
 
 
-src = EUPHEMIA_ROOT / "data" / "raw_data" / "omie" / "OMIE_orderdata_parsed.csv"
+src = DATA_DIR / "omie" / "raw_data" / "OMIE_orderdata_parsed.csv"
 df  = pd.read_csv(src)
 
 sign = lambda cv: 1 if cv == "V" else -1
@@ -129,7 +129,7 @@ scalable_complex_orders_df = pd.DataFrame(sco_parents) if sco_parents else pd.Da
 scalable_step_orders_df = pd.DataFrame(sco_steps) if sco_steps else pd.DataFrame(columns=sco_step_cols)
 
 
-out_dir = EUPHEMIA_ROOT / "data" / "raw_data" / "omie"
+out_dir = DATA_DIR / "omie"
 complex_orders_df.to_csv(out_dir / "complex_orders.csv",          index=False)
 complex_step_orders_df.to_csv(out_dir / "complex_step_orders.csv",index=False)
 scalable_complex_orders_df.to_csv(out_dir / "scalable_complex_orders.csv", index=False)

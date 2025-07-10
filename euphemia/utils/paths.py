@@ -10,14 +10,14 @@ from apem.data.parsing.parse_ieee_rts import ParseIEEERTS
 EUPHEMIA_ROOT = Path(__file__).resolve().parent.parent
 
 # Path to raw data inside EUPHEMIA
-RAW_DATA_DIR = EUPHEMIA_ROOT / "data" / "raw_data"
+DATA_DIR = EUPHEMIA_ROOT / "data" / "datasets"
 
 CONVERTED_DATASET_PATH_MAP = {
-    ParseIEEERTS: RAW_DATA_DIR / "ieee_rts",
-    ParsePJM: RAW_DATA_DIR / "pjm",
-    ParseARPA: RAW_DATA_DIR / "arpa",
-    ParsePyPSAEurLarge: RAW_DATA_DIR / "pypsa_large",
-    ParsePyPSAEurSmall: RAW_DATA_DIR / "pypsa_small",
+    ParseIEEERTS: DATA_DIR / "ieee_rts",
+    ParsePJM: DATA_DIR / "pjm",
+    ParseARPA: DATA_DIR / "arpa",
+    ParsePyPSAEurLarge: DATA_DIR / "pypsa_large",
+    ParsePyPSAEurSmall: DATA_DIR / "pypsa_small",
 }
 
 def ensure_dir(path: Path):

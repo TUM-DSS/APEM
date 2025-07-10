@@ -1,4 +1,4 @@
-from euphemia.utils.paths import EUPHEMIA_ROOT
+from euphemia.utils.paths import DATA_DIR
 
 import datetime as dt
 import matplotlib.pyplot as plt
@@ -13,4 +13,4 @@ dateEnd = dt.datetime(2025, 3, 18)
 df = OMIEMarginalPriceFileImporter(date_ini=dateIni, date_end=dateEnd).read_to_dataframe(verbose=True)
 df.sort_values(by='DATE', axis=0, inplace=True)
 print(df)
-df.to_csv(EUPHEMIA_ROOT / 'data/raw_data/omie/prices.csv', index=False)
+df.to_csv(DATA_DIR / 'omie/raw_data/prices.csv', index=False)

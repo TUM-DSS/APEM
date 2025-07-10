@@ -35,12 +35,12 @@ def run_us_eu_conversion(us_data: ParseData,
    block_orders_buyers = conversion.compute_buyers_inelastic_bids()
    step_orders = conversion.compute_buyers_elastic_bids()
    print("Converting no min uptime demand data...")
-   scalable_complex_orders, scalable_step_orders = conversion.generate_no_min_uptime_bids()
+   scalable_complex_orders, scalable_step_orders = conversion.generate_zero_no_load_cost_bids()
    if generate_uptime_patterns:
       print("Generating patterns for min uptime demand data...")
       conversion.generate_write_patterns(use_contiguous_patterns=use_contiguous_patterns)
    print("Converting min uptime demand data...")
-   block_orders_sellers = conversion.generate_min_uptime_bids(reduce_linked_blocks=reduce_linked_blocks)
+   block_orders_sellers = conversion.generate_positive_no_load_cost_bids(reduce_linked_blocks=reduce_linked_blocks)
 
    # Load empty datasets for data not filled
    cols = ['id', 'step_orders', 'fixed_term', 'variable_term', 'condition', 'load_gradient']
@@ -50,12 +50,14 @@ def run_us_eu_conversion(us_data: ParseData,
    cols = ['id', 't', 'p0', 'p1', 'q']
    piecewise_linear_orders = pd.DataFrame(columns=cols)
 
-   # merge block orders
-   block_orders = pd.concat([block_orders_buyers, block_orders_sellers], ignore_index=True)
+
 
    # compress identical block orders
    if compress_identical_blocks:
-      block_orders = DataConversion.compress_linked(conversion, block_orders)
+      block_orders_sellers = DataConversion.compress_blocks(conversion, block_orders_sellers)
+
+   # merge block orders
+   block_orders = pd.concat([block_orders_buyers, block_orders_sellers], ignore_index=True)
 
    periods = data.periods
    periods_df = pd.DataFrame({'period': periods})
@@ -99,7 +101,7 @@ def save_df(df, us_data: ParseData, name: str):
 
 if __name__ == '__main__':
    run_us_eu_conversion(ParseIEEERTS,
-                        generate_uptime_patterns=False,
+                        generate_uptime_patterns=True,
                         use_contiguous_patterns=True,
                         reduce_linked_blocks=True,
                         compress_identical_blocks=True)

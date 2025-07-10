@@ -77,19 +77,19 @@ class DataConversion:
         print(df_step_orders)
         return df_step_orders
 
-    def generate_no_min_uptime_bids(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    def generate_zero_no_load_cost_bids(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """
         Generate scalable complex orders and associated sub-orders to encode the bids of the sellers that fulfill
         the following criteria:
             - minimum uptime = 0
-            - minimum production level > 0
+            - minimum production level >= 0
             - no-load cost = 0
         Assume cost1 is the smallest marginal cost.
         Create a scalable complex order for each seller.
         For all periods t, set MAP_t to the minimum production level in period t.
         Create associated step orders based on the supply curves.
         """
-        sellers = self.df_sellers[(self.df_sellers['min_uptime'].isin([0, 1])) & (self.df_sellers['min_prod'] > 0) &
+        sellers = self.df_sellers[(self.df_sellers['min_uptime'].isin([0, 1])) &
                                   (self.df_sellers['no_load_cost'] == 0)]['seller'].unique().tolist()
         scalable_orders, scalable_step_orders, step_orders = [], [], []
         for s in sellers:
@@ -102,17 +102,15 @@ class DataConversion:
 
                 # check if s submitted bids for the current period
                 min_prod_t = seller_info['min_prod'].values[0] if not seller_info['min_prod'].empty else 0
-                if min_prod_t == 0:
-                    continue
-
-                scalable_step_order_min = {'id': id_step_min_prod,
-                                           'scalable_order_id': scalable_id,
-                                           't': t,
-                                           'p': seller_info['cost1'].values[0],
-                                           'q': min_prod_t
-                                           }
-                suborders_ids.append(id_step_min_prod)
-                scalable_step_orders.append(scalable_step_order_min)
+                if min_prod_t != 0:
+                    scalable_step_order_min = {'id': id_step_min_prod,
+                                               'scalable_order_id': scalable_id,
+                                               't': t,
+                                               'p': seller_info['cost1'].values[0],
+                                               'q': min_prod_t
+                                               }
+                    suborders_ids.append(id_step_min_prod)
+                    scalable_step_orders.append(scalable_step_order_min)
 
                 for block in self.blocks_sellers:
                     id_step_block = 's' + str(s) + 't' + f'{t}' + 'l' + f'{block}'
@@ -153,20 +151,21 @@ class DataConversion:
 
         return df_scalable_orders, df_scalable_step_orders
 
-    def generate_min_uptime_bids(self, reduce_linked_blocks: bool) -> pd.DataFrame:
+    def generate_positive_no_load_cost_bids(self, reduce_linked_blocks: bool) -> pd.DataFrame:
         """
         Generate block orders to encode the bids of the sellers that fulfill the following criteria:
-            - minimum uptime > 1
-            - minimum production level > 0
-            - no-load cost >= 0
+            - minimum uptime > 1  OR no-load cost >= 0
+            (Note only contiguous patterns supported for min uptime in [0,1])
+            - minimum production level >= 0
+
         Assume cost1 is the smallest marginal cost.
         """
-        sellers = self.df_sellers[(self.df_sellers['min_uptime'] > 1) & (self.df_sellers['min_prod'] > 0)]['seller'].unique().tolist()
-        min_uptime_values = self.df_sellers[self.df_sellers['min_uptime'] > 1]['min_uptime'].unique().tolist()
+        sellers = self.df_sellers[(self.df_sellers['min_uptime'] > 1) |
+                                  (self.df_sellers['no_load_cost'] > 1)]['seller'].unique().tolist()
 
         # retrieve patterns that encode in which periods a seller is committed
         patterns = {}
-        for val in min_uptime_values:
+        for val in range(2, 25):
             file_path = RAW_DATA_DIR / "euphemia" / "patterns" / f"{val}.txt"
             patterns_val = []
 
@@ -183,22 +182,33 @@ class DataConversion:
         block_bids = []
         for s in sellers:
             sellers_general_info = self.df_sellers[self.df_sellers['seller'] == s]
-            min_uptime = sellers_general_info['min_uptime'].values[0]
+            min_uptime = sellers_general_info['min_uptime'].values[0] if sellers_general_info['min_uptime'].values[0] > 1 else 2
             min_cost = sellers_general_info['cost1'].values[0]
             exclusive_id = f's{s}exclusive'
             count = 1
             seen_time_commitments = set()
 
+            time_commitments = []
+            # create time commitments for patterns
             for pattern in patterns[min_uptime]:
+                current_commitment = []
                 # create a vector in which the value at index i is 1 if the pattern indicates that the seller is
                 # committed in period i + 1 and 0 otherwise
-                time_commitment = []
                 for value in pattern:
                     if value != 1:
-                        time_commitment.extend([1] * value)
+                        current_commitment.extend([1] * value)
                     else:
-                        time_commitment.append(0)
+                        current_commitment.append(0)
+                time_commitments.append(current_commitment)
 
+            # create contiguous commitment pattern for minuptime = 1 if necessary
+            if not sellers_general_info['min_uptime'].values[0] > 1:
+                for period in range(len(self.periods)):
+                    current_commitment = [0] * len(self.periods)
+                    current_commitment[period] = 1
+                    time_commitments.append(current_commitment)
+
+            for time_commitment in time_commitments:
                 if sum(time_commitment) == 0:
                     continue
 
@@ -212,7 +222,6 @@ class DataConversion:
                 active_hours = sum(time_commitment)  # k
                 min_prod = sellers_general_info['min_prod'].values[0]
                 no_load = sellers_general_info['no_load_cost'].values[0]
-                min_cost = sellers_general_info['cost1'].values[0]
 
                 pattern_price = min_cost  # c_min,s
                 if no_load > 0 and active_hours * min_prod > 0:
@@ -245,7 +254,7 @@ class DataConversion:
                 else:
                     continue
 
-                print(f"Exclusive blocks finished - Seller {s} - Pattern {pattern}")
+                print(f"Exclusive blocks finished - Seller {s} - Commitment pattern {time_commitment}")
 
                 self.add_linked_block_orders(time_commitment, s, count, block_bids, reduce_orders=reduce_linked_blocks)
 
@@ -412,7 +421,7 @@ class DataConversion:
       • update the children so their `code_prm` points to the *new*
         parent ID.
     """
-    def compress_linked(self, df: pd.DataFrame) -> pd.DataFrame:
+    def compress_blocks(self, df: pd.DataFrame) -> pd.DataFrame:
         qty_cols = [c for c in df.columns if c.startswith("q")]
 
         # 1) Determine the parent ID for every row:
@@ -457,12 +466,7 @@ class DataConversion:
             p_rows = sub[sub["block_type"] == "exclusive"]
             parent = p_rows.iloc[0].copy()
             parent[qty_cols] = p_rows[qty_cols].sum()
-            parent["MAR"] = (
-                1 / len(p_rows)
-                if (p_rows["MAR"] == 1).all()
-                else (p_rows["MAR"] * p_rows[qty_cols].sum(axis=1)).sum()
-                     / p_rows[qty_cols].sum().sum()
-            )
+            parent["MAR"] = 1
             parent["id"] = "+".join(p_rows["id"])
             parent_new_id = parent["id"]  # remember for children
             merged_rows.append(parent)
@@ -477,7 +481,10 @@ class DataConversion:
                 merged_rows.append(kid)
 
         # Drop helper column before returning
-        return pd.DataFrame(merged_rows).drop(columns="parent_id")
+        if merged_rows:
+            return pd.DataFrame(merged_rows).drop(columns="parent_id")
+        else:
+            return pd.DataFrame(merged_rows)
 
     def set_block_bids(self) -> None:
         pass

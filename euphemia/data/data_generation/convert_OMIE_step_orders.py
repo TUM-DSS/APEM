@@ -1,6 +1,6 @@
 import pandas as pd
 
-from euphemia.utils.paths import RAW_DATA_DIR
+from euphemia.utils.paths import DATA_DIR
 
 
 def convert_omie_to_step_orders(input_path: str, output_path: str, days: list[str] = None):
@@ -40,4 +40,4 @@ def convert_omie_to_step_orders(input_path: str, output_path: str, days: list[st
     print(f"Converted file saved to: {output_path}")
 
 # Example usage:
-convert_omie_to_step_orders(RAW_DATA_DIR / "omie/supply_demand_curves.csv", RAW_DATA_DIR / "omie/step_orders.csv", days=None)
+convert_omie_to_step_orders(DATA_DIR / "omie/raw_data/supply_demand_curves.csv", DATA_DIR / "omie/step_orders.csv", days=None)

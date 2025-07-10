@@ -1,6 +1,6 @@
 import pandas as pd
 
-from euphemia.utils.paths import RAW_DATA_DIR
+from euphemia.utils.paths import DATA_DIR
 
 '''
 --- OMIE ---
@@ -10,9 +10,9 @@ Download data from 4. Bid section from https://www.omie.es/en/file-access-list#D
 '''
 
 # === STEP 1: Define file paths ===
-cab_path = RAW_DATA_DIR / "omie/CAB_20250318.1"
-det_path = RAW_DATA_DIR / "omie/DET_20250318.1"
-output_csv = RAW_DATA_DIR / "omie/OMIE_orderdata_parsed.csv"
+cab_path = DATA_DIR / "omie/raw_data/CAB_20250318.1"
+det_path = DATA_DIR / "omie/raw_data/DET_20250318.1"
+output_csv = DATA_DIR / "omie/raw_data/OMIE_orderdata_parsed.csv"
 
 # === STEP 2: Read DET file (detail of orders) ===
 det_colspecs = [
