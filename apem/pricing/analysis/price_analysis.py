@@ -1,31 +1,35 @@
 from typing import Optional, Tuple
+
 import os
 import pandas as pd
 
 from apem.allocation.algorithms.zonal_clearing.zonal_NTC import Zonal_NTC
 from apem.allocation.allocation import Allocation
+from apem.allocation.configuration import Configuration
 from apem.data.analysis.plot import plot_supply_demand
 from apem.data.parsing.scenario import Scenario
 from apem.pricing.algorithms.elmp import ELMP
 from apem.pricing.algorithms.ip import IP
 from apem.pricing.algorithms.min_mwp import MinMWP
-from apem.pricing.analysis.plot import plot_avg_prices, plot_pypsa_heatmap
+from apem.pricing.analysis.plot import plot_avg_prices, plot_price_heatmap
 from apem.pricing.analysis.pricing import Pricing, GLOCS, LLOCS, MWPS
 
 
 class PriceAnalysis:
 
-    def __init__(self, scenario: Scenario, allocation: Allocation, pricing: Pricing):
+    def __init__(self, scenario: Scenario, allocation: Allocation, pricing: Pricing, configuration: Configuration, base_scenario: Optional[Scenario] = None):
         self.scenario = scenario
         self.allocation = allocation
         self.pricing = pricing
+        self.configuration = configuration
+        self.base_scenario = base_scenario # used only for zonal_NTC
 
     def compute_glocs(self, file_glocs: str = "", mode="w") -> Optional[GLOCS]:
         pricing = self.pricing
         if pricing.status == 1:
             if not pricing.glocs:
                 elmp = ELMP()
-                elmp_results = elmp.compute_prices(self.allocation, self.scenario, fixed_prices=pricing)
+                elmp_results = elmp.compute_prices(self.allocation, self.scenario, self.configuration, fixed_prices=pricing)
                 if elmp_results.status == 1:
                     pricing.glocs = elmp_results.glocs
                 else:
@@ -49,7 +53,7 @@ class PriceAnalysis:
         if pricing.status == 1:
             if not pricing.llocs:
                 ip = IP()
-                ip_results = ip.compute_prices(self.allocation, self.scenario, fixed_prices=pricing)
+                ip_results = ip.compute_prices(self.allocation, self.scenario, self.configuration, fixed_prices=pricing)
                 if ip_results.status == 1:
                     pricing.llocs = ip_results.llocs
                 else:
@@ -73,7 +77,7 @@ class PriceAnalysis:
         if pricing.status == 1:
             if not pricing.mwps:
                 min_mwp = MinMWP()
-                min_mwp_results = min_mwp.compute_prices(self.allocation, self.scenario, fixed_prices=pricing)
+                min_mwp_results = min_mwp.compute_prices(self.allocation, self.scenario, self.configuration, fixed_prices=pricing)
                 if min_mwp_results.status == 1:
                     pricing.mwps = min_mwp_results.mwps
                 else:
@@ -185,5 +189,7 @@ class PriceAnalysis:
         avg_prices = self.avg_node_prices(file_avg=file_stats, mode="a")
 
         if self.scenario.name in ["PyPSA_Eur_Large", "PyPSA_Eur_Small"]:
-            plot_pypsa_heatmap(f"{path}/{self.pricing.used_algorithm}_heatmap.png", self.scenario.name,
+            nodal_scenario = self.base_scenario if zonal_config else self.scenario
+                
+            plot_price_heatmap(f"{path}/{self.pricing.used_algorithm}_heatmap.png", nodal_scenario,
                                avg_prices, zonal_config)
