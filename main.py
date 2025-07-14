@@ -9,8 +9,8 @@ from euphemia.execution_chain import solve_euphemia as solve_euphemia
 
 def main():
     # Euphemia example
-    #solve_euphemia(EuphemiaDatasets.OMIE, CutType.PB)
-    #run_evaluation(withIEEE=True)
+    # solve_euphemia(EuphemiaDatasets.OMIE, CutType.PB)
+    # run_evaluation(withIEEE=True)
 
     config = ConfigLoader()
     solve_and_analyse_scenario(
