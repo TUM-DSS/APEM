@@ -65,7 +65,7 @@ class Euphemia:
         self.found_solution = False
         self.current_best_objective = -1
         self.reinsertion_run = False
-        self.reinsertionDisabled = True
+        self.disable_reinsertion = True
 
         self.model.Params.LazyConstraints = 1
 
@@ -153,7 +153,7 @@ class Euphemia:
                     file.flush()
                     os.fsync(file.fileno())
 
-            if not self.reinsertion_run and not self.reinsertionDisabled:
+            if not self.reinsertion_run and not self.disable_reinsertion:
                 PRMIC_PRB_reinsertion(self, is_prmic_reinsertion=True)
                 PRMIC_PRB_reinsertion(self, is_prmic_reinsertion=False)
 

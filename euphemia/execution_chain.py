@@ -52,13 +52,13 @@ def run_evaluation(withIEEE: bool = False):
         print(f"Running Combinatorial Benders Cut on {dataset}")
         euphemia = Euphemia(scenario)
         euphemia.cutting_strategy = CutType.CB
-        euphemia.reinsertionDisabled = True
+        euphemia.disable_reinsertion = True
         euphemia.solve()
 
         print(f"Running Price-based Cut on {dataset}; beta_MIC=10% delta_load_gradient=10000")
         euphemia = Euphemia(scenario)
         euphemia.cutting_strategy = CutType.PB
-        euphemia.reinsertionDisabled = True
+        euphemia.disable_reinsertion = True
         euphemia.beta_MIC = 0.1
         euphemia.delta_load_gradient = 10000
         euphemia.solve()
@@ -66,7 +66,7 @@ def run_evaluation(withIEEE: bool = False):
         print(f"Running Price-based Cut on {dataset}; beta_MIC=50% delta_load_gradient=70000")
         euphemia = Euphemia(scenario)
         euphemia.cutting_strategy = CutType.PB
-        euphemia.reinsertionDisabled = True
+        euphemia.disable_reinsertion = True
         euphemia.beta_MIC = 0.5
         euphemia.delta_load_gradient = 70000
         euphemia.solve()
@@ -74,7 +74,7 @@ def run_evaluation(withIEEE: bool = False):
         print(f"Running Price-based Cut on {dataset}; beta_MIC=25% delta_load_gradient=40000")
         euphemia = Euphemia(scenario)
         euphemia.cutting_strategy = CutType.PB
-        euphemia.reinsertionDisabled = True
+        euphemia.disable_reinsertion = True
         euphemia.beta_MIC = 0.25
         euphemia.delta_load_gradient = 40000
         euphemia.solve()
@@ -83,14 +83,14 @@ def run_evaluation(withIEEE: bool = False):
     scenario = retrieve_data(Datasets.GENERATED_SMALL)
     euphemia = Euphemia(scenario)
     euphemia.cutting_strategy = CutType.NG
-    euphemia.reinsertionDisabled = True
+    euphemia.disable_reinsertion = True
     euphemia.solve()
 
     print(f"No good Cut on {Datasets.GME}")
     scenario = retrieve_data(Datasets.GME)
     euphemia = Euphemia(scenario)
     euphemia.cutting_strategy = CutType.NG
-    euphemia.reinsertionDisabled = True
+    euphemia.disable_reinsertion = True
     euphemia.solve()
 
     print("Evaluation finished")

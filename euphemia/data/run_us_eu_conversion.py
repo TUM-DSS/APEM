@@ -34,12 +34,12 @@ def run_us_eu_conversion(us_data: ParseData,
    print("Converting demand data...")
    block_orders_buyers = conversion.compute_buyers_inelastic_bids()
    step_orders = conversion.compute_buyers_elastic_bids()
-   print("Converting no min uptime demand data...")
+   print("Converting no min uptime and no no-load cost demand data...")
    scalable_complex_orders, scalable_step_orders = conversion.generate_zero_no_load_cost_bids()
    if generate_uptime_patterns:
       print("Generating patterns for min uptime demand data...")
       conversion.generate_write_patterns(use_contiguous_patterns=use_contiguous_patterns)
-   print("Converting min uptime demand data...")
+   print("Converting min uptime or no-load cost demand data...")
    block_orders_sellers = conversion.generate_positive_no_load_cost_bids(reduce_linked_blocks=reduce_linked_blocks)
 
    # Load empty datasets for data not filled
@@ -58,6 +58,8 @@ def run_us_eu_conversion(us_data: ParseData,
 
    # merge block orders
    block_orders = pd.concat([block_orders_buyers, block_orders_sellers], ignore_index=True)
+
+   print(f"Size of block orders: {len(block_orders)}")
 
    periods = data.periods
    periods_df = pd.DataFrame({'period': periods})
