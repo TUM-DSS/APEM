@@ -8,7 +8,7 @@ from euphemia.execution_chain import solve_euphemia as solve_euphemia
 
 def main():
     # Euphemia example
-    # solve_euphemia(EuphemiaDatasets.IEEE_RTS, CutType.PB)
+    # solve_euphemia(EuphemiaDatasets.GME, CutType.PB)
     # run_evaluation(withIEEE=True)
     # run_IEEE_evaluation()
 
