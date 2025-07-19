@@ -91,7 +91,6 @@ def add_market_constraints(self) -> None:
 
     # flexible blocks
     flexible_blocks = list(self.block_orders[self.block_orders['block_type'] == 'flexible']['id'])
-    self.model.addConstrs(gp.quicksum(self.flex_period[i, t] for t in self.periods) <= 1 for i in flexible_blocks)
     self.model.addConstrs(self.accept_block[i] == gp.quicksum(self.flex_period[i, t] for t in self.periods)
                           for i in flexible_blocks)
 
