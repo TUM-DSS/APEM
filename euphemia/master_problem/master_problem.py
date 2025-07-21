@@ -140,7 +140,7 @@ class MasterProblem:
         print("Solving master problem...")
         self.solve_master_problem()
         self.model.write(os.path.join(EUPHEMIA_ROOT / self.paths['debug'], f"master_problem.lp"))
-        print(f"Master problem status: {self.model.Status}, {self.model.ObjVal}")
+        print(f"Master problem status: {self.model.Status}")
         if self.model.Status == GRB.Status.INFEASIBLE:
             print("Master problem is infeasible")
 
