@@ -39,3 +39,4 @@ Statistics about an Euphemia run are stored in `euphemia_results/evaluation/eval
 ### Conversion (US-EU bidding language)
 The main method in `run_us_eu_conversion.py` can be modified and used to run the conversion with different parameters. Here, you can also set
 if patterns should be generated and what compression methods should be applied to the data.
+In some IDEs this may not work: Alternatively, you can run `run_us_eu_conversion(...)` from the main file of the project.
