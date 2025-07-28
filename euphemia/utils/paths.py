@@ -5,7 +5,6 @@ from apem.data.parsing.parse_pypsa_eur_large import ParsePyPSAEurLarge
 from apem.data.parsing.parse_arpa import ParseARPA
 from apem.data.parsing.parse_ieee_rts import ParseIEEERTS
 
-
 # Root of EUPHEMIA package
 EUPHEMIA_ROOT = Path(__file__).resolve().parent.parent
 
@@ -19,6 +18,7 @@ CONVERTED_DATASET_PATH_MAP = {
     ParsePyPSAEurLarge: DATA_DIR / "pypsa_large",
     ParsePyPSAEurSmall: DATA_DIR / "pypsa_small",
 }
+
 
 def ensure_dir(path: Path):
     """Ensure the given directory exists."""

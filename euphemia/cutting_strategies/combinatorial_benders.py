@@ -1,6 +1,6 @@
 import gurobipy as gp
 
-import euphemia.cutting.no_good as no_good_cutting
+import euphemia.cutting_strategies.no_good as no_good_cutting
 from euphemia.enums.order_types import OrderType
 
 

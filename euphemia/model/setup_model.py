@@ -1,6 +1,5 @@
 import gurobipy as gp
 from gurobipy import GRB
-import os
 
 from euphemia.utils.extraction import get
 
@@ -48,8 +47,9 @@ def add_objective(self) -> None:
 
     # 8) max curtailment
 
-    self.model.setObjective(-step_orders_obj - block_orders_obj - complex_orders_obj - scalable_orders_obj - piecewise_linear_orders_obj,
-                            GRB.MAXIMIZE)
+    self.model.setObjective(
+        -step_orders_obj - block_orders_obj - complex_orders_obj - scalable_orders_obj - piecewise_linear_orders_obj,
+        GRB.MAXIMIZE)
 
 
 def add_market_constraints(self) -> None:

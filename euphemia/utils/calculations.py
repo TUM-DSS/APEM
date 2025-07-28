@@ -16,6 +16,7 @@ def calculate_flexible_order_active_period(master_problem, block_id) -> int:
     # Find time period with value 1
     return next((t for t, val in flex_vals.items() if val > 0.5), None)
 
+
 def calculate_block_demand_surplus(master_problem):
     total_surplus = 0.0
     for _, row in master_problem.block_orders.iterrows():

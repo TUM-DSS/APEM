@@ -8,9 +8,9 @@ import re
 import pandas as pd
 import time
 
-import euphemia.cutting.price_based as price_based_cutting
-import euphemia.cutting.no_good as no_good_cutting
-import euphemia.cutting.combinatorial_benders as combinatorial_benders_cutting
+import euphemia.cutting_strategies.price_based as price_based_cutting
+import euphemia.cutting_strategies.no_good as no_good_cutting
+import euphemia.cutting_strategies.combinatorial_benders as combinatorial_benders_cutting
 from euphemia.enums.cut_types import CutType
 from euphemia.euphemia_config import EuphemiaConfig
 from euphemia.model.setup_model import add_objective, add_market_constraints, add_network_constraints

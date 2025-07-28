@@ -1,11 +1,7 @@
-import re
-from typing import Optional
 import gurobipy as gp
 from gurobipy import GRB
 import pandas as pd
-import random
 
-from euphemia.enums.cut_types import CutType
 from euphemia.enums.order_types import OrderType
 from euphemia.utils.calculations import calculate_flexible_order_active_period
 from euphemia.utils.paths import EUPHEMIA_ROOT
