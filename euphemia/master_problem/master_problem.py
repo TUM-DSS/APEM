@@ -96,16 +96,16 @@ class MasterProblem:
         self.calculate_corrected_welfare = config.calculate_corrected_welfare
 
         self.paths = {
-            "alloc": "euphemia_results/allocation",
-            "prices": "euphemia_results/prices",
-            "pab": "euphemia_results/pab",
-            "block_inm_threshold": "euphemia_results/block_inm_threshold",
-            "complex_mic": "euphemia_results/complex_mic",
-            "complex_mic_inm_threshold": "euphemia_results/complex_mic_inm_threshold",
-            "scalable_mic": "euphemia_results/scalable_mic",
-            "scalable_mic_inm_threshold": "euphemia_results/scalable_mic_inm_threshold",
-            "debug": "euphemia_results/debug",
-            "evaluation": "euphemia_results/evaluation",
+            "alloc": f"euphemia_results/{self.config.dataset}/allocation",
+            "prices": f"euphemia_results/{self.config.dataset}/prices",
+            "pab": f"euphemia_results/{self.config.dataset}/pab",
+            "block_inm_threshold": f"euphemia_results/{self.config.dataset}/block_inm_threshold",
+            "complex_mic": f"euphemia_results/{self.config.dataset}/complex_mic",
+            "complex_mic_inm_threshold": f"euphemia_results/{self.config.dataset}/complex_mic_inm_threshold",
+            "scalable_mic": f"euphemia_results/{self.config.dataset}/scalable_mic",
+            "scalable_mic_inm_threshold": f"euphemia_results/{self.config.dataset}/scalable_mic_inm_threshold",
+            "debug": f"euphemia_results/{self.config.dataset}/debug",
+            "evaluation": f"euphemia_results/{self.config.dataset}/evaluation",
         }
 
         for attr, path in self.paths.items():

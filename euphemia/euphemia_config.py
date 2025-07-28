@@ -10,6 +10,7 @@ class EuphemiaConfig:
     def __init__(self):
         self.scenario = None
         self.set_dataset(Datasets.GENERATED_SMALL)  # "Generated Small" as base dataset
+        self.dataset = None
         self.disable_reinsertion = True  # Disable automatic start of reinsertions
         self.price_lower_bound = -500  # Lower price bound
         self.price_upper_bound = 4000  # Upper price bound
@@ -26,4 +27,5 @@ class EuphemiaConfig:
         """
         Set the dataset to use.
         """
+        self.dataset = dataset.name
         self.scenario = dataset.value.parse_data()
