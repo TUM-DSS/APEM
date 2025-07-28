@@ -3,7 +3,12 @@ import gurobipy as gp
 import euphemia.cutting.no_good as no_good_cutting
 from euphemia.enums.order_types import OrderType
 
+
 def add_combinatorial_benders_cut(self, callback_model, price_subproblem) -> None:
+    """
+    Add a combinatorial Benders cut to exclude the current solution from future consideration.
+    Force at least one variable included in a constraint from an Irreducible Infeasible Subset (IIS) to change value.
+    """
     price_subproblem.pricing_model.computeIIS()
     terms = []
     for constr in price_subproblem.pricing_model.getConstrs():

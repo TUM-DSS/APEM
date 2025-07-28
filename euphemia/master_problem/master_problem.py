@@ -22,6 +22,10 @@ from euphemia.utils.paths import EUPHEMIA_ROOT
 
 
 class MasterProblem:
+    """
+    Formulate and solve the Euphemia master problem.
+    """
+
     def __init__(self, config: EuphemiaConfig):
         if not config:
             config = EuphemiaConfig()
@@ -102,7 +106,6 @@ class MasterProblem:
             "scalable_mic_inm_threshold": "euphemia_results/scalable_mic_inm_threshold",
             "debug": "euphemia_results/debug",
             "evaluation": "euphemia_results/evaluation",
-
         }
 
         for attr, path in self.paths.items():
@@ -174,6 +177,7 @@ class MasterProblem:
     def solve_master_problem(self) -> None:
         """
         Search for a selection of block and MIC orders that maximizes the economic surplus.
+        The callback function is called for each valid integer solution.
         """
         self.model.optimize(callback=self.master_problem_callback)
 
@@ -190,7 +194,7 @@ class MasterProblem:
             # Check iteration limit
             if self.iteration >= self.max_iterations:
                 print(f"Maximum iterations ({self.max_iterations}) reached. Terminating.")
-                callback_model.terminate()
+                callback_model.terminate()  # terminate optimization early
                 if not self.reinsertion_run:
                     elapsed = time.time() - self.start_time
                     # Log if no solution could be found
@@ -252,7 +256,7 @@ class MasterProblem:
                         self.current_best_objective = objective_value
                         self.found_solution = True
 
-                # if price subproblem infeasible add cut to master problem
+                # if price subproblem is infeasible, add cut to master problem
                 if price_subproblem.pricing_model.Status == GRB.INFEASIBLE:
                     print("Price subproblem is infeasible")
 
@@ -281,7 +285,7 @@ class MasterProblem:
 
     def update_order_dataframes(self) -> None:
         """
-        Add current acceptance value to order in dataframe for simplification of further processing
+        Add current acceptance value to order in dataframe for simplification of further processing.
         """
 
         solution_df = pd.DataFrame(self.current_alloc_solution)

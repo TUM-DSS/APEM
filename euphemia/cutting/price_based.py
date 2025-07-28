@@ -7,6 +7,10 @@ import euphemia.cutting.no_good as no_good_cutting
 
 
 def handle_price_based_cutting(self, callback_model) -> None:
+    """
+    Solve a price subproblem without any block order, complex order and scalable complex order constraints.
+    Only step order and piecewise linear order constraints are included.
+    """
     print("Creating unconstrained subproblem")
     price_subproblem = PriceSubproblem(master_problem=self)
     price_subproblem.isConstrained = False

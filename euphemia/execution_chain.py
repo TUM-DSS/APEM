@@ -5,6 +5,15 @@ from euphemia.master_problem.master_problem import MasterProblem
 
 
 def solve_euphemia(dataset: Datasets, cutting_strategy: CutType):
+    """
+    Solves an Euphemia scenario.
+    Args:
+        dataset (Datasets): Used dataset.
+        cutting_strategy (CutType): Cutting strategy to be used in the solver.
+
+    Returns:
+
+    """
     config = EuphemiaConfig()
     config.set_dataset(dataset)
     config.cutting_strategy = cutting_strategy

@@ -6,6 +6,10 @@ from euphemia.utils.extraction import get
 
 
 def add_objective(self) -> None:
+    """
+    Set the objective of the Euphemia master problem for a given model.
+    """
+
     # 1) step orders
     step_orders_obj = gp.quicksum(
         self.accept_step[i] * get(self.step_orders, 'q', i) * get(self.step_orders, 'p', i)
@@ -49,6 +53,10 @@ def add_objective(self) -> None:
 
 
 def add_market_constraints(self) -> None:
+    """
+    Formulate the market constraints of the Euphemia master problem for a given model.
+    """
+
     # supply - demand balance
     self.model.addConstrs(
         (gp.quicksum(self.accept_step[i] * get(self.step_orders, 'q', i)
@@ -178,6 +186,9 @@ def add_market_constraints(self) -> None:
 
 
 def add_network_constraints(self) -> None:
+    """
+    Formulate the network constraints of the Euphemia master problem for a given model. TODO extend
+    """
     # ATC
 
     # PTDF
