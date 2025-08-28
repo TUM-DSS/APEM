@@ -10,6 +10,7 @@
         "Generated Small",
         "Generated Large",
         "OMIE",
+        "GME",
         "IEEE_RTS",
         "ARPA",
         "PyPSAEurSmall",
@@ -50,9 +51,9 @@
     ],
     "verbosity": true,
     "scenario": {
-        "US_dataset": "PyPSAEurSmall",
-        "EU_dataset": "ARPA",
-        "market_model": "US_model",
+        "US_dataset": "ARPA",
+        "EU_dataset": "GME",
+        "market_model": "EU_model",
         "power_flow_model": {
             "type": "DCOPF"
         },
