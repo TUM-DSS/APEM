@@ -51,9 +51,9 @@
     ],
     "verbosity": true,
     "scenario": {
+        "market_model": "EU_model",
         "US_dataset": "ARPA",
         "EU_dataset": "GME",
-        "market_model": "EU_model",
         "power_flow_model": {
             "type": "DCOPF"
         },
