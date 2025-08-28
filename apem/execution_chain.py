@@ -38,8 +38,8 @@ def _create_configuration() -> Configuration:
     )
 
 
-def _solve_allocation_problem(scenario: Scenario, power_flow_model: PowerFlowModel, configuration: Configuration,
-                              u_fixed: Optional[dict] = None):
+def _solve_US_allocation_problem(scenario: Scenario, power_flow_model: PowerFlowModel, configuration: Configuration,
+                                 u_fixed: Optional[dict] = None):
     if configuration.verbosity:
         print(f"Starting allocation problem for {scenario} using {power_flow_model}...")
 
@@ -52,10 +52,10 @@ def _solve_allocation_problem(scenario: Scenario, power_flow_model: PowerFlowMod
                                   stats_file=path + f'/{power_flow_model}_stats.txt', u_fixed=u_fixed)
 
 
-def _solve_redispatch_problem(scenario: Scenario, power_flow_model: PowerFlowModel,
-                              redispatch_algorithm: RedispatchAlgorithms, nodal_scenario: Scenario,
-                              zonal_allocation: SellersAllocation,
-                              configuration: Configuration) -> Union[Allocation, Error]:
+def _solve_US_redispatch_problem(scenario: Scenario, power_flow_model: PowerFlowModel,
+                                 redispatch_algorithm: RedispatchAlgorithms, nodal_scenario: Scenario,
+                                 zonal_allocation: SellersAllocation,
+                                 configuration: Configuration) -> Union[Allocation, Error]:
     if configuration.verbosity:
         print(f"Starting redispatch problem using {redispatch_algorithm}...")
     redispatch_algorithm = redispatch_algorithm.value
@@ -68,8 +68,8 @@ def _solve_redispatch_problem(scenario: Scenario, power_flow_model: PowerFlowMod
     return redispatch_algorithm.compute_redispatch(nodal_scenario, zonal_allocation, configuration, path)
 
 
-def _solve_pricing_problem(scenario: Scenario, allocation: Allocation, pricing_algorithm: PricingAlgorithms,
-                           power_flow_model: PowerFlowModel, configuration: Configuration, prices=None) -> Pricing:
+def _solve_US_pricing_problem(scenario: Scenario, allocation: Allocation, pricing_algorithm: PricingAlgorithms,
+                              power_flow_model: PowerFlowModel, configuration: Configuration, prices=None) -> Pricing:
     if configuration.verbosity:
         print(f"Starting pricing problem using {pricing_algorithm}...")
 
@@ -86,8 +86,7 @@ def _solve_pricing_problem(scenario: Scenario, allocation: Allocation, pricing_a
 
 
 def analyse_results(scenario: Scenario, allocation: Allocation, pricing: Pricing, configuration: Configuration,
-                    pf_model_value,
-                    base_scenario: Optional[Scenario] = None) -> PriceAnalysis:
+                    pf_model_value, base_scenario: Optional[Scenario] = None) -> PriceAnalysis:
     """Performs several analyses.
 
     Args:
@@ -109,8 +108,8 @@ def analyse_results(scenario: Scenario, allocation: Allocation, pricing: Pricing
     return analysis
 
 
-def solve_scenario(dataset: US_Datasets, power_flow_model: PowerFlowModel, pricing_algorithm: PricingAlgorithms,
-                   redispatch_algorithm: RedispatchAlgorithms = RedispatchAlgorithms.MinCostRD) -> PriceAnalysis:
+def solve_US_scenario(dataset: US_Datasets, power_flow_model: PowerFlowModel, pricing_algorithm: PricingAlgorithms,
+                      redispatch_algorithm: RedispatchAlgorithms = RedispatchAlgorithms.MinCostRD) -> PriceAnalysis:
     """Computes allocation and pricing for some scenario.
 
     Args:
@@ -129,8 +128,8 @@ def solve_scenario(dataset: US_Datasets, power_flow_model: PowerFlowModel, prici
     configuration = _create_configuration()
 
     if isinstance(power_flow_model, DCOPF):
-        allocation = _solve_allocation_problem(scenario, power_flow_model, configuration)
-        pricing = _solve_pricing_problem(scenario, allocation, pricing_algorithm, power_flow_model, configuration)
+        allocation = _solve_US_allocation_problem(scenario, power_flow_model, configuration)
+        pricing = _solve_US_pricing_problem(scenario, allocation, pricing_algorithm, power_flow_model, configuration)
         return PriceAnalysis(scenario, allocation, pricing, configuration)
 
     else:
@@ -140,13 +139,14 @@ def solve_scenario(dataset: US_Datasets, power_flow_model: PowerFlowModel, prici
                 {power_flow_model}. Zonal prices can only be computed for the PyPSA datasets."
             )
 
-        zonal_scenario, allocation = _solve_allocation_problem(scenario, power_flow_model, configuration)
+        zonal_scenario, allocation = _solve_US_allocation_problem(scenario, power_flow_model, configuration)
 
-        _solve_redispatch_problem(zonal_scenario, power_flow_model, redispatch_algorithm=redispatch_algorithm,
-                                  nodal_scenario=scenario, configuration=configuration,
-                                  zonal_allocation=allocation.SellersAllocation)
+        _solve_US_redispatch_problem(zonal_scenario, power_flow_model, redispatch_algorithm=redispatch_algorithm,
+                                     nodal_scenario=scenario, configuration=configuration,
+                                     zonal_allocation=allocation.SellersAllocation)
 
-        pricing = _solve_pricing_problem(zonal_scenario, allocation, pricing_algorithm, power_flow_model, configuration)
+        pricing = _solve_US_pricing_problem(zonal_scenario, allocation, pricing_algorithm, power_flow_model,
+                                            configuration)
         return PriceAnalysis(zonal_scenario, allocation, pricing, configuration, scenario)
 
 
@@ -156,23 +156,23 @@ def solve_and_analyse_scenario(US_dataset: US_Datasets, EU_dataset: EU_Datasets,
                                redispatch_algorithm: RedispatchAlgorithms = RedispatchAlgorithms.MinCostRD):
     """Computes allocation and pricing for some scenario and performs several analyses.
 
-    Args: TODO
-        dataset (US_Datasets): dataset for which allocation and pricing are computed
-        power_flow_model (PowerFlowModels): power flow model for which allocation and pricing are computed
-        pricing_algorithm (PricingAlgorithms): pricing algorithm used for the pricing computations
-        redispatch_algorithm (RedispatchAlgorithms): redispatch algorithm used for solving the redispatch problem
+    Args:
+        US_dataset (US_Datasets): dataset in the US bidding language for which allocation and pricing are computed
+        EU_dataset (EU_Datasets): dataset in the EU bidding language for which allocation and pricing are computed
+        market_model: market model that should be considered
+        power_flow_model (PowerFlowModels): power flow model for which allocation and pricing are computed (US market model)
+        cut_type: cutting strategy used in the EU market model
+        pricing_algorithm (PricingAlgorithms): pricing algorithm used for the pricing computations (US market model)
+        redispatch_algorithm (RedispatchAlgorithms): redispatch algorithm used for solving the redispatch problem (US market model)
 
     Raises:
         ValueError: power flow model 'Zonal_NTC' can only be used together with the PyPSA datasets
-
-    Returns:
-        PricingAnalysis object
     """
     if market_model == MarketModels.EU_model:
         solve_euphemia(EU_dataset, cut_type)
 
     elif market_model == MarketModels.US_model:
-        price_analysis = solve_scenario(US_dataset, power_flow_model, pricing_algorithm, redispatch_algorithm)
+        price_analysis = solve_US_scenario(US_dataset, power_flow_model, pricing_algorithm, redispatch_algorithm)
         is_pypsa_dataset = US_dataset in [US_Datasets.PyPSAEurLarge, US_Datasets.PyPSAEurSmall]
         base_scenario = None
 
