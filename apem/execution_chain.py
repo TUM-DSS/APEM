@@ -1,6 +1,9 @@
 import os
 from typing import Optional, Union
 
+from apem.EU_market_model.euphemia.enums.cut_types import CutType
+from apem.EU_market_model.euphemia.execution_chain import solve_euphemia
+from apem.EU_market_model.euphemia.enums.datasets import EU_Datasets
 from apem.US_market_model.allocation.algorithms.nodal_clearing.dcopf import DCOPF
 from apem.US_market_model.allocation.algorithms.zonal_clearing.zonal_NTC import Zonal_NTC
 from apem.US_market_model.allocation.allocation import SellersAllocation, Allocation
@@ -10,11 +13,11 @@ from apem.US_market_model.data.parsing.scenario import Scenario
 from apem.US_market_model.pricing.analysis.price_analysis import PriceAnalysis
 from apem.US_market_model.pricing.analysis.pricing import Pricing
 from apem.config_loader import ConfigLoader
-from apem.enums import Datasets, PricingAlgorithms, RedispatchAlgorithms, PowerFlowModels, MarketModels
+from apem.enums import US_Datasets, PricingAlgorithms, RedispatchAlgorithms, PowerFlowModels, MarketModels
 from apem.US_market_model.allocation.power_flow_model import PowerFlowModel
 
 
-def _retrieve_data(dataset: Datasets) -> Scenario:
+def _retrieve_data(dataset: US_Datasets) -> Scenario:
     return dataset.value.parse_data()
 
 
@@ -106,12 +109,12 @@ def analyse_results(scenario: Scenario, allocation: Allocation, pricing: Pricing
     return analysis
 
 
-def solve_scenario(dataset: Datasets, power_flow_model: PowerFlowModel, pricing_algorithm: PricingAlgorithms,
+def solve_scenario(dataset: US_Datasets, power_flow_model: PowerFlowModel, pricing_algorithm: PricingAlgorithms,
                    redispatch_algorithm: RedispatchAlgorithms = RedispatchAlgorithms.MinCostRD) -> PriceAnalysis:
     """Computes allocation and pricing for some scenario.
 
     Args:
-        dataset (Datasets): dataset for which allocation and pricing are computed
+        dataset (US_Datasets): dataset for which allocation and pricing are computed
         power_flow_model (PowerFlowModels): power flow model for which allocation and pricing are computed
         pricing_algorithm (PricingAlgorithms): pricing algorithm used for the pricing computations
         redispatch_algorithm (RedispatchAlgorithms): redispatch algorithm used to solve the redispatch problem
@@ -131,7 +134,7 @@ def solve_scenario(dataset: Datasets, power_flow_model: PowerFlowModel, pricing_
         return PriceAnalysis(scenario, allocation, pricing, configuration)
 
     else:
-        if dataset not in [Datasets.PyPSAEurLarge, Datasets.PyPSAEurSmall]:
+        if dataset not in [US_Datasets.PyPSAEurLarge, US_Datasets.PyPSAEurSmall]:
             raise ValueError(
                 f"The dataset {dataset.name} cannot be used in combination with the power flow model \
                 {power_flow_model}. Zonal prices can only be computed for the PyPSA datasets."
@@ -147,14 +150,14 @@ def solve_scenario(dataset: Datasets, power_flow_model: PowerFlowModel, pricing_
         return PriceAnalysis(zonal_scenario, allocation, pricing, configuration, scenario)
 
 
-def solve_and_analyse_scenario(dataset: Datasets, market_model: MarketModels,
+def solve_and_analyse_scenario(dataset: any, market_model: MarketModels,
                                power_flow_model: PowerFlowModel,
                                pricing_algorithm: PricingAlgorithms,
                                redispatch_algorithm: RedispatchAlgorithms = RedispatchAlgorithms.MinCostRD):
     """Computes allocation and pricing for some scenario and performs several analyses.
 
     Args:
-        dataset (Datasets): dataset for which allocation and pricing are computed
+        dataset (US_Datasets): dataset for which allocation and pricing are computed
         power_flow_model (PowerFlowModels): power flow model for which allocation and pricing are computed
         pricing_algorithm (PricingAlgorithms): pricing algorithm used for the pricing computations
         redispatch_algorithm (RedispatchAlgorithms): redispatch algorithm used for solving the redispatch problem
@@ -166,11 +169,11 @@ def solve_and_analyse_scenario(dataset: Datasets, market_model: MarketModels,
         PricingAnalysis object
     """
     if market_model == MarketModels.EU_model:
-        print("EU Model")
+        solve_euphemia(EU_Datasets.ARPA, CutType.PB)
 
     elif market_model == MarketModels.US_model:
         price_analysis = solve_scenario(dataset, power_flow_model, pricing_algorithm, redispatch_algorithm)
-        is_pypsa_dataset = dataset in [Datasets.PyPSAEurLarge, Datasets.PyPSAEurSmall]
+        is_pypsa_dataset = dataset in [US_Datasets.PyPSAEurLarge, US_Datasets.PyPSAEurSmall]
         base_scenario = None
 
         if is_pypsa_dataset:
@@ -188,17 +191,17 @@ def solve_and_analyse_scenario(dataset: Datasets, market_model: MarketModels,
                                price_analysis.configuration, power_flow_model, base_scenario)
 
 
-def apply_all_algorithms(dataset: Datasets):
+def apply_all_algorithms(dataset: US_Datasets):
     """Computes allocation and pricing and performs several analyses for all valid combinations of power flow 
     models and pricing algorithms for a defined dataset.
 
     Args:
-        dataset (Datasets): dataset for which allocation and pricing are computed
+        dataset (US_Datasets): dataset for which allocation and pricing are computed
     """
     scenario = _retrieve_data(dataset)
     original_scenario = scenario  # keep original scenario for Zonal_NTC
     configuration = _create_configuration()
-    is_pypsa_dataset = dataset in [Datasets.PyPSAEurLarge, Datasets.PyPSAEurSmall]
+    is_pypsa_dataset = dataset in [US_Datasets.PyPSAEurLarge, US_Datasets.PyPSAEurSmall]
 
     if is_pypsa_dataset:
         scenario.analyse_scenario()  # analyse base scenario
@@ -232,8 +235,8 @@ def apply_to_all_datasets(power_flow_model: PowerFlowModel, pricing_algorithm: P
         power_flow_model (PowerFlowModels): power flow model for which allocation and pricing are computed
         pricing_algorithm (PricingAlgorithm): pricing algorithm used for the pricing computations
     """
-    datasets = Datasets if isinstance(power_flow_model, DCOPF) else [Datasets.PyPSAEurSmall,
-                                                                     Datasets.PyPSAEurLarge]
+    datasets = US_Datasets if isinstance(power_flow_model, DCOPF) else [US_Datasets.PyPSAEurSmall,
+                                                                        US_Datasets.PyPSAEurLarge]
 
     for dataset in datasets:
         solve_and_analyse_scenario(dataset, power_flow_model, pricing_algorithm)

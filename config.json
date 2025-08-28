@@ -36,7 +36,7 @@
     "verbosity": true,
     "scenario": {
         "dataset": "PyPSAEurSmall",
-        "market_model": "US_model",
+        "market_model": "EU_model",
         "power_flow_model": {
             "type": "Zonal_NTC"
         },

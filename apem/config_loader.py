@@ -3,7 +3,7 @@ from typing import Dict, Any
 
 from apem.US_market_model.allocation.algorithms.nodal_clearing.dcopf import DCOPF
 from apem.US_market_model.allocation.algorithms.zonal_clearing.zonal_NTC import Zonal_NTC
-from apem.enums import Datasets, MarketModels, PricingAlgorithms, RedispatchAlgorithms
+from apem.enums import US_Datasets, MarketModels, PricingAlgorithms, RedispatchAlgorithms
 
 
 class ConfigLoader:
@@ -23,7 +23,7 @@ class ConfigLoader:
 
     def _validate_config(self):
         # Validate dataset
-        if self.raw_config['scenario']['dataset'] not in [d.name for d in Datasets]:
+        if self.raw_config['scenario']['dataset'] not in [d.name for d in US_Datasets]:
             raise ValueError(f"Invalid dataset: {self.raw_config['scenario']['dataset']}")
 
         # Validate market model
@@ -50,8 +50,8 @@ class ConfigLoader:
             if not 0 <= zonal_config['factor'] <= 1:
                 raise ValueError(f"Invalid zonal factor: {zonal_config['factor']}. Must be between 0 and 1.")
 
-    def get_dataset(self) -> Datasets:
-        return Datasets[self.config['scenario']['dataset']]
+    def get_dataset(self) -> US_Datasets:
+        return US_Datasets[self.config['scenario']['dataset']]
 
     def get_market_model(self) -> MarketModels:
         return MarketModels[self.config['scenario']['market_model']]

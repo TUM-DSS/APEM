@@ -44,7 +44,7 @@ class RedispatchAlgorithms(Enum):
     MinVolRD = MinVolRD()
 
 
-class Datasets(Enum):
+class US_Datasets(Enum):
     IEEE_RTS = ParseIEEERTS()
     PJM = ParsePJM()
     PyPSAEurSmall = ParsePyPSAEurSmall()
