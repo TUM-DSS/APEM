@@ -3,6 +3,7 @@ from typing import Dict, Any
 
 from apem.allocation.algorithms.nodal_clearing.dcopf import DCOPF
 from apem.allocation.algorithms.nodal_clearing.nodal_fbmc_included import NodalFBMC
+from apem.allocation.algorithms.zonal_clearing.zonal_fbmc_included import ZonalFBMC
 from apem.allocation.algorithms.zonal_clearing.zonal_NTC import Zonal_NTC
 from apem.enums import Datasets, PricingAlgorithms, RedispatchAlgorithms
 
@@ -28,7 +29,7 @@ class ConfigLoader:
             raise ValueError(f"Invalid dataset: {self.raw_config['scenario']['dataset']}")
 
         # Validate power flow model
-        if self.raw_config['scenario']['power_flow_model']['type'] not in ["DCOPF", "Zonal_NTC", "Nodal_FBMC"]:
+        if self.raw_config['scenario']['power_flow_model']['type'] not in ["DCOPF", "Zonal_NTC", "Nodal_FBMC", "Zonal_FBMC"]:
             raise ValueError(f"Invalid power flow model: {self.raw_config['scenario']['power_flow_model']['type']}")
 
         # Validate pricing algorithm
@@ -39,13 +40,15 @@ class ConfigLoader:
         if self.raw_config['scenario']['redispatch_algorithm'] not in [r.name for r in RedispatchAlgorithms]:
             raise ValueError(f"Invalid redispatch algorithm: {self.raw_config['scenario']['redispatch_algorithm']}")
 
-        # Validate zonal configuration if using Zonal_NTC
-        if self.raw_config['scenario']['power_flow_model']['type'] == "Zonal_NTC":
+        # Validate zonal configuration if using Zonal allocation method
+        if self.raw_config['scenario']['power_flow_model']['type'] in ["Zonal_NTC", "Zonal_FBMC"]:
             zonal_config = self.raw_config['zonal_configuration']
             if zonal_config['type'] not in self.raw_config['_available_zonal_configurations']:
                 raise ValueError(f"Invalid zonal configuration type: {zonal_config['type']}")
             if not 0 <= zonal_config['factor'] <= 1:
                 raise ValueError(f"Invalid zonal factor: {zonal_config['factor']}. Must be between 0 and 1.")
+            if zonal_config['base_case'] not in self.raw_config['_available_base_cases']:
+                raise ValueError(f"Invalid zonal base case: {zonal_config['base_case']}.")
 
     def get_dataset(self) -> Datasets:
         return Datasets[self.config['scenario']['dataset']]
@@ -57,6 +60,9 @@ class ConfigLoader:
             return Zonal_NTC(zonal_configuration=zonal_config['type'], factor=zonal_config['factor'])
         elif model_type == "DCOPF":
             return DCOPF()
+        elif model_type == "Zonal_FBMC":
+            zonal_config = self.config['zonal_configuration']
+            return ZonalFBMC(zonal_configuration=zonal_config['type'], base_case_type=zonal_config['base_case'])
         else:
             return NodalFBMC()
 

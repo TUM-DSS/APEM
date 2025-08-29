@@ -4,6 +4,7 @@ from typing import Optional, Union, Dict, Any
 
 from apem.allocation.algorithms.nodal_clearing.dcopf import DCOPF
 from apem.allocation.algorithms.zonal_clearing.zonal_NTC import Zonal_NTC
+from apem.allocation.algorithms.zonal_clearing.zonal_fbmc_included import ZonalFBMC
 from apem.allocation.algorithms.nodal_clearing.nodal_fbmc_included import NodalFBMC
 from apem.allocation.allocation import SellersAllocation, Allocation
 from apem.allocation.configuration import Configuration
@@ -55,7 +56,7 @@ def _solve_allocation_problem(scenario: Scenario, power_flow_model: PowerFlowMod
     if configuration.verbosity:
         print(f"Starting allocation problem for {scenario} using {power_flow_model}...")
 
-    zonal_part = f"{power_flow_model.zonal_configuration}/" if isinstance(power_flow_model, Zonal_NTC) else ""
+    zonal_part = f"{power_flow_model.zonal_configuration}/" if isinstance(power_flow_model, (Zonal_NTC, ZonalFBMC)) else ""
     base_path = f"results/{scenario}_results/{power_flow_model}"
     path = base_path + "/" + zonal_part + "allocation_results"
     os.makedirs(path, exist_ok=True)
@@ -72,7 +73,7 @@ def _solve_redispatch_problem(scenario: Scenario, power_flow_model: PowerFlowMod
         print(f"Starting redispatch problem using {redispatch_algorithm}...")
     redispatch_algorithm = redispatch_algorithm.value
 
-    zonal_part = f"{power_flow_model.zonal_configuration}/" if isinstance(power_flow_model, Zonal_NTC) else ""
+    zonal_part = f"{power_flow_model.zonal_configuration}/" if isinstance(power_flow_model, (Zonal_NTC, ZonalFBMC)) else ""
     base_path = f"results/{scenario}_results/{power_flow_model}"
     path = base_path + "/" + zonal_part + "allocation_results/redispatch"
     os.makedirs(path, exist_ok=True)
@@ -87,7 +88,7 @@ def _solve_pricing_problem(scenario: Scenario, allocation: Allocation, pricing_a
 
     pricing_algorithm = pricing_algorithm.value
 
-    zonal_part = f"{power_flow_model.zonal_configuration}/" if isinstance(power_flow_model, Zonal_NTC) else ""
+    zonal_part = f"{power_flow_model.zonal_configuration}/" if isinstance(power_flow_model, (Zonal_NTC, ZonalFBMC)) else ""
     path = f"results/{scenario}_results/{power_flow_model}/{zonal_part}{pricing_algorithm}_results"
     os.makedirs(path, exist_ok=True)
 
@@ -188,10 +189,10 @@ def solve_and_analyse_scenario(dataset: Datasets, power_flow_model: PowerFlowMod
                                else price_analysis.base_scenario)
         base_scenario = None if isDCOPF else price_analysis.base_scenario
         zonal_config = (power_flow_model.zonal_configuration if 
-                        isinstance(power_flow_model, Zonal_NTC) else "")
+                        isinstance(power_flow_model, (Zonal_NTC, ZonalFBMC)) else "")
         
         scenario_to_analyse.analyse_scenario()  # analyse base scenario
-        scenario_to_analyse.plot_network(zonal_config)  # plot underlying network
+        scenario_to_analyse.plot_network(power_flow_model, zonal_config)  # plot underlying network
         
     return analyse_results(price_analysis.scenario, price_analysis.allocation, price_analysis.pricing, 
                            price_analysis.configuration, power_flow_model, base_scenario)

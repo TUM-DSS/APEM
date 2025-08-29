@@ -88,7 +88,7 @@ class Scenario:
 
         f.close()
 
-    def plot_network(self, zonal_config: str = "") -> None:
+    def plot_network(self, power_flow_model, zonal_config: str = "") -> None:
         """
         Plots the electricity network for the underlying scenario.
         
@@ -97,8 +97,7 @@ class Scenario:
         """
 
         # Define power flow model and create results directory, if not exists
-        power_flow_model = "Zonal_NTC" if zonal_config else "DCOPF"
-        results_directory = os.path.join("results", f"{self.name}_results", power_flow_model)
+        results_directory = os.path.join("results", f"{self.name}_results", power_flow_model.__str__())
         os.makedirs(results_directory, exist_ok=True)
 
         # Get nodes and edges from the network

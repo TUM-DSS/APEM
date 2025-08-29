@@ -5,6 +5,8 @@ from gurobipy import GRB
 import re
 import numpy as np
 
+from apem.allocation.configuration import Configuration
+
 # A large number to represent the cost of non-served energy (C^nse)
 C_NSE = 10000  
 
@@ -17,7 +19,7 @@ class NodalDispatchModel:
     Includes verification and logging logic.
     """
 
-    def solve(self, network: pypsa.Network, ptdf: pd.DataFrame, verbose: bool = True):
+    def solve(self, network: pypsa.Network, ptdf: pd.DataFrame, verbose: bool = True, configuration:Configuration=None):
         """
         Formulates and solves the nodal dispatch problem.
 
@@ -28,8 +30,9 @@ class NodalDispatchModel:
                  otherwise None.
         """
         model = gp.Model(f'Nodal_Dispatch_BC1')
-        
-        model.setParam('LogToConsole', 0 if not verbose else 1)
+
+        if configuration:
+            configuration.apply_to_model(model)
 
         # --- 1. Extract Sets and Parameters from PyPSA Network ---
         snapshots = network.snapshots

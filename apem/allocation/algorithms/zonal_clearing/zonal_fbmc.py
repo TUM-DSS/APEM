@@ -5,30 +5,21 @@ import gurobipy as gp
 from gurobipy import GRB
 import logging
 
-# --- Setup a dedicated logger for this module ---
-# This will create a file named 'zonal_dispatch_debug.log'
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    filename='zonal_dispatch_debug.log',
-    filemode='w'
-)
+from apem.allocation.configuration import Configuration
 
 # High penalty for non-served energy, consistent with the paper's approach
 C_NSE = 10000
 # A high penalty cost for deviating from the zonal schedule in Redispatch R1
 C_DEV = 99999 
 
-# ==============================================================================
-# === 1. HELPER FUNCTIONS FOR ZONAL CALCULATIONS
-# ==============================================================================
+#Helper functions
 
 def get_zone_maps(network: pypsa.Network, node_zone_mapper: callable, zonal_configuration: str):
     """
     Creates mappings from nodes to zones and zones to nodes using the provided mapper function.
     """
     node_to_zone = pd.Series(
-        {bus: node_zone_mapper(zonal_configuration, network.buses.at[bus, 'x'], network.buses.at[bus, 'y'])
+        {bus: node_zone_mapper(zonal_configuration, network.buses.at[bus, 'y'], network.buses.at[bus, 'x'])
          for bus in network.buses.index},
         name="zone"
     ).dropna().astype(int)
@@ -69,9 +60,7 @@ def aggregate_by_zone(df: pd.DataFrame, node_to_zone: pd.Series) -> pd.DataFrame
     """Aggregates a nodal DataFrame (like demand or net positions) to the zonal level."""
     return df.T.groupby(node_to_zone).sum().T
 
-# ==============================================================================
-# === 2. BASE CASE GENERATOR (Reference Nodal Positions)
-# ==============================================================================
+
 class BaseCaseGenerator:
     def __init__(self, network: pypsa.Network, ptdf: pd.DataFrame, 
                  node_zone_mapper: callable, zonal_configuration: str):
@@ -138,7 +127,6 @@ class BaseCaseGenerator:
 
     def generate(self, base_case_type: str):
         """Generates a base case for expected nodal net positions (p_bus_expected)."""
-        logging.info(f"--- Generating Base Case for: {base_case_type} ---")
         if base_case_type == 'BC1': # Same as nodal solution
             model, p_bus = self._create_base_nodal_model(self.network)
         elif base_case_type == 'BC2': # Eq. (9)
@@ -173,23 +161,23 @@ class BaseCaseGenerator:
 
         model.optimize()
         if model.Status == GRB.OPTIMAL:
-            logging.info(f"Base Case {base_case_type} solved successfully.")
             return pd.DataFrame({b: {t: p_bus[b, t].X for t in self.snapshots} for b in self.buses})
         else:
             logging.error(f"Base Case Generation for {base_case_type} FAILED. IIS written to file.");
             model.computeIIS(); model.write(f"base_case_{base_case_type}_iis.ilp")
             return None
 
-# ==============================================================================
-# === 3. ZONAL DISPATCH MODEL (Flow-Based Market Coupling)
-# ==============================================================================
 class ZonalDispatchModel:
     def solve(self, network: pypsa.Network, nodal_ptdf: pd.DataFrame, 
               p_bus_expected: pd.DataFrame, node_zone_mapper: callable,
-              zonal_configuration: str, verbose: bool = True):
+              zonal_configuration: str, verbose: bool = True, configuration: Configuration = None):
         
-        logging.info("--- Starting ZonalDispatchModel solve ---")
-        model = gp.Model('Zonal_Dispatch_FBMC'); model.setParam('LogToConsole', 1 if verbose else 0)
+        if verbose:
+            logging.info("--- Starting ZonalDispatchModel solve ---")
+        model = gp.Model('Zonal_Dispatch_FBMC')
+
+        if configuration:
+            configuration.apply_to_model(model)
 
         # --- 1. Zonal Pre-calculations ---
         node_to_zone, zone_to_nodes = get_zone_maps(network, node_zone_mapper, zonal_configuration)
@@ -253,6 +241,8 @@ class ZonalDispatchModel:
         # --- 4. Solve and Prepare Results ---
         model.optimize()
         if model.Status == GRB.OPTIMAL:
+            all_vars_for_saving = [{"variable": v.VarName, "value": v.X} for v in model.getVars()]
+
             # Fix integer variables and re-solve as LP to get duals
             for v in model.getVars():
                 if v.VType in (GRB.BINARY, GRB.INTEGER): v.LB = v.X; v.UB = v.X
@@ -264,22 +254,22 @@ class ZonalDispatchModel:
                 "p_tz": pd.DataFrame({z: {t: p_tz[z, t].X for t in snapshots} for z in zones}),
                 "u": pd.DataFrame({g: {t: u[g, t].X for t in snapshots} for g in generators}),
                 "nse_tz": pd.DataFrame({z: {t: nse_tz[z, t].X for t in snapshots} for z in zones}),
-                "duals": { "zonal_price": pd.DataFrame({z: {t: relaxed.getConstrByName(f"zonal_balance_{z}_{t}").Pi for t in snapshots} for z in zones})}
+                "model": model,
+                "duals": { "zonal_price": pd.DataFrame({z: {t: relaxed.getConstrByName(f"zonal_balance_{z}_{t}").Pi for t in snapshots} for z in zones})},
+                "all_vars": all_vars_for_saving
             }
         else:
             logging.error(f"Zonal MILP failed. IIS written to zonal_model_iis.ilp")
             model.computeIIS(); model.write("zonal_model_iis.ilp")
             return None
 
-# ==============================================================================
-# === 4. POST-ZONAL REDISPATCH MODEL
-# ==============================================================================
 class RedispatchModel:
     def solve(self, network: pypsa.Network, ptdf: pd.DataFrame,
               zonal_results: dict, node_zone_mapper: callable,
               zonal_configuration: str, method: str, verbose: bool = True):
 
-        logging.info(f"--- Starting RedispatchModel solve (Method: {method}) ---")
+        if verbose:
+            logging.info(f"--- Starting RedispatchModel solve (Method: {method}) ---")
         if method not in ['R1', 'R2']: raise ValueError("Method must be 'R1' or 'R2'")
         model = gp.Model(f'Redispatch_{method}'); model.setParam('LogToConsole', 1 if verbose else 0)
 

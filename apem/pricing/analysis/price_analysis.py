@@ -4,6 +4,7 @@ import os
 import pandas as pd
 
 from apem.allocation.algorithms.zonal_clearing.zonal_NTC import Zonal_NTC
+from apem.allocation.algorithms.zonal_clearing.zonal_fbmc_included import ZonalFBMC
 from apem.allocation.allocation import Allocation
 from apem.allocation.configuration import Configuration
 from apem.data.analysis.plot import plot_supply_demand
@@ -173,7 +174,7 @@ class PriceAnalysis:
         if self.scenario.name != "ARPA":
             plot_supply_demand(dir_stats, self.scenario)
 
-        zonal_config = pf_model_value.zonal_configuration if isinstance(pf_model_value, Zonal_NTC) else ""
+        zonal_config = pf_model_value.zonal_configuration if isinstance(pf_model_value, (Zonal_NTC, ZonalFBMC)) else ""
         zonal_path = zonal_config + "/" if zonal_config else ""
 
         path = f"{dir_stats}/{pf_model_value}/{zonal_path}{self.pricing.used_algorithm}_results"
@@ -192,4 +193,4 @@ class PriceAnalysis:
             nodal_scenario = self.base_scenario if zonal_config else self.scenario
                 
             plot_price_heatmap(f"{path}/{self.pricing.used_algorithm}_heatmap.png", nodal_scenario,
-                               avg_prices, zonal_config)
+                               avg_prices, zonal_config, pf_model_value.__str__())

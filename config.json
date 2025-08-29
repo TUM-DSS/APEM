@@ -9,6 +9,7 @@
     "_available_power_flow_models": [
         "DCOPF",
         "Nodal_FBMC",
+        "Zonal_FBMC",
         "Zonal_NTC"
     ],
     "_available_pricing_algorithms": [
@@ -30,13 +31,20 @@
         "zonal_DE4-refined",
         "zonal_DE5"
     ],
+    "_available_base_cases": [
+        "BC1",
+        "BC2",
+        "BC3.1",
+        "BC3.2",
+        "BC4"
+    ],
     "verbosity": true,
     "scenario": {
         "dataset": "PyPSAEurSmall",
         "power_flow_model": {
-            "type": "Nodal_FBMC"
+            "type": "DCOPF"
         },
-        "pricing_algorithm": "ELMP",
+        "pricing_algorithm": "IP",
         "redispatch_algorithm": "MinCostRD"
     },
     "solver_configuration": {
@@ -52,6 +60,7 @@
     },
     "zonal_configuration": {
         "type": "zonal_DE4-refined",
-        "factor": 0.8
+        "factor": 0.8,
+        "base_case": "BC4"
     }
 } 

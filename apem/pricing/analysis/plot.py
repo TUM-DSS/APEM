@@ -17,7 +17,7 @@ def plot_avg_prices(avg_prices: pd.DataFrame, scenario: Scenario, file_plot: str
     plt.close()
 
 
-def plot_price_heatmap(file_heatmap: str, scenario: Scenario, avg_prices: dict = None, zonal_config: str = "") -> None:
+def plot_price_heatmap(file_heatmap: str, scenario: Scenario, avg_prices: dict = None, zonal_config: str = "", power_flow_model: str = "") -> None:
     """Creates a heatmap with the (average) nodal (or zonal) prices for the underlying network.
 
     Args:
@@ -28,7 +28,6 @@ def plot_price_heatmap(file_heatmap: str, scenario: Scenario, avg_prices: dict =
     """
 
     # Define power flow model and create results directory, if not exists
-    power_flow_model = "Zonal_NTC" if zonal_config else "DCOPF"
     results_directory = os.path.join("results", f"{scenario.name}_results", power_flow_model)
     os.makedirs(results_directory, exist_ok=True)
 
