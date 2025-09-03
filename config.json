@@ -40,9 +40,9 @@
     ],
     "verbosity": true,
     "scenario": {
-        "dataset": "PyPSAEurSmall",
+        "dataset": "PyPSAEurLarge",
         "power_flow_model": {
-            "type": "DCOPF"
+            "type": "Zonal_FBMC"
         },
         "pricing_algorithm": "IP",
         "redispatch_algorithm": "MinCostRD"

@@ -10,9 +10,10 @@ from apem.allocation.configuration import Configuration
 # High penalty for non-served energy, consistent with the paper's approach
 C_NSE = 10000
 # A high penalty cost for deviating from the zonal schedule in Redispatch R1
-C_DEV = 99999 
+C_DEV = 99999
 
-#Helper functions
+
+# Helper functions
 
 def get_zone_maps(network: pypsa.Network, node_zone_mapper: callable, zonal_configuration: str):
     """
@@ -23,9 +24,10 @@ def get_zone_maps(network: pypsa.Network, node_zone_mapper: callable, zonal_conf
          for bus in network.buses.index},
         name="zone"
     ).dropna().astype(int)
-    
+
     zone_to_nodes = node_to_zone.groupby(node_to_zone).apply(lambda group: group.index.tolist()).to_dict()
     return node_to_zone, zone_to_nodes
+
 
 def calculate_gsk(network: pypsa.Network, node_to_zone: pd.Series, zone_to_nodes: dict) -> pd.Series:
     """Calculates Generation Shift Keys (GSK) based on generator p_nom."""
@@ -36,17 +38,22 @@ def calculate_gsk(network: pypsa.Network, node_to_zone: pd.Series, zone_to_nodes
         zone_total_p_nom = bus_p_nom.loc[nodes_in_zone].sum()
         if zone_total_p_nom > 1e-6:
             gsk.loc[nodes_in_zone] = bus_p_nom.loc[nodes_in_zone] / zone_total_p_nom
-        else: # Handle zones with no generation capacity by distributing evenly
+        else:  # Handle zones with no generation capacity by distributing evenly
             num_nodes = len(nodes_in_zone)
-            if num_nodes > 0: gsk.loc[nodes_in_zone] = 1.0 / num_nodes
-            else: gsk.loc[nodes_in_zone] = 0.0
+            if num_nodes > 0:
+                gsk.loc[nodes_in_zone] = 1.0 / num_nodes
+            else:
+                gsk.loc[nodes_in_zone] = 0.0
     return gsk
+
 
 def calculate_zonal_ptdf(nodal_ptdf: pd.DataFrame, gsk: pd.Series, node_to_zone: pd.Series) -> pd.DataFrame:
     """Calculates the Zonal PTDF matrix."""
     return nodal_ptdf.mul(gsk, axis='columns').T.groupby(node_to_zone).sum().T
 
-def select_fb_lines(zonal_ptdf: pd.DataFrame, network: pypsa.Network, node_to_zone: pd.Series, threshold: float = 0.05) -> list:
+
+def select_fb_lines(zonal_ptdf: pd.DataFrame, network: pypsa.Network, node_to_zone: pd.Series,
+                    threshold: float = 0.05) -> list:
     """Selects lines for the Flow-Based domain (interzonal + sensitive intrazonal)."""
     interzonal_lines = {
         line for line, data in network.lines.iterrows()
@@ -56,13 +63,14 @@ def select_fb_lines(zonal_ptdf: pd.DataFrame, network: pypsa.Network, node_to_zo
     sensitive_intrazonal_lines = set(ptdf_impact[ptdf_impact > threshold].index)
     return sorted(list(interzonal_lines | sensitive_intrazonal_lines))
 
+
 def aggregate_by_zone(df: pd.DataFrame, node_to_zone: pd.Series) -> pd.DataFrame:
     """Aggregates a nodal DataFrame (like demand or net positions) to the zonal level."""
     return df.T.groupby(node_to_zone).sum().T
 
 
 class BaseCaseGenerator:
-    def __init__(self, network: pypsa.Network, ptdf: pd.DataFrame, 
+    def __init__(self, network: pypsa.Network, ptdf: pd.DataFrame,
                  node_zone_mapper: callable, zonal_configuration: str):
         self.network = network
         self.ptdf = ptdf
@@ -101,13 +109,15 @@ class BaseCaseGenerator:
                      gp.quicksum(startup[g, t] * startup_costs[g] for g, t in startup) +
                      gp.quicksum(nse[b, t] * C_NSE for b, t in nse))
         model.setObjective(objective, GRB.MINIMIZE)
-        
+
         # --- Base Constraints (Eqs. 1, 3, 4, 5, 6) ---
         # Eq. (3) - Nodal power balance
-        model.addConstrs((p_bus[b, t] == gp.quicksum(p_gen[g, t] for g in gen_buses[gen_buses == b].index) - bus_demand.at[t, b] + nse[b, t]
+        model.addConstrs((p_bus[b, t] == gp.quicksum(p_gen[g, t] for g in gen_buses[gen_buses == b].index) -
+                          bus_demand.at[t, b] + nse[b, t]
                           for b in self.buses for t in self.snapshots), name="power_balance")
         # Eq. (4) - System-wide power balance
-        model.addConstrs((gp.quicksum(p_bus[b, t] for b in self.buses) == 0 for t in self.snapshots), name="system_balance")
+        model.addConstrs((gp.quicksum(p_bus[b, t] for b in self.buses) == 0 for t in self.snapshots),
+                         name="system_balance")
         # Eq. (6) - DC power flow calculation
         model.addConstrs((flow[l, t] == gp.quicksum(self.ptdf.at[l, b] * p_bus[b, t] for b in self.buses)
                           for l in self.lines for t in self.snapshots), name="dc_flow")
@@ -119,31 +129,34 @@ class BaseCaseGenerator:
             for t_idx, t in enumerate(self.snapshots):
                 model.addConstr(p_gen[g, t] >= p_min_pu[g] * p_nom[g] * u[g, t])
                 model.addConstr(p_gen[g, t] <= p_max_pu_t.at[t, g] * p_nom[g] * u[g, t])
-                if t_idx > 0: model.addConstr(u[g, t] - u[g, self.snapshots[t_idx-1]] == startup[g, t] - shutdown[g, t])
-                else: model.addConstr(u[g, t] == startup[g, t]); model.addConstr(shutdown[g, t] == 0)
+                if t_idx > 0:
+                    model.addConstr(u[g, t] - u[g, self.snapshots[t_idx - 1]] == startup[g, t] - shutdown[g, t])
+                else:
+                    model.addConstr(u[g, t] == startup[g, t]); model.addConstr(shutdown[g, t] == 0)
                 model.addConstr(startup[g, t] + shutdown[g, t] <= 1)
-        model.addConstrs((nse[b, t] <= bus_demand.at[t,b] for b, t in nse), name="nse_limit")
+        model.addConstrs((nse[b, t] <= bus_demand.at[t, b] for b, t in nse), name="nse_limit")
         return model, p_bus
 
     def generate(self, base_case_type: str):
         """Generates a base case for expected nodal net positions (p_bus_expected)."""
-        if base_case_type == 'BC1': # Same as nodal solution
+        if base_case_type == 'BC1':  # Same as nodal solution
             model, p_bus = self._create_base_nodal_model(self.network)
-        elif base_case_type == 'BC2': # Eq. (9)
+        elif base_case_type == 'BC2':  # Eq. (9)
             model, p_bus = self._create_base_nodal_model(self.network)
             for t in self.snapshots:
                 for zone_id, nodes in self.zone_to_nodes.items():
-                    model.addConstr(gp.quicksum(p_bus[b, t] for b in nodes) == 0, name=f"zonal_net_pos_zero_{zone_id}_{t}")
-        elif base_case_type == 'BC3.1': # Eq. (10)
+                    model.addConstr(gp.quicksum(p_bus[b, t] for b in nodes) == 0,
+                                    name=f"zonal_net_pos_zero_{zone_id}_{t}")
+        elif base_case_type == 'BC3.1':  # Eq. (10)
             net_mod = self.network.copy()
             net_mod.loads_t.p_set *= 1.2
             model, p_bus = self._create_base_nodal_model(net_mod)
-        elif base_case_type == 'BC3.2': # Eq. (11)
+        elif base_case_type == 'BC3.2':  # Eq. (11)
             net_mod = self.network.copy()
             perturbation = 1 + (np.random.rand(*net_mod.loads_t.p_set.shape) * 0.4 - 0.2)
             net_mod.loads_t.p_set *= perturbation
             model, p_bus = self._create_base_nodal_model(net_mod)
-        elif base_case_type == 'BC4': # Eq. (12)
+        elif base_case_type == 'BC4':  # Eq. (12)
             net_relaxed = self.network.copy()
             for line_name, line_data in net_relaxed.lines.iterrows():
                 if self.node_to_zone.get(line_data.bus0) == self.node_to_zone.get(line_data.bus1):
@@ -156,22 +169,26 @@ class BaseCaseGenerator:
             model, p_bus = self._create_base_nodal_model(self.network)
             for t in self.snapshots:
                 for zone_id, nodes in self.zone_to_nodes.items():
-                    model.addConstr(gp.quicksum(p_bus[b, t] for b in nodes) == p_tz_ref.at[t, zone_id], name=f"zonal_net_pos_fixed_{zone_id}_{t}")
-        else: raise ValueError(f"Unknown base_case_type: {base_case_type}")
+                    model.addConstr(gp.quicksum(p_bus[b, t] for b in nodes) == p_tz_ref.at[t, zone_id],
+                                    name=f"zonal_net_pos_fixed_{zone_id}_{t}")
+        else:
+            raise ValueError(f"Unknown base_case_type: {base_case_type}")
 
         model.optimize()
         if model.Status == GRB.OPTIMAL:
             return pd.DataFrame({b: {t: p_bus[b, t].X for t in self.snapshots} for b in self.buses})
         else:
             logging.error(f"Base Case Generation for {base_case_type} FAILED. IIS written to file.");
-            model.computeIIS(); model.write(f"base_case_{base_case_type}_iis.ilp")
+            model.computeIIS();
+            model.write(f"base_case_{base_case_type}_iis.ilp")
             return None
 
+
 class ZonalDispatchModel:
-    def solve(self, network: pypsa.Network, nodal_ptdf: pd.DataFrame, 
+    def solve(self, network: pypsa.Network, nodal_ptdf: pd.DataFrame,
               p_bus_expected: pd.DataFrame, node_zone_mapper: callable,
               zonal_configuration: str, verbose: bool = True, configuration: Configuration = None):
-        
+
         if verbose:
             logging.info("--- Starting ZonalDispatchModel solve ---")
         model = gp.Model('Zonal_Dispatch_FBMC')
@@ -188,13 +205,14 @@ class ZonalDispatchModel:
         gsk = calculate_gsk(network, node_to_zone, zone_to_nodes)
         zonal_ptdf = calculate_zonal_ptdf(nodal_ptdf, gsk, node_to_zone)
         L_z = select_fb_lines(zonal_ptdf, network, node_to_zone, threshold=0.05)
-        
-        bus_demand = network.loads_t.p_set.T.groupby(network.loads.bus).sum().T.reindex(columns=network.buses.index, fill_value=0)
+
+        bus_demand = network.loads_t.p_set.T.groupby(network.loads.bus).sum().T.reindex(columns=network.buses.index,
+                                                                                        fill_value=0)
         zonal_demand = aggregate_by_zone(bus_demand, node_to_zone)
         p_tz_expected = aggregate_by_zone(p_bus_expected, node_to_zone)
         flow_expected_nodal = nodal_ptdf.dot(p_bus_expected.T).T
         flow_expected_zonal = zonal_ptdf.dot(p_tz_expected.T).T
-        delta_F = flow_expected_nodal - flow_expected_zonal # Eq. (16) correction term
+        delta_F = flow_expected_nodal - flow_expected_zonal  # Eq. (16) correction term
 
         # --- 2. Define Model Variables & Objective ---
         snapshots, generators = network.snapshots, network.generators.index
@@ -221,22 +239,30 @@ class ZonalDispatchModel:
         for g in generators:
             for t_idx, t in enumerate(snapshots):
                 model.addConstr(p_gen[g, t] >= p_min_pu[g] * p_nom[g] * u[g, t])
-                model.addConstr(p_gen[g, t] <= p_max_pu_t.at[t,g] * p_nom[g] * u[g, t]) # CORRECTED
-                if t_idx > 0: model.addConstr(u[g, t] - u[g, snapshots[t_idx-1]] == startup[g, t] - shutdown[g, t])
-                else: model.addConstr(u[g, t] == startup[g, t]); model.addConstr(shutdown[g, t] == 0)
+                model.addConstr(p_gen[g, t] <= p_max_pu_t.at[t, g] * p_nom[g] * u[g, t])  # CORRECTED
+                if t_idx > 0:
+                    model.addConstr(u[g, t] - u[g, snapshots[t_idx - 1]] == startup[g, t] - shutdown[g, t])
+                else:
+                    model.addConstr(u[g, t] == startup[g, t]); model.addConstr(shutdown[g, t] == 0)
 
         # Zonal Power Balance - Eq. (14)
         for t in snapshots:
             for z in zones:
                 gens_in_zone = gen_to_zone[gen_to_zone == z].index
-                model.addConstr(gp.quicksum(p_gen[g,t] for g in gens_in_zone) - p_tz[z,t] + nse_tz[z,t] == zonal_demand.at[t,z], name=f"zonal_balance_{z}_{t}")
+                model.addConstr(
+                    gp.quicksum(p_gen[g, t] for g in gens_in_zone) - p_tz[z, t] + nse_tz[z, t] == zonal_demand.at[t, z],
+                    name=f"zonal_balance_{z}_{t}")
         # System-wide zonal balance - Eq. (15)
         model.addConstrs((gp.quicksum(p_tz[z, t] for z in zones) == 0 for t in snapshots), name="system_zonal_balance")
         # Zonal flow calculation & limits - Eq. (16), (17), (18)
-        model.addConstrs((flow_zonal[l, t] == gp.quicksum(zonal_ptdf.at[l, z] * p_tz[z, t] for z in zones) for l,t in flow_zonal), name="zonal_flow_calc")
-        model.addConstrs((flow_zonal[l, t] <= network.lines.at[l, 's_nom'] - delta_F.at[t, l] for l,t in flow_zonal), name="zonal_flow_upper")
-        model.addConstrs((flow_zonal[l, t] >= -network.lines.at[l, 's_nom'] - delta_F.at[t, l] for l,t in flow_zonal), name="zonal_flow_lower")
-        model.addConstrs((nse_tz[z, t] <= zonal_demand.at[t, z] for z,t in nse_tz), name="nse_limit_zonal")
+        model.addConstrs(
+            (flow_zonal[l, t] == gp.quicksum(zonal_ptdf.at[l, z] * p_tz[z, t] for z in zones) for l, t in flow_zonal),
+            name="zonal_flow_calc")
+        model.addConstrs((flow_zonal[l, t] <= network.lines.at[l, 's_nom'] - delta_F.at[t, l] for l, t in flow_zonal),
+                         name="zonal_flow_upper")
+        model.addConstrs((flow_zonal[l, t] >= -network.lines.at[l, 's_nom'] - delta_F.at[t, l] for l, t in flow_zonal),
+                         name="zonal_flow_lower")
+        model.addConstrs((nse_tz[z, t] <= zonal_demand.at[t, z] for z, t in nse_tz), name="nse_limit_zonal")
 
         # --- 4. Solve and Prepare Results ---
         model.optimize()
@@ -246,8 +272,10 @@ class ZonalDispatchModel:
             # Fix integer variables and re-solve as LP to get duals
             for v in model.getVars():
                 if v.VType in (GRB.BINARY, GRB.INTEGER): v.LB = v.X; v.UB = v.X
-            relaxed = model.relax(); relaxed.setParam('LogToConsole', 0); relaxed.optimize()
-            
+            relaxed = model.relax();
+            relaxed.setParam('LogToConsole', 0);
+            relaxed.optimize()
+
             return {
                 "objective_value": model.ObjVal,
                 "p_gen": pd.DataFrame({g: {t: p_gen[g, t].X for t in snapshots} for g in generators}),
@@ -255,13 +283,16 @@ class ZonalDispatchModel:
                 "u": pd.DataFrame({g: {t: u[g, t].X for t in snapshots} for g in generators}),
                 "nse_tz": pd.DataFrame({z: {t: nse_tz[z, t].X for t in snapshots} for z in zones}),
                 "model": model,
-                "duals": { "zonal_price": pd.DataFrame({z: {t: relaxed.getConstrByName(f"zonal_balance_{z}_{t}").Pi for t in snapshots} for z in zones})},
+                "duals": {"zonal_price": pd.DataFrame(
+                    {z: {t: relaxed.getConstrByName(f"zonal_balance_{z}_{t}").Pi for t in snapshots} for z in zones})},
                 "all_vars": all_vars_for_saving
             }
         else:
             logging.error(f"Zonal MILP failed. IIS written to zonal_model_iis.ilp")
-            model.computeIIS(); model.write("zonal_model_iis.ilp")
+            model.computeIIS();
+            model.write("zonal_model_iis.ilp")
             return None
+
 
 class RedispatchModel:
     def solve(self, network: pypsa.Network, ptdf: pd.DataFrame,
@@ -271,7 +302,8 @@ class RedispatchModel:
         if verbose:
             logging.info(f"--- Starting RedispatchModel solve (Method: {method}) ---")
         if method not in ['R1', 'R2']: raise ValueError("Method must be 'R1' or 'R2'")
-        model = gp.Model(f'Redispatch_{method}'); model.setParam('LogToConsole', 1 if verbose else 0)
+        model = gp.Model(f'Redispatch_{method}');
+        model.setParam('LogToConsole', 1 if verbose else 0)
 
         # --- 1. Extract Sets, Parameters, and Schedules ---
         node_to_zone, _ = get_zone_maps(network, node_zone_mapper, zonal_configuration)
@@ -285,49 +317,58 @@ class RedispatchModel:
         shutdown = model.addVars(generators, snapshots, vtype=GRB.BINARY, name="shutdown_rd")
         p_bus = model.addVars(buses, snapshots, lb=-GRB.INFINITY, name="p_bus_rd")
         nse = model.addVars(buses, snapshots, name="nse_rd", lb=0)
-        
+
         gen_costs, startup_costs = network.generators.marginal_cost, network.generators.start_up_cost
 
         # --- 3. Set Objective Function based on Method ---
         if method == 'R1':
             # Eq. (19) - Minimize total operating cost + deviation penalty
             delta_tz = model.addVars(zonal_results['p_tz'].columns, snapshots, lb=0, name="delta_tz")
-            op_costs = (gp.quicksum(p_gen[g, t] * gen_costs[g] for g,t in p_gen) +
-                        gp.quicksum(startup[g, t] * startup_costs[g] for g,t in startup) +
-                        gp.quicksum(nse[b, t] * C_NSE for b,t in nse))
-            deviation_penalty = gp.quicksum(delta_tz[z, t] * C_DEV for z,t in delta_tz)
+            op_costs = (gp.quicksum(p_gen[g, t] * gen_costs[g] for g, t in p_gen) +
+                        gp.quicksum(startup[g, t] * startup_costs[g] for g, t in startup) +
+                        gp.quicksum(nse[b, t] * C_NSE for b, t in nse))
+            deviation_penalty = gp.quicksum(delta_tz[z, t] * C_DEV for z, t in delta_tz)
             model.setObjective(op_costs + deviation_penalty, GRB.MINIMIZE)
-            
+
         elif method == 'R2':
             # Eq. (20) - Minimize redispatch compensation costs
             p_up = model.addVars(generators, snapshots, name="p_up", lb=0)
             p_down = model.addVars(generators, snapshots, name="p_down", lb=0)
-            model.addConstrs((p_gen[g, t] - p_gen_zonal.at[t, g] == p_up[g, t] - p_down[g, t] for g, t in p_gen), name="redispatch_delta_definition")
+            model.addConstrs((p_gen[g, t] - p_gen_zonal.at[t, g] == p_up[g, t] - p_down[g, t] for g, t in p_gen),
+                             name="redispatch_delta_definition")
 
             zonal_prices = zonal_results['duals']['zonal_price']
             gen_zones = network.generators.bus.map(node_to_zone)
             gen_prices = pd.Series({g: zonal_prices.at[snapshots[0], gen_zones[g]] for g in generators})
-            
+
             cost_up_reg = gp.quicksum(p_up[g, t] * gen_costs[g] for g, t in p_up)
             profit_margin = (gen_prices - gen_costs).clip(lower=0)
             cost_down_reg = gp.quicksum(p_down[g, t] * profit_margin[g] for g, t in p_down)
-            cost_new_startup = gp.quicksum(startup[g, t] * startup_costs[g] for g, t in startup if u_zonal.at[t, g] < 0.5)
+            cost_new_startup = gp.quicksum(
+                startup[g, t] * startup_costs[g] for g, t in startup if u_zonal.at[t, g] < 0.5)
             cost_nse = gp.quicksum(nse[b, t] * C_NSE for b, t in nse)
             model.setObjective(cost_up_reg + cost_down_reg + cost_new_startup + cost_nse, GRB.MINIMIZE)
 
         # --- 4. Add Nodal Redispatch Constraints ---
         bus_demand = network.loads_t.p_set.T.groupby(network.loads.bus).sum().T.reindex(columns=buses, fill_value=0)
-        
+
         # Eq. (23) -> Nodal Power Balance
-        model.addConstrs((p_bus[b, t] == gp.quicksum(p_gen[g, t] for g in network.generators.index[network.generators.bus == b]) - bus_demand.at[t, b] + nse[b, t] 
+        model.addConstrs((p_bus[b, t] == gp.quicksum(
+            p_gen[g, t] for g in network.generators.index[network.generators.bus == b]) - bus_demand.at[t, b] + nse[
+                              b, t]
                           for b in buses for t in snapshots), name="redispatch_balance")
         # Eq. (4) -> System-wide balance
-        model.addConstrs((gp.quicksum(p_bus[b, t] for b in buses) == 0 for t in snapshots), name="redispatch_sys_balance")
-        
+        model.addConstrs((gp.quicksum(p_bus[b, t] for b in buses) == 0 for t in snapshots),
+                         name="redispatch_sys_balance")
+
         # Eq. (25) & (6) -> Nodal flow calculation and limits
-        model.addConstrs((gp.quicksum(ptdf.at[l, b] * p_bus[b,t] for b in ptdf.columns) <= network.lines.at[l, 's_nom'] for l in lines for t in snapshots), name="redispatch_flow_upper")
-        model.addConstrs((gp.quicksum(ptdf.at[l, b] * p_bus[b,t] for b in ptdf.columns) >= -network.lines.at[l, 's_nom'] for l in lines for t in snapshots), name="redispatch_flow_lower")
-        
+        model.addConstrs(
+            (gp.quicksum(ptdf.at[l, b] * p_bus[b, t] for b in ptdf.columns) <= network.lines.at[l, 's_nom'] for l in
+             lines for t in snapshots), name="redispatch_flow_upper")
+        model.addConstrs(
+            (gp.quicksum(ptdf.at[l, b] * p_bus[b, t] for b in ptdf.columns) >= -network.lines.at[l, 's_nom'] for l in
+             lines for t in snapshots), name="redispatch_flow_lower")
+
         # Part of set P in Eq. (19) -> Generator operating constraints
         p_min_pu, p_nom = network.generators.p_min_pu, network.generators.p_nom
         p_max_pu_t = network.generators_t.p_max_pu
@@ -342,15 +383,17 @@ class RedispatchModel:
         # Eq. (22) -> Fixed commitment for slow units
         slow_carriers = ['nuclear', 'lignite', 'coal', 'oil']
         slow_gens = network.generators[network.generators.carrier.isin(slow_carriers)].index
-        model.addConstrs((u[g,t] == u_zonal.at[t,g] for g in slow_gens for t in snapshots), name="fixed_slow_uc")
-        
+        model.addConstrs((u[g, t] == u_zonal.at[t, g] for g in slow_gens for t in snapshots), name="fixed_slow_uc")
+
         # Eq. (21) -> Deviation calculation (only for R1 method)
         if method == 'R1':
             for t in snapshots:
                 for z, nodes in get_zone_maps(network, node_zone_mapper, zonal_configuration)[1].items():
                     p_bus_in_zone = gp.quicksum(p_bus[b, t] for b in nodes)
-                    model.addConstr(delta_tz[z, t] >= p_bus_in_zone - zonal_results['p_tz'].at[t, z], name=f"dev_pos_{z}_{t}")
-                    model.addConstr(delta_tz[z, t] >= -(p_bus_in_zone - zonal_results['p_tz'].at[t, z]), name=f"dev_neg_{z}_{t}")
+                    model.addConstr(delta_tz[z, t] >= p_bus_in_zone - zonal_results['p_tz'].at[t, z],
+                                    name=f"dev_pos_{z}_{t}")
+                    model.addConstr(delta_tz[z, t] >= -(p_bus_in_zone - zonal_results['p_tz'].at[t, z]),
+                                    name=f"dev_neg_{z}_{t}")
 
         # --- 5. Solve and Prepare Results ---
         model.optimize()
@@ -358,20 +401,22 @@ class RedispatchModel:
             p_gen_redispatch = pd.DataFrame({g: {t: p_gen[g, t].X for t in snapshots} for g in generators})
             startup_redispatch = pd.DataFrame({g: {t: startup[g, t].X > 0.5 for t in snapshots} for g in generators})
             nse_redispatch = pd.DataFrame({b: {t: nse[b, t].X for t in snapshots} for b in buses})
-            
+
             redispatch_cost = model.ObjVal
             startup_cost_total = (startup_redispatch * startup_costs).sum().sum()
-            
-            final_operating_cost = ((p_gen_redispatch * gen_costs).sum().sum() + startup_cost_total + (nse_redispatch.sum().sum() * C_NSE))
+
+            final_operating_cost = ((p_gen_redispatch * gen_costs).sum().sum() + startup_cost_total + (
+                        nse_redispatch.sum().sum() * C_NSE))
             return {
-                            "method": method,
-                            "status": "Optimal",
-                            "redispatch_cost": redispatch_cost,
-                            "final_operating_cost": final_operating_cost,
-                            "p_gen_redispatch": p_gen_redispatch,
-                            "nse_redispatch": nse_redispatch,
-                            "startup_redispatch": startup_redispatch
-                        }
+                "method": method,
+                "status": "Optimal",
+                "redispatch_cost": redispatch_cost,
+                "final_operating_cost": final_operating_cost,
+                "p_gen_redispatch": p_gen_redispatch,
+                "nse_redispatch": nse_redispatch,
+                "startup_redispatch": startup_redispatch
+            }
         else:
-            model.computeIIS(); model.write(f"redispatch_{method}_iis.ilp")
+            model.computeIIS()
+            model.write(f"redispatch_{method}_iis.ilp")
             return {"status": "Failed", "method": method}

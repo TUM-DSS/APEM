@@ -1,11 +1,11 @@
 import pypsa
 import pandas as pd
-import numpy as np
-import gurobipy as gp
 from gurobipy import GRB
 import logging
 from typing import Optional, Union
 import os
+import networkx as nx
+from itertools import combinations
 
 from apem.allocation.power_flow_model import PowerFlowModel
 from apem.data.parsing.scenario import Scenario
@@ -21,7 +21,8 @@ from apem.allocation.algorithms.fbmc_utils import (
     calculate_nodal_ptdf,
 )
 
-from apem.allocation.algorithms.zonal_clearing.zonal_fbmc import BaseCaseGenerator, ZonalDispatchModel, get_zone_maps, aggregate_by_zone
+from apem.allocation.algorithms.zonal_clearing.zonal_fbmc import BaseCaseGenerator, ZonalDispatchModel, get_zone_maps, \
+    aggregate_by_zone
 
 
 class ZonalFBMC(PowerFlowModel):
@@ -30,7 +31,7 @@ class ZonalFBMC(PowerFlowModel):
     
     This class wraps the ZonalDispatchModel to work within the APEM framework,
     handling the full workflow from scenario parsing to returning an Allocation object.
-    Redispatch is currently ignored as per instructions.
+    Redispatch is currently ignored.
     """
 
     def __init__(self, zonal_configuration: str, base_case_type: str = 'BC2'):
@@ -43,7 +44,6 @@ class ZonalFBMC(PowerFlowModel):
         self.node_zone_mapper = node_zone_mapper
         self.base_case_type = base_case_type
         super().__init__()
-
 
     def create_zonal_scenario_FBMC(self, base_scenario: Scenario) -> Scenario:
         """
@@ -58,27 +58,25 @@ class ZonalFBMC(PowerFlowModel):
         Returns:
             Scenario: A zonal scenario suitable for DCOPF solving
         """
-        import networkx as nx
-        from itertools import combinations
-        
+
         # Convert to PyPSA network to get zone mappings
         network = create_pypsa_network_from_scenario(base_scenario)
         network = fix_missing_generator_timeseries(network)
-        
+
         # Get zone mappings
         node_to_zone, zone_to_nodes = get_zone_maps(
             network, node_zone_mapper, self.zonal_configuration
         )
-        
+
         # Create aggregated zonal data
         df_sellers = base_scenario.df_sellers.copy()
         df_buyers = base_scenario.df_buyers.copy()
-        
+
         # Map nodes to zones in seller and buyer data
         for node, zone in node_to_zone.items():
             df_sellers.loc[df_sellers['node'] == node, 'node'] = str(zone)
             df_buyers.loc[df_buyers['node'] == node, 'node'] = str(zone)
-        
+
         # Aggregate by zone and keep the scenario structure
         # For sellers: aggregate by zone but maintain unique seller IDs
         for zone_id, nodes_in_zone in zone_to_nodes.items():
@@ -86,24 +84,24 @@ class ZonalFBMC(PowerFlowModel):
             # Update all sellers in this zone to use the zone as their node
             df_sellers.loc[df_sellers['node'].isin(nodes_in_zone), 'node'] = zone_str
             df_buyers.loc[df_buyers['node'].isin(nodes_in_zone), 'node'] = zone_str
-        
+
         # Create simplified zonal network with Flow-Based constraints
         aggregated_network = nx.Graph()
         zones = list(zone_to_nodes.keys())
-        
+
         if len(zones) > 1:
             # Create zonal network - for FBMC we create a more connected structure
             # Add all zones as nodes
             for zone in zones:
                 aggregated_network.add_node(str(zone))
-            
+
             # Calculate zonal transmission capacities based on Flow-Based domain
             # For now, create connections between all zone pairs
             for z1, z2 in combinations(zones, 2):
                 # Calculate aggregate capacity between zones
                 total_capacity = 0
                 min_susceptance = float('inf')
-                
+
                 # Sum capacities of all lines connecting the two zones
                 for node1 in zone_to_nodes[z1]:
                     for node2 in zone_to_nodes[z2]:
@@ -111,7 +109,7 @@ class ZonalFBMC(PowerFlowModel):
                             edge_data = base_scenario.network[node1][node2]
                             total_capacity += edge_data.get('F_max', 0)
                             min_susceptance = min(min_susceptance, edge_data.get('B', float('inf')))
-                
+
                 # Add zonal connection if there are physical connections
                 if total_capacity > 0 and min_susceptance != float('inf'):
                     aggregated_network.add_edge(
@@ -122,7 +120,7 @@ class ZonalFBMC(PowerFlowModel):
         else:
             # Single zone case
             aggregated_network.add_node(str(zones[0]))
-        
+
         # Create nodes_agents for zones
         nodes_agents = {}
         for zone_id, nodes_in_zone in zone_to_nodes.items():
@@ -133,16 +131,16 @@ class ZonalFBMC(PowerFlowModel):
                 'latitude': network.buses.loc[nodes_in_zone[0], 'y'],  # Use first node's coordinates
                 'longitude': network.buses.loc[nodes_in_zone[0], 'x']
             }
-        
+
         # Save zone mappings for later use
         results_path = f"results/{base_scenario.name}_results/Zonal_FBMC/{self.zonal_configuration}"
         os.makedirs(results_path, exist_ok=True)
         node_to_zone_df = pd.DataFrame(list(node_to_zone.items()), columns=['node', 'zone'])
         node_to_zone_df.to_csv(os.path.join(results_path, "node_to_zone.csv"), index=False)
-        
+
         # Reference zone (first zone)
         r_star = str(list(zone_to_nodes.keys())[0])
-        
+
         # Return a zonal scenario
         return Scenario(
             name=f'{base_scenario.name}',
@@ -163,9 +161,8 @@ class ZonalFBMC(PowerFlowModel):
         """
         Formulates and solves the Zonal FBMC problem.
         """
-        
-        try:
 
+        try:
             zonal_scenario = self.create_zonal_scenario_FBMC(scenario)
             # 1. Convert Scenario to PyPSA Network and calculate PTDF
             network = create_pypsa_network_from_scenario(scenario)
@@ -175,10 +172,10 @@ class ZonalFBMC(PowerFlowModel):
             # 2. Generate the Base Case for the Zonal Model
             base_case_gen = BaseCaseGenerator(network, nodal_ptdf, self.node_zone_mapper, self.zonal_configuration)
             p_bus_expected = base_case_gen.generate(self.base_case_type)
-            
+
             if p_bus_expected is None:
                 print(f'{self} allocation error: Base case generation failed.')
-                return Error(-2) # Specific error for base case failure
+                return Error(-2)  # Specific error for base case failure
 
             # 3. Solve the Zonal Dispatch Model
             zonal_model = ZonalDispatchModel()
@@ -191,22 +188,23 @@ class ZonalFBMC(PowerFlowModel):
                 verbose=False,
                 configuration=configuration
             )
-            
+
             if zonal_results is None:
                 print(f'{self} allocation error: ZonalDispatchModel failed to solve.')
                 return Error(-1)
 
             # 4. Convert results to Allocation object
-            allocation = create_allocation_from_zonal_results(zonal_results, network, zonal_scenario, self, p_bus_expected, nodal_ptdf)
-            
+            allocation = create_allocation_from_zonal_results(zonal_results, network, zonal_scenario, self,
+                                                              p_bus_expected, nodal_ptdf)
+
             if stats_file and zonal_results.get('model'):
                 compute_stats(stats_file, scenario, configuration, allocation, zonal_results['model'])
 
             if results_file:
-                self._save_zonal_results(zonal_results, results_file) 
+                self._save_zonal_results(zonal_results, results_file)
 
             return zonal_scenario, allocation
-            
+
         except Exception as e:
             logging.exception("An error occurred during ZonalFBMC solve.")
             print(f'{self} allocation error: {str(e)}')
@@ -293,7 +291,7 @@ def create_allocation_from_zonal_results(zonal_results: dict, network: pypsa.Net
         if line_name in network.lines.index:
             line_info = network.lines.loc[line_name]
             node_v, node_w = line_info.bus0, line_info.bus1
-            
+
             zone_v = str(node_to_zone.get(node_v))
             zone_w = str(node_to_zone.get(node_w))
 
@@ -309,7 +307,6 @@ def create_allocation_from_zonal_results(zonal_results: dict, network: pypsa.Net
                         f_vwt[(zone_w, zone_v, t)] += flow
                         f_vwt[(zone_v, zone_w, t)] -= flow
 
-
     # --- 3. Populate other Zonal Allocation Dictionaries ---
 
     # alpha_vt (Zonal Prices)
@@ -321,7 +318,8 @@ def create_allocation_from_zonal_results(zonal_results: dict, network: pypsa.Net
 
     # Seller data (y_st, u_st, phi_st) - no aggregation needed
     y_st, u_st, phi_st = {}, {}, {}
-    gen_name_to_seller_id = pd.Series(zonal_scenario.df_sellers.seller.values, index=zonal_scenario.df_sellers.generator).to_dict()
+    gen_name_to_seller_id = pd.Series(zonal_scenario.df_sellers.seller.values,
+                                      index=zonal_scenario.df_sellers.generator).to_dict()
     for gen_name in p_gen_df.columns:
         seller_id = gen_name_to_seller_id.get(gen_name)
         if seller_id is None: continue
@@ -342,21 +340,22 @@ def create_allocation_from_zonal_results(zonal_results: dict, network: pypsa.Net
             period = snapshot_to_period[snapshot]
             total_zonal_demand = zonal_demand_df.loc[snapshot, zone_id]
             served_ratio = 1.0 - (nse_val / total_zonal_demand) if total_zonal_demand > 1e-6 else 1.0
-            
+
             buyers_in_zone = zonal_scenario.nodes_agents.get(zone_str, {}).get('buyers', [])
             for b in buyers_in_zone:
                 buyer_info = zonal_scenario.df_buyers[
                     (zonal_scenario.df_buyers['buyer'] == b) & (zonal_scenario.df_buyers['period'] == period)
-                ].iloc[0]
-                
+                    ].iloc[0]
+
                 # Calculate total accepted demand
-                original_demand = buyer_info['inelastic_dem'] + sum(buyer_info[f'size_{lb}'] for lb in zonal_scenario.blocks_buyers)
+                original_demand = buyer_info['inelastic_dem'] + sum(
+                    buyer_info[f'size_{lb}'] for lb in zonal_scenario.blocks_buyers)
                 accepted_demand = original_demand * served_ratio
                 x_bt[(b, period)] = accepted_demand
-                
+
                 # Reconstruct block-level acceptance (x_btl)
                 remaining_demand_to_fulfill = accepted_demand
-                
+
                 # Inelastic demand is always met first
                 inelastic_accepted = min(remaining_demand_to_fulfill, buyer_info['inelastic_dem'])
                 remaining_demand_to_fulfill -= inelastic_accepted

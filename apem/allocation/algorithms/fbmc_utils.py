@@ -1,12 +1,7 @@
 import pandas as pd
-import gurobipy as gp
-from gurobipy import GRB 
 import pypsa
-import networkx as nx
-from types import SimpleNamespace
-from apem.allocation.algorithms.nodal_clearing.nodal_fbmc import NodalDispatchModel
-from apem.allocation.allocation import Allocation
 from apem.data.parsing.scenario import Scenario
+
 
 def calculate_nodal_ptdf(network):
     """
@@ -59,20 +54,20 @@ def fix_missing_generator_timeseries(network):
             pd.Series(1.0, index=network.snapshots, name=gen_name)
             for gen_name in missing_gens
         ]
-        
+
         # Add new profiles to the network
         network.generators_t.p_max_pu = pd.concat(
-            [network.generators_t.p_max_pu] + new_series_list, 
+            [network.generators_t.p_max_pu] + new_series_list,
             axis=1
         )
-        
+
         # Verify the fix
         final_missing = network.generators.index.difference(
             network.generators_t.p_max_pu.columns
         )
         if not final_missing.empty:
             print("Warning: Some generators are still missing from time-series data")
-            
+
     return network
 
 
@@ -103,19 +98,19 @@ def create_pypsa_network_from_scenario(scenario: Scenario) -> pypsa.Network:
     for i, (u, v, data) in enumerate(scenario.network.edges(data=True)):
         # Calculate reactance from susceptance (B). Assume resistance r=0 if not provided.
         reactance = 1 / data['B'] if data['B'] != 0 else 0
-        
+
         n.add("Line",
               name=f"L_{i}",
               bus0=u,
               bus1=v,
               s_nom=data['F_max'],  # F_max maps to nominal power capacity
-              x=reactance,          # PyPSA uses reactance 'x'
-              r=0)                  # Assume resistance is zero
+              x=reactance,  # PyPSA uses reactance 'x'
+              r=0)  # Assume resistance is zero
 
     # 5. Add Generators (from Sellers)
     # Get static attributes for each unique generator
     static_gen_data = scenario.df_sellers.drop_duplicates(subset='generator').set_index('generator')
-    
+
     # Calculate nominal power (p_nom) as the maximum possible output across all periods
     p_nom = scenario.df_sellers.groupby('generator')['max_prod'].max()
 
@@ -127,7 +122,7 @@ def create_pypsa_network_from_scenario(scenario: Scenario) -> pypsa.Network:
               marginal_cost=row['cost1'],
               start_up_cost=row['no_load_cost'],
               p_nom=p_nom.get(gen_name, 0))
-    
+
     # Add time-varying generator attributes (p_max_pu)
     if not n.generators.empty:
         p_max_pu_t = scenario.df_sellers.pivot(index='period', columns='generator', values='max_prod')
@@ -139,7 +134,6 @@ def create_pypsa_network_from_scenario(scenario: Scenario) -> pypsa.Network:
         p_min_pu_t = p_min_pu_t / n.generators.p_nom
         n.generators_t.p_min_pu = p_min_pu_t.reindex(index=snapshots, columns=n.generators.index).fillna(0)
 
-
     # 6. Add Loads (from Buyers)
     # PyPSA typically has one load per bus. We'll aggregate buyers by bus if necessary.
     # The provided data has one buyer per node, which simplifies this.
@@ -148,11 +142,11 @@ def create_pypsa_network_from_scenario(scenario: Scenario) -> pypsa.Network:
 
     # Add Load components
     for bus_name in bus_demand.columns:
-        if bus_demand[bus_name].sum() > 0: # Only add loads where there is demand
+        if bus_demand[bus_name].sum() > 0:  # Only add loads where there is demand
             n.add("Load",
-                  name=bus_name, # Name the load after its bus for simplicity
+                  name=bus_name,  # Name the load after its bus for simplicity
                   bus=bus_name)
-    
+
     # Attach the time-series demand data
     n.loads_t.p_set = bus_demand.rename_axis(None, axis=1)
 
