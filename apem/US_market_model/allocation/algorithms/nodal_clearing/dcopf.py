@@ -20,7 +20,8 @@ class DCOPF(PowerFlowModel):
 
     def add_redispatch_constraints_objective(self, rd_type: str, model: Any, scenario: Scenario,
                                              y_stl: Dict, u_st: Dict, seller_cost_dict: Dict,
-                                             seller_no_load_cost_dict: Dict, zonal_allocation: SellersAllocation):
+                                             seller_no_load_cost_dict: Dict, zonal_allocation: SellersAllocation,
+                                             constrain_units: bool = False, threshold: float = 0.001):
         df_sellers = scenario.df_sellers
         periods = scenario.periods
         blocks_sellers = scenario.blocks_sellers
@@ -69,6 +70,15 @@ class DCOPF(PowerFlowModel):
                 )
 
         elif rd_type == 'MinCostRD':
+            if constrain_units:
+                seller_period_max_prod = {
+                    (row.seller, row.period): row.max_prod
+                    for row in df_sellers.itertuples(index=False)
+                }
+                for (s, t) in seller_period_max_prod:
+                    if seller_period_max_prod[s, t] < threshold:
+                        model.addConstr(u_st[s, t] == zonal_allocation.u_st[s, t])
+
             model.setObjective(
                 gp.quicksum(
                     seller_cost_dict[ls][s, t] * (y_stl[s, t, ls] - zonal_allocation.y_stl[s, t, ls])
@@ -84,7 +94,8 @@ class DCOPF(PowerFlowModel):
 
     def solve(self, scenario: Scenario, configuration: Configuration, results_file: Optional[str] = None,
               stats_file: Optional[str] = None, u_fixed: Optional[dict] = None,
-              redispatch_type: Optional[str] = None,
+              redispatch_type: Optional[str] = None, constrain_units: Optional[bool] = False,
+              threshold: Optional[float] = 0.001,
               zonal_allocation: Optional[SellersAllocation] = None) -> Union[Allocation, Error]:
         """
         Formulate and solve a DCOPF problem in Gurobi similar to the one from https://arxiv.org/pdf/2209.07386.pdf
@@ -96,6 +107,8 @@ class DCOPF(PowerFlowModel):
         :param stats_file: name of the file that contains the statistics
         :param u_fixed: values of the commitment decision variables to be fixed in the problem
         :param redispatch_type: type if redispatch
+        :param constrain_units: whether only a subset of units can be used for redispatch
+        :param threshold: threshold for deciding what units are redispatchable
         :param zonal_allocation: zonal allocation for which a redispatch solution should be computed
         :return: Allocation object if the problem can be solved optimally or an Error object otherwise
         """
@@ -184,7 +197,8 @@ class DCOPF(PowerFlowModel):
             )
         else:
             self.add_redispatch_constraints_objective(redispatch_type, model, scenario, y_stl, u_st, seller_cost_dict,
-                                                      seller_no_load_cost_dict, zonal_allocation)
+                                                      seller_no_load_cost_dict, zonal_allocation, constrain_units,
+                                                      threshold)
 
         # 1
         model.addConstrs(
