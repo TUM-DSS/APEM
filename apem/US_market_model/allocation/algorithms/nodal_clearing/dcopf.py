@@ -69,7 +69,16 @@ class DCOPF(PowerFlowModel):
                 )
 
         elif rd_type == 'min-cost2':
-            pass
+            model.setObjective(
+                gp.quicksum(
+                    seller_cost_dict[ls][s, t] * (y_stl[s, t, ls] - zonal_allocation.y_stl[s, t, ls])
+                    for s in sellers for t in periods for ls in blocks_sellers
+                ) +
+                gp.quicksum(
+                    seller_no_load_cost_dict[s, t] * (u_st[s, t] - zonal_allocation.u_st[s, t])
+                    for s in sellers for t in periods),
+                GRB.MINIMIZE
+            )
 
         return model
 
@@ -345,10 +354,11 @@ class DCOPF(PowerFlowModel):
             if stats_file:
                 if not redispatch_type:
                     compute_stats(stats_file, scenario, configuration, allocation, model)
+                    print("Objective: ", abs(obj))
                 else:
                     f = open(stats_file, 'w+')
-                    if redispatch_type:
-                        f.write(f'Redispatch objective: {obj}')
+                    f.write(f'Redispatch objective: {obj}')
+                    print(f'Redispatch objective: {obj}')
 
                     f.close()
 

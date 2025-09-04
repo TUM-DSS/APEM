@@ -22,8 +22,8 @@ class MinCostRD2(RedispatchAlgorithm):
                            configuration: Configuration, path: str) -> Union[Allocation, Error]:
         dcopf = DCOPF()
         return dcopf.solve(scenario=nodal_scenario, configuration=configuration,
-                           results_file=path + '/min_cost.csv', stats_file=path + '/min_cost_obj.txt',
-                           zonal_allocation=zonal_allocation)
+                           results_file=path + '/min_cost2.csv', stats_file=path + '/min_cost_obj2.txt',
+                           redispatch_type='min-cost2', zonal_allocation=zonal_allocation)
 
     def __str__(self):
-        return '2'
+        return 'MinCostRD2'
