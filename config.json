@@ -38,7 +38,8 @@
     ],
     "_available_redispatch_algorithms": [
         "MinCostRD",
-        "MinVolRD"
+        "MinVolRD",
+        "MinCostRD2"
     ],
     "_available_zonal_configurations": [
         "national",
@@ -52,7 +53,7 @@
     "verbosity": true,
     "scenario": {
         "market_model": "US_model",
-        "US_dataset": "PyPSASmall",
+        "US_dataset": "PyPSAEurSmall",
         "EU_dataset": "GME",
         "power_flow_model": {
             "type": "Zonal_NTC"

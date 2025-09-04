@@ -26,7 +26,7 @@ class DCOPF(PowerFlowModel):
         blocks_sellers = scenario.blocks_sellers
         sellers = df_sellers['seller'].unique().tolist()
 
-        if rd_type in ['min-cost', 'min-vol']:
+        if rd_type in ['MinAbsCostRD', 'MinAbsVolRD']:
             diff_stl = model.addVars(sellers, periods, blocks_sellers, lb=0, name='diff_y_stl')
             u_diff_st = model.addVars(sellers, periods, lb=0, name=f'diff_u_st')
 
@@ -39,7 +39,7 @@ class DCOPF(PowerFlowModel):
                 y_stl[s, t, ls] - zonal_allocation.y_stl[s, t, ls] <= diff_stl[s, t, ls]
                 for s in sellers for t in periods for ls in blocks_sellers)
 
-            if rd_type == 'min-cost':
+            if rd_type == 'MinAbsCostRD':
                 model.setObjective(
                     gp.quicksum(
                         seller_cost_dict[ls][s, t] * diff_stl[s, t, ls]
@@ -59,7 +59,7 @@ class DCOPF(PowerFlowModel):
                     u_st[s, t] - zonal_allocation.u_st[s, t] <= u_diff_st[s, t] for s in sellers for t in periods
                 )
 
-            elif rd_type == 'min-vol':
+            elif rd_type == 'MinAbsVolRD':
                 model.setObjective(
                     gp.quicksum(
                         diff_stl[s, t, ls]
@@ -68,7 +68,7 @@ class DCOPF(PowerFlowModel):
                     GRB.MINIMIZE
                 )
 
-        elif rd_type == 'min-cost2':
+        elif rd_type == 'MinCostRD':
             model.setObjective(
                 gp.quicksum(
                     seller_cost_dict[ls][s, t] * (y_stl[s, t, ls] - zonal_allocation.y_stl[s, t, ls])

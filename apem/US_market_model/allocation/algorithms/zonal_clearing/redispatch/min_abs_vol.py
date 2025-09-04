@@ -9,21 +9,18 @@ from apem.US_market_model.allocation.error import Error
 from apem.US_market_model.allocation.algorithms.zonal_clearing.redispatch.redispatch_algorithm import RedispatchAlgorithm
 
 
-class MinCostRD2(RedispatchAlgorithm):
+class MinAbsVolRD(RedispatchAlgorithm):
     """
-    TODO in line with RD 2.0
-    Computes a redispatch solution that minimizes the total redispatch costs, i.e., the reimbursements to the
-    redispatched units. Assumes that:
-    - all generators can be redispatched
-    - that the reimbursements are based on the production costs
+    Computes a redispatch solution that minimizes the total redispatch volumes, i.e., the upward and downward
+    deviations from the zonal solution. Assumes that all generators can be redispatched.
     """
 
     def compute_redispatch(self, nodal_scenario: Scenario, zonal_allocation: SellersAllocation,
                            configuration: Configuration, path: str) -> Union[Allocation, Error]:
         dcopf = DCOPF()
         return dcopf.solve(scenario=nodal_scenario, configuration=configuration,
-                           results_file=path + '/min_cost2.csv', stats_file=path + '/min_cost_obj2.txt',
-                           redispatch_type='min-cost2', zonal_allocation=zonal_allocation)
+                           results_file=path + '/min_abs_vol.csv', stats_file=path + '/min_abs_vol_obj.txt',
+                           redispatch_type=self.__str__(), zonal_allocation=zonal_allocation)
 
     def __str__(self):
-        return 'MinCostRD2'
+        return 'MinAbsVolRD'

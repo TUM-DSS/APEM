@@ -11,9 +11,9 @@ from apem.US_market_model.pricing.algorithms.elmp import ELMP
 from apem.US_market_model.pricing.algorithms.ip import IP
 from apem.US_market_model.pricing.algorithms.join import Join
 from apem.US_market_model.pricing.algorithms.min_mwp import MinMWP
+from apem.US_market_model.allocation.algorithms.zonal_clearing.redispatch.min_abs_cost import MinAbsCostRD
+from apem.US_market_model.allocation.algorithms.zonal_clearing.redispatch.min_abs_vol import MinAbsVolRD
 from apem.US_market_model.allocation.algorithms.zonal_clearing.redispatch.min_cost import MinCostRD
-from apem.US_market_model.allocation.algorithms.zonal_clearing.redispatch.min_vol import MinVolRD
-from apem.US_market_model.allocation.algorithms.zonal_clearing.redispatch.min_cost_2 import MinCostRD2
 from apem.US_market_model.allocation.algorithms.zonal_clearing.zonal_NTC import Zonal_NTC
 from apem.US_market_model.allocation.algorithms.nodal_clearing.dcopf import DCOPF
 
@@ -41,9 +41,9 @@ class PricingAlgorithms(Enum):
 
 
 class RedispatchAlgorithms(Enum):
+    MinAbsCostRD = MinAbsCostRD()
+    MinAbsVolRD = MinAbsVolRD()
     MinCostRD = MinCostRD()
-    MinVolRD = MinVolRD()
-    MinCostRD2 = MinCostRD2()
 
 
 class US_Datasets(Enum):
