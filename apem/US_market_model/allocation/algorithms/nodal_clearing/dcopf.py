@@ -11,9 +11,6 @@ from apem.US_market_model.allocation.error import Error
 from apem.US_market_model.allocation.power_flow_model import PowerFlowModel
 from apem.US_market_model.data.parsing.scenario import Scenario
 from apem.US_market_model.utils.extraction import preprocess_as_dict
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from apem.enums import RedispatchAlgorithms
 
 
 class DCOPF(PowerFlowModel):
@@ -21,10 +18,11 @@ class DCOPF(PowerFlowModel):
     Implementation of the Direct Current Optimal Power Flow Model. The class is also used for computing redispatch.
     """
 
-    def add_redispatch_constraints_objective(self, rd_type: "RedispatchAlgorithms", model: Any, scenario: Scenario,
+    def add_redispatch_constraints_objective(self, rd_type: str, model: Any, scenario: Scenario,
                                              y_stl: Dict, u_st: Dict, seller_cost_dict: Dict,
                                              seller_no_load_cost_dict: Dict, zonal_allocation: SellersAllocation,
-                                             constrain_units: bool = False, threshold: float = 0.001) -> gp.Model:
+                                             redispatch_constraint_units: bool = False,
+                                             redispatch_threshold: float = 0.001) -> gp.Model:
         """
         Include redispatch constraints and objective in the DCOPF model.
 
@@ -49,10 +47,10 @@ class DCOPF(PowerFlowModel):
             No-load/startup-like (fixed) cost per (s,t).
         zonal_allocation : SellersAllocation
             Reference allocation with attributes y_stl[(s,t,ls)] and u_st[(s,t)].
-        constrain_units : bool, default False
+        redispatch_constraint_units : bool, default False
             If True and seller's max_prod < threshold, force u_st == zonal u_st.
-        threshold : float, default 1e-3
-            Small production threshold for unit fixing.
+        redispatch_threshold : float, default 1e-3
+            Production threshold for filtering what units can be redispatched.
 
         Returns
         -------
@@ -60,7 +58,6 @@ class DCOPF(PowerFlowModel):
             The updated model.
         """
 
-        rd_type = getattr(rd_type, "name", None) or str(rd_type)
         df_sellers = scenario.df_sellers
         periods = scenario.periods
         blocks_sellers = scenario.blocks_sellers
@@ -109,13 +106,13 @@ class DCOPF(PowerFlowModel):
                 )
 
         elif rd_type == 'MinCostRD':
-            if constrain_units:
+            if redispatch_constraint_units:
                 seller_period_max_prod = {
                     (row.seller, row.period): row.max_prod
                     for row in df_sellers.itertuples(index=False)
                 }
                 for (s, t) in seller_period_max_prod:
-                    if seller_period_max_prod[s, t] < threshold:
+                    if seller_period_max_prod[s, t] < redispatch_threshold:
                         model.addConstr(u_st[s, t] == zonal_allocation.u_st[s, t])
 
             model.setObjective(
@@ -133,9 +130,9 @@ class DCOPF(PowerFlowModel):
 
     def solve(self, scenario: Scenario, configuration: Configuration, results_file: Optional[str] = None,
               stats_file: Optional[str] = None, u_fixed: Optional[dict] = None,
-              redispatch_type: Optional[str] = None, constrain_units: Optional[bool] = False,
-              threshold: Optional[float] = 0.001,
-              zonal_allocation: Optional[SellersAllocation] = None) -> Union[Allocation, Error]:
+              redispatch_type: Optional[str] = None,
+              zonal_allocation: Optional[SellersAllocation] = None, redispatch_constraint_units: bool = False,
+              redispatch_threshold: float = 0.001) -> Union[Allocation, Error]:
         """
         Formulate and solve a DCOPF problem in Gurobi similar to the one from https://arxiv.org/pdf/2209.07386.pdf
         (Appendix B).
@@ -236,8 +233,8 @@ class DCOPF(PowerFlowModel):
             )
         else:
             self.add_redispatch_constraints_objective(redispatch_type, model, scenario, y_stl, u_st, seller_cost_dict,
-                                                      seller_no_load_cost_dict, zonal_allocation, constrain_units,
-                                                      threshold)
+                                                      seller_no_load_cost_dict, zonal_allocation,
+                                                      redispatch_constraint_units, redispatch_threshold)
 
         # 1
         model.addConstrs(

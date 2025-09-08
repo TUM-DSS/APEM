@@ -20,12 +20,14 @@ class MinCostRD(RedispatchAlgorithm):
     """
 
     def compute_redispatch(self, nodal_scenario: Scenario, zonal_allocation: SellersAllocation,
-                           configuration: Configuration, path: str) -> Union[Allocation, Error]:
+                           configuration: Configuration, path: str, redispatch_constraint_units: bool,
+                           redispatch_threshold: float) -> Union[Allocation, Error]:
         dcopf = DCOPF()
         return dcopf.solve(scenario=nodal_scenario, configuration=configuration,
                            results_file=path + '/min_cost.csv', stats_file=path + '/min_cost_obj.txt',
                            redispatch_type=self.__str__(), zonal_allocation=zonal_allocation,
-                           constrain_units=False, threshold=0.001)
+                           redispatch_constraint_units=redispatch_constraint_units,
+                           redispatch_threshold=redispatch_threshold)
 
     def __str__(self):
         return 'MinCostRD'

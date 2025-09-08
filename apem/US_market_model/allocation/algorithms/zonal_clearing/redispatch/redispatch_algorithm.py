@@ -14,7 +14,8 @@ class RedispatchAlgorithm(ABC):
 
     @abstractmethod
     def compute_redispatch(self, nodal_scenario: Scenario, zonal_allocation: SellersAllocation,
-                           configuration: Configuration, path: str) -> Union[Allocation, Error]:
+                           configuration: Configuration, path: str, redispatch_constraint_units: bool,
+                           redispatch_threshold: float) -> Union[Allocation, Error]:
         """
         Computes a redispatch solution for a given zonal solution. The redispatch solution satisfies the constraints
         formulated based on a nodal scenario.
@@ -27,6 +28,10 @@ class RedispatchAlgorithm(ABC):
         :type configuration: Configuration
         :param path: path to store the results
         :type path: str
+        :param redispatch_constraint_units: True if all units can be used for redispatch, False otherwise
+        :type redispatch_constraint_units: bool
+        :param redispatch_threshold: production threshold for filtering what units can be redispatched
+        :type redispatch_threshold: float
         :return: redispatch allocation or error
         :rtype: Union[Allocation, Error]
         """

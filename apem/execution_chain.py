@@ -55,7 +55,8 @@ def _solve_US_allocation_problem(scenario: Scenario, power_flow_model: PowerFlow
 def _solve_US_redispatch_problem(scenario: Scenario, power_flow_model: PowerFlowModel,
                                  redispatch_algorithm: RedispatchAlgorithms, nodal_scenario: Scenario,
                                  zonal_allocation: SellersAllocation,
-                                 configuration: Configuration) -> Union[Allocation, Error]:
+                                 configuration: Configuration, redispatch_constraint_units: bool,
+                                 redispatch_threshold: float) -> Union[Allocation, Error]:
     if configuration.verbosity:
         print(f"Starting redispatch problem using {redispatch_algorithm}...")
     redispatch_algorithm = redispatch_algorithm.value
@@ -65,7 +66,8 @@ def _solve_US_redispatch_problem(scenario: Scenario, power_flow_model: PowerFlow
     path = base_path + "/" + zonal_part + "allocation_results/redispatch"
     os.makedirs(path, exist_ok=True)
 
-    return redispatch_algorithm.compute_redispatch(nodal_scenario, zonal_allocation, configuration, path)
+    return redispatch_algorithm.compute_redispatch(nodal_scenario, zonal_allocation, configuration, path,
+                                                   redispatch_constraint_units, redispatch_threshold)
 
 
 def _solve_US_pricing_problem(scenario: Scenario, allocation: Allocation, pricing_algorithm: PricingAlgorithms,
@@ -109,7 +111,8 @@ def analyse_results(scenario: Scenario, allocation: Allocation, pricing: Pricing
 
 
 def solve_US_scenario(dataset: US_Datasets, power_flow_model: PowerFlowModel, pricing_algorithm: PricingAlgorithms,
-                      redispatch_algorithm: RedispatchAlgorithms = RedispatchAlgorithms.MinCostRD) -> PriceAnalysis:
+                      redispatch_algorithm: RedispatchAlgorithms = RedispatchAlgorithms.MinCostRD,
+                      redispatch_constraint_units: bool = False, redispatch_threshold: float = 0) -> PriceAnalysis:
     """Computes allocation and pricing for some scenario.
 
     Args:
@@ -143,7 +146,9 @@ def solve_US_scenario(dataset: US_Datasets, power_flow_model: PowerFlowModel, pr
 
         _solve_US_redispatch_problem(zonal_scenario, power_flow_model, redispatch_algorithm=redispatch_algorithm,
                                      nodal_scenario=scenario, configuration=configuration,
-                                     zonal_allocation=allocation.SellersAllocation)
+                                     zonal_allocation=allocation.SellersAllocation,
+                                     redispatch_constraint_units=redispatch_constraint_units,
+                                     redispatch_threshold=redispatch_threshold)
 
         pricing = _solve_US_pricing_problem(zonal_scenario, allocation, pricing_algorithm, power_flow_model,
                                             configuration)
@@ -153,7 +158,8 @@ def solve_US_scenario(dataset: US_Datasets, power_flow_model: PowerFlowModel, pr
 def solve_and_analyse_scenario(US_dataset: US_Datasets, EU_dataset: EU_Datasets, market_model: MarketModels,
                                power_flow_model: PowerFlowModel, cut_type: CutTypes,
                                pricing_algorithm: PricingAlgorithms,
-                               redispatch_algorithm: RedispatchAlgorithms = RedispatchAlgorithms.MinCostRD):
+                               redispatch_algorithm: RedispatchAlgorithms = RedispatchAlgorithms.MinCostRD,
+                               redispatch_constraint_units: bool = False, redispatch_threshold: float = 0):
     """Computes allocation and pricing for some scenario and performs several analyses.
 
     Args:
@@ -164,6 +170,8 @@ def solve_and_analyse_scenario(US_dataset: US_Datasets, EU_dataset: EU_Datasets,
         cut_type: cutting strategy used in the EU market model
         pricing_algorithm (PricingAlgorithms): pricing algorithm used for the pricing computations (US market model)
         redispatch_algorithm (RedispatchAlgorithms): redispatch algorithm used for solving the redispatch problem (US market model)
+        redispatch_constraint_units (bool): True if not all units should be used for redisptch
+        redispatch_threshold (float): capacity threshold (MW) for selecting what units can be used for redispatch
 
     Raises:
         ValueError: power flow model 'Zonal_NTC' can only be used together with the PyPSA datasets
@@ -172,7 +180,8 @@ def solve_and_analyse_scenario(US_dataset: US_Datasets, EU_dataset: EU_Datasets,
         solve_euphemia(EU_dataset, cut_type)
 
     elif market_model == MarketModels.US_model:
-        price_analysis = solve_US_scenario(US_dataset, power_flow_model, pricing_algorithm, redispatch_algorithm)
+        price_analysis = solve_US_scenario(US_dataset, power_flow_model, pricing_algorithm, redispatch_algorithm,
+                                           redispatch_constraint_units, redispatch_threshold)
         is_pypsa_dataset = US_dataset in [US_Datasets.PyPSAEurLarge, US_Datasets.PyPSAEurSmall]
         base_scenario = None
 
