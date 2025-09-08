@@ -21,19 +21,12 @@ class RedispatchAlgorithm(ABC):
         formulated based on a nodal scenario.
 
         :param nodal_scenario: nodal scenario based on which constraints are formulated
-        :type nodal_scenario: Scenario
         :param zonal_allocation: allocation computed with zonal clearing
-        :type zonal_allocation: SellersAllocation
         :param configuration: values of some parameters to be set in the optimizer
-        :type configuration: Configuration
         :param path: path to store the results
-        :type path: str
         :param redispatch_constraint_units: True if all units can be used for redispatch, False otherwise
-        :type redispatch_constraint_units: bool
         :param redispatch_threshold: production threshold for filtering what units can be redispatched
-        :type redispatch_threshold: float
         :return: redispatch allocation or error
-        :rtype: Union[Allocation, Error]
         """
         pass
 

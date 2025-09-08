@@ -26,36 +26,23 @@ class DCOPF(PowerFlowModel):
         """
         Include redispatch constraints and objective in the DCOPF model.
 
-        Parameters
-        ----------
-        rd_type : {"MinAbsCostRD", "MinAbsVolRD", "MinCostRD"}
-            Objective flavor:
-              - MinAbsCostRD: minimize absolute cost deviations relative to zonal_allocation.
-              - MinAbsVolRD:  minimize absolute volume deviations relative to zonal_allocation.
-              - MinCostRD:    minimize (signed) redispatch cost relative to zonal_allocation.
-        model : gurobipy.Model
-            The working model.
-        scenario : Scenario
-            Holds df_sellers, periods, blocks_sellers.
-        y_stl : Dict[(s,t,ls) -> Var]
-            Decision vars for seller s, period t, block ls.
-        u_st : Dict[(s,t) -> Var]
-            Commitment/on-off vars for seller s, period t.
-        seller_cost_dict : Dict[ls -> Dict[(s,t) -> float]]
-            Marginal cost per block (by (s,t)) for each ls.
-        seller_no_load_cost_dict : Dict[(s,t) -> float]
-            No-load/startup-like (fixed) cost per (s,t).
-        zonal_allocation : SellersAllocation
-            Reference allocation with attributes y_stl[(s,t,ls)] and u_st[(s,t)].
-        redispatch_constraint_units : bool, default False
-            If True and seller's max_prod < threshold, force u_st == zonal u_st.
-        redispatch_threshold : float, default 1e-3
-            Production threshold for filtering what units can be redispatched.
-
-        Returns
-        -------
-        gurobipy.Model
-            The updated model.
+        :param rd_type: {"MinAbsCostRD", "MinAbsVolRD", "MinCostRD"}.
+            Objective type:
+              - MinAbsCostRD: minimize absolute cost deviations relative to ``zonal_allocation``.
+              - MinAbsVolRD: minimize absolute volume deviations relative to ``zonal_allocation``.
+              - MinCostRD: minimize (signed) redispatch cost relative to ``zonal_allocation``.
+        :param model: gurobipy.Model. The working optimization model.
+        :param scenario: Scenario. Holds ``df_sellers``, ``periods``, and ``blocks_sellers``.
+        :param y_stl: Dict[(s, t, ls) -> Var]. Decision variables for seller ``s``, period ``t``, block ``ls``.
+        :param u_st: Dict[(s, t) -> Var]. Commitment (on/off) variables for seller ``s`` in period ``t``.
+        :param seller_cost_dict: Dict[ls -> Dict[(s, t) -> float]]. Marginal cost per block (by (s, t)) for each ``ls``.
+        :param seller_no_load_cost_dict: Dict[(s, t) -> float]. No-load/startup-like (fixed) cost per (s, t).
+        :param zonal_allocation: SellersAllocation. Reference allocation with attributes
+            ``y_stl[(s,t,ls)]`` and ``u_st[(s,t)]``.
+        :param redispatch_constraint_units: bool. If True and a seller's ``max_prod`` < ``redispatch_threshold``,
+            force ``u_st == zonal_allocation.u_st``.
+        :param redispatch_threshold: float. Production threshold for filtering which units can be redispatched.
+        :return: gurobipy.Model. The updated model.
         """
 
         df_sellers = scenario.df_sellers
@@ -130,8 +117,8 @@ class DCOPF(PowerFlowModel):
 
     def solve(self, scenario: Scenario, configuration: Configuration, results_file: Optional[str] = None,
               stats_file: Optional[str] = None, u_fixed: Optional[dict] = None,
-              redispatch_type: Optional[str] = None,
-              zonal_allocation: Optional[SellersAllocation] = None, redispatch_constraint_units: bool = False,
+              redispatch_type: Optional[str] = None, zonal_allocation: Optional[SellersAllocation] = None,
+              redispatch_constraint_units: bool = False,
               redispatch_threshold: float = 0.001) -> Union[Allocation, Error]:
         """
         Formulate and solve a DCOPF problem in Gurobi similar to the one from https://arxiv.org/pdf/2209.07386.pdf
@@ -146,6 +133,8 @@ class DCOPF(PowerFlowModel):
         :param constrain_units: whether only a subset of units can be used for redispatch
         :param threshold: threshold for deciding what units are redispatchable
         :param zonal_allocation: zonal allocation for which a redispatch solution should be computed
+        :param redispatch_constraint_units: True if all units can be used for redispatch, False otherwise
+        :param redispatch_threshold: production threshold for filtering what units can be redispatched
         :return: Allocation object if the problem can be solved optimally or an Error object otherwise
         """
         if configuration.relaxation:
