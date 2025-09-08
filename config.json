@@ -60,9 +60,9 @@
         },
         "cut_type": "price based",
         "pricing_algorithm": "IP",
-        "redispatch_algorithm": "MinCostRD",
+        "redispatch_algorithm": "MinAbsVolRD",
         "redispatch_constraint_units": false,
-        "redispatch_threshold": 100
+        "redispatch_threshold": 0.001
     },
     "solver_configuration": {
         "MIP_gap": 1e-4,

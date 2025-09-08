@@ -60,6 +60,8 @@ The most important section is `scenario`, which defines the dataset, market mode
     "cut_type": "price based",     // choose from _available_cut_types
     "pricing_algorithm": "IP",     // choose from _available_pricing_algorithms
     "redispatch_algorithm": "MinCostRD"  // choose from _available_redispatch_algorithms 
+    "redispatch_constraint_units": false, // controls whether some units should not be redispatched
+    "redispatch_threshold": 0.001 // in MW, controls what units can be redispatched
 }
 ```
 
@@ -72,7 +74,7 @@ The most important section is `scenario`, which defines the dataset, market mode
 - **Power flow models** (only for ``US_model``): `DCOPF`, `Zonal_NTC`
 - **Cut types** (only for `EU_model`): `price based`, `combinatorial benders`, `no good`
 - **Pricing algorithms** (only for `US_model`): `ELMP`, `IP`, `MinMWP`, `Join`
-- **Redispatch algorithms** (only for `US_model/Zonal_NTC`): `MinCostRD`, `MinVolRD`
+- **Redispatch algorithms** (only for `US_model/Zonal_NTC`): `MinCostRD`, `MinAbsCostRD`, `MinAbsVolRD`
 - **Zonal configurations** (only for `US_model/Zonal_NTC`): `national`, `zonal_DE2-k`, `zonal_DE2-s`, `zonal_DE3`, `zonal_DE4`, `zonal_DE4-refined`, `zonal_DE5`
 
 Other global settings like solver tolerances and runtime limits can be adjusted under `"solver_configuration"`. Zonal-specific settings are under `"zonal_configuration"`.
