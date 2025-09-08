@@ -402,7 +402,7 @@ class DCOPF(PowerFlowModel):
                     f.close()
 
                     redispatch_file = Path(stats_file).with_name(
-                        f"{redispatch_type}_{redispatch_constraint_units}_{redispatch_threshold}_adjustments.csv")
+                        f"{redispatch_type}_{redispatch_constraint_units}_{redispatch_threshold}_zonal_final_alloc_comparison.csv")
 
                     self.zonal_vs_final_allocation_comparison(zonal_allocation=zonal_allocation,
                                                               final_allocation=allocation.SellersAllocation,
