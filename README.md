@@ -59,7 +59,7 @@ The most important section is `scenario`, which defines the dataset, market mode
     },
     "cut_type": "price based",     // choose from _available_cut_types
     "pricing_algorithm": "IP",     // choose from _available_pricing_algorithms
-    "redispatch_algorithm": "MinCostRD"  // choose from _available_redispatch_algorithms 
+    "redispatch_algorithm": "MinCostRD",  // choose from _available_redispatch_algorithms 
     "redispatch_constraint_units": false, // controls whether some units should not be redispatched
     "redispatch_threshold": 0.001 // in MW, controls what units can be redispatched
 }
