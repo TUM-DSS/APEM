@@ -52,6 +52,15 @@ class ConfigLoader:
         if self.raw_config['scenario']['redispatch_algorithm'] not in [r.name for r in RedispatchAlgorithms]:
             raise ValueError(f"Invalid redispatch algorithm: {self.raw_config['scenario']['redispatch_algorithm']}")
 
+        # Validate redispatch constraint units
+        if self.raw_config['scenario']['redispatch_constraint_units'] not in [True, False]:
+            raise ValueError(
+                f"Invalid redispatch constraint: {self.raw_config['scenario']['redispatch_constraint_units']}")
+
+        # Validate redispatch threshold
+        if self.raw_config['scenario']['redispatch_threshold'] < 0:
+            raise ValueError(f"Invalid redispatch threshold: {self.raw_config['scenario']['redispatch_threshold']}")
+
         # Validate zonal configuration if using Zonal_NTC
         if self.raw_config['scenario']['power_flow_model']['type'] == "Zonal_NTC":
             zonal_config = self.raw_config['zonal_configuration']
@@ -85,5 +94,11 @@ class ConfigLoader:
     def get_redispatch_algorithm(self) -> RedispatchAlgorithms:
         return RedispatchAlgorithms[self.config['scenario']['redispatch_algorithm']]
 
+    def get_redispatch_constraint_units(self) -> bool:
+        return self.config['scenario']['redispatch_constraint_units']
+
+    def get_redispatch_threshold(self) -> float:
+        return self.config['scenario']['redispatch_threshold']
+
     def get_solver_configuration(self) -> Dict[str, Any]:
-        return self.config['solver_configuration'] 
+        return self.config['solver_configuration']

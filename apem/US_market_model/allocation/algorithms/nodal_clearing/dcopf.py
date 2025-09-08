@@ -1,4 +1,5 @@
-from typing import Optional, Union
+from pathlib import Path
+from typing import Optional, Union, Any, Dict
 
 import gurobipy as gp
 import pandas as pd
@@ -19,9 +20,10 @@ class DCOPF(PowerFlowModel):
     """
 
     def solve(self, scenario: Scenario, configuration: Configuration, results_file: Optional[str] = None,
-              stats_file: Optional[str] = None, u_fixed: Optional[dict] = None, redispatch: Optional[bool] = False,
-              min_cost: Optional[bool] = False, min_vol: Optional[bool] = False,
-              zonal_allocation: Optional[SellersAllocation] = None) -> Union[Allocation, Error]:
+              stats_file: Optional[str] = None, u_fixed: Optional[dict] = None,
+              redispatch_type: Optional[str] = None, zonal_allocation: Optional[SellersAllocation] = None,
+              redispatch_constraint_units: bool = False,
+              redispatch_threshold: float = 0.001) -> Union[Allocation, Error]:
         """
         Formulate and solve a DCOPF problem in Gurobi similar to the one from https://arxiv.org/pdf/2209.07386.pdf
         (Appendix B).
@@ -31,10 +33,12 @@ class DCOPF(PowerFlowModel):
         :param results_file: name of the file in which results are written
         :param stats_file: name of the file that contains the statistics
         :param u_fixed: values of the commitment decision variables to be fixed in the problem
-        :param redispatch: True if a redispatch solution should be computed
-        :param min_cost: True if a minimum-cost redispatch solution should be computed
-        :param min_vol: True if a minimum-volume redispatch solution should be computed
+        :param redispatch_type: type if redispatch
+        :param constrain_units: whether only a subset of units can be used for redispatch
+        :param threshold: threshold for deciding what units are redispatchable
         :param zonal_allocation: zonal allocation for which a redispatch solution should be computed
+        :param redispatch_constraint_units: True if all units can be used for redispatch, False otherwise
+        :param redispatch_threshold: production threshold for filtering what units can be redispatched
         :return: Allocation object if the problem can be solved optimally or an Error object otherwise
         """
         if configuration.relaxation:
@@ -59,26 +63,26 @@ class DCOPF(PowerFlowModel):
         nodes = network.nodes
         buyers = df_buyers['buyer'].unique().tolist()
         sellers = df_sellers['seller'].unique().tolist()
-        
+
         # precompute dictionaries for fast access
         buyer_val_dict, buyer_size_dict = {}, {}
         seller_cost_dict, seller_size_dict = {}, {}
-        
+
         buyer_inelastic_dem_dict = preprocess_as_dict(df_buyers, ['buyer', 'period'], 'inelastic_dem')
         buyer_max_dem_dict = preprocess_as_dict(df_buyers, ['buyer', 'period'], 'max_dem')
         seller_no_load_cost_dict = preprocess_as_dict(df_sellers, ['seller', 'period'], 'no_load_cost')
         seller_min_prod_dict = preprocess_as_dict(df_sellers, ['seller', 'period'], 'min_prod')
         seller_max_prod_dict = preprocess_as_dict(df_sellers, ['seller', 'period'], 'max_prod')
         seller_min_uptime_dict = preprocess_as_dict(df_sellers, ['seller', 'period'], 'min_uptime')
-        
+
         for block in blocks_buyers:
             buyer_val_dict[block] = preprocess_as_dict(df_buyers, ['buyer', 'period'], 'val', block)
             buyer_size_dict[block] = preprocess_as_dict(df_buyers, ['buyer', 'period'], 'size', block)
-            
+
         for block in blocks_sellers:
             seller_cost_dict[block] = preprocess_as_dict(df_sellers, ['seller', 'period'], 'cost', block)
-            seller_size_dict[block] = preprocess_as_dict(df_sellers, ['seller', 'period'], 'size', block)    
-        
+            seller_size_dict[block] = preprocess_as_dict(df_sellers, ['seller', 'period'], 'size', block)
+
         x_bt = model.addVars(buyers, periods, name='x_bt')
         x_btl = model.addVars(buyers, periods, blocks_buyers, name='x_btl')
         y_st = model.addVars(sellers, periods, name='y_st')
@@ -99,7 +103,7 @@ class DCOPF(PowerFlowModel):
         f_vwt = model.addVars([(v, w, t) for v in nodes for w in list(network.neighbors(v)) for t in periods],
                               lb=-GRB.INFINITY, ub=GRB.INFINITY, name='f_vwt')
 
-        if not redispatch:
+        if not redispatch_type:
             model.setObjective(
                 gp.quicksum(
                     buyer_val_dict[lb][b, t] * x_btl[b, t, lb]
@@ -121,46 +125,9 @@ class DCOPF(PowerFlowModel):
                 GRB.MAXIMIZE
             )
         else:
-            diff_stl = model.addVars(sellers, periods, blocks_sellers, lb=0, name='diff_y_stl')
-            u_diff_st = model.addVars(sellers, periods, lb=0, name=f'diff_u_st')
-
-            model.addConstrs(
-                zonal_allocation.y_stl[s, t, ls] - y_stl[s, t, ls] <= diff_stl[s, t, ls]
-                for s in sellers for t in periods for ls in blocks_sellers
-            )
-
-            model.addConstrs(
-                y_stl[s, t, ls] - zonal_allocation.y_stl[s, t, ls] <= diff_stl[s, t, ls]
-                for s in sellers for t in periods for ls in blocks_sellers)
-
-            if min_cost:
-                model.setObjective(
-                    gp.quicksum(
-                        seller_cost_dict[ls][s, t] * diff_stl[s, t, ls]
-                        for s in sellers for t in periods for ls in blocks_sellers
-                    ) +
-                    gp.quicksum(
-                        seller_no_load_cost_dict[s, t] * u_diff_st[s, t]
-                        for s in sellers for t in periods),
-                    GRB.MINIMIZE
-                )
-
-                model.addConstrs(
-                    zonal_allocation.u_st[s, t] - u_st[s, t] <= u_diff_st[s, t] for s in sellers for t in periods
-                )
-
-                model.addConstrs(
-                    u_st[s, t] - zonal_allocation.u_st[s, t] <= u_diff_st[s, t] for s in sellers for t in periods
-                )
-
-            elif min_vol:
-                model.setObjective(
-                    gp.quicksum(
-                        diff_stl[s, t, ls]
-                        for s in sellers for t in periods for ls in blocks_sellers
-                    ),
-                    GRB.MINIMIZE
-                )
+            self.add_redispatch_constraints_objective(redispatch_type, model, scenario, y_stl, u_st, seller_cost_dict,
+                                                      seller_no_load_cost_dict, zonal_allocation,
+                                                      redispatch_constraint_units, redispatch_threshold)
 
         # 1
         model.addConstrs(
@@ -328,15 +295,40 @@ class DCOPF(PowerFlowModel):
                                     model.Runtime, model.NumVars, model.NumConstrs, model.MIPGap,
                                     model.NumVars - model.NumBinVars, model.NumBinVars, scenario)
             if stats_file:
-                if not redispatch:
+                if not redispatch_type:
                     compute_stats(stats_file, scenario, configuration, allocation, model)
+                    print('-' * 50)
+                    print(f"DCOPF Objective: {obj}")
+                    print('-' * 50)
                 else:
                     f = open(stats_file, 'w+')
-                    if min_cost:
-                        f.write(f'Redispatch costs: {obj}')
-                    else:
-                        f.write(f'Redispatch volumes: {obj}')
+                    f.write(f'Redispatch objective: {obj}')
                     f.close()
+
+                    alloc_comparison_file = Path(stats_file).with_name(
+                        f"{redispatch_type}_{redispatch_constraint_units}_{redispatch_threshold}_zonal_final_alloc_comparison.csv")
+
+                    redispatch_costs_file = Path(stats_file).with_name(
+                        f"{redispatch_type}_{redispatch_constraint_units}_{redispatch_threshold}_redispatch_costs.csv")
+
+                    redispatch_vols_file = Path(stats_file).with_name(
+                        f"{redispatch_type}_{redispatch_constraint_units}_{redispatch_threshold}_redispatch_vols.csv")
+
+                    self.compare_zonal_vs_final_allocation(zonal_allocation=zonal_allocation,
+                                                           final_allocation=allocation.SellersAllocation,
+                                                           file=str(alloc_comparison_file))
+
+                    self.compute_redispatch_costs(zonal_allocation=zonal_allocation,
+                                                  final_allocation=allocation.SellersAllocation,
+                                                  seller_cost_dict=seller_cost_dict,
+                                                  periods=periods, blocks_sellers=blocks_sellers, sellers=sellers,
+                                                  seller_no_load_cost_dict=seller_no_load_cost_dict,
+                                                  file=str(redispatch_costs_file))
+
+                    self.compute_redispatch_volumes(zonal_allocation=zonal_allocation,
+                                                    final_allocation=allocation.SellersAllocation,
+                                                    periods=periods, blocks_sellers=blocks_sellers, sellers=sellers,
+                                                    file=str(redispatch_vols_file))
 
             return allocation
 
@@ -356,6 +348,177 @@ class DCOPF(PowerFlowModel):
             print(f'{self} allocation error with code {status}')
             error = Error(status)
             return error
-    
+
+    def add_redispatch_constraints_objective(self, redispatch_type: str, model: Any, scenario: Scenario,
+                                             y_stl: Dict, u_st: Dict, seller_cost_dict: Dict,
+                                             seller_no_load_cost_dict: Dict, zonal_allocation: SellersAllocation,
+                                             redispatch_constraint_units: bool = False,
+                                             redispatch_threshold: float = 0.001) -> gp.Model:
+        """
+        Include redispatch constraints and objective in the DCOPF model.
+
+        :param redispatch_type: {"MinAbsCostRD", "MinAbsVolRD", "MinCostRD"}.
+            - MinAbsCostRD: minimize absolute cost deviations relative to zonal_allocation
+            - MinAbsVolRD: minimize absolute volume deviations relative to zonal_allocation
+            - MinCostRD: minimize (signed) redispatch cost relative to zonal_allocation
+        :param model: The working optimization model
+        :param scenario: Holds df_sellers, periods, and blocks_sellers
+        :param y_stl: Decision variables for seller s, period t, block ls
+        :param u_st: Commitment (on/off) variables for seller s in period t
+        :param seller_cost_dict: Marginal cost per block (by (s, t)) for each ls
+        :param seller_no_load_cost_dict: No-load/startup-like (fixed) cost per (s, t)
+        :param zonal_allocation: Reference allocation
+        :param redispatch_constraint_units: If True and a seller's max_prod < redispatch_threshold, set u_st == zonal_allocation.u_st
+        :param redispatch_threshold: Production threshold for filtering which units can be redispatched
+        :return: updated model
+        """
+
+        df_sellers = scenario.df_sellers
+        periods = scenario.periods
+        blocks_sellers = scenario.blocks_sellers
+        sellers = df_sellers['seller'].unique().tolist()
+
+        if redispatch_type in ['MinAbsCostRD', 'MinAbsVolRD']:
+            diff_stl = model.addVars(sellers, periods, blocks_sellers, lb=0, name='diff_y_stl')
+            u_diff_st = model.addVars(sellers, periods, lb=0, name=f'diff_u_st')
+
+            model.addConstrs(
+                zonal_allocation.y_stl[s, t, ls] - y_stl[s, t, ls] <= diff_stl[s, t, ls]
+                for s in sellers for t in periods for ls in blocks_sellers
+            )
+
+            model.addConstrs(
+                y_stl[s, t, ls] - zonal_allocation.y_stl[s, t, ls] <= diff_stl[s, t, ls]
+                for s in sellers for t in periods for ls in blocks_sellers)
+
+            if redispatch_type == 'MinAbsCostRD':
+                model.setObjective(
+                    gp.quicksum(
+                        seller_cost_dict[ls][s, t] * diff_stl[s, t, ls]
+                        for s in sellers for t in periods for ls in blocks_sellers
+                    ) +
+                    gp.quicksum(
+                        seller_no_load_cost_dict[s, t] * u_diff_st[s, t]
+                        for s in sellers for t in periods),
+                    GRB.MINIMIZE
+                )
+
+                model.addConstrs(
+                    zonal_allocation.u_st[s, t] - u_st[s, t] <= u_diff_st[s, t] for s in sellers for t in periods
+                )
+
+                model.addConstrs(
+                    u_st[s, t] - zonal_allocation.u_st[s, t] <= u_diff_st[s, t] for s in sellers for t in periods
+                )
+
+            elif redispatch_type == 'MinAbsVolRD':
+                model.setObjective(
+                    gp.quicksum(
+                        diff_stl[s, t, ls]
+                        for s in sellers for t in periods for ls in blocks_sellers
+                    ),
+                    GRB.MINIMIZE
+                )
+
+        elif redispatch_type == 'MinCostRD':
+            if redispatch_constraint_units:
+                seller_period_max_prod = {
+                    (row.seller, row.period): row.max_prod
+                    for row in df_sellers.itertuples(index=False)
+                }
+                for (s, t) in seller_period_max_prod:
+                    if seller_period_max_prod[s, t] < redispatch_threshold:
+                        model.addConstr(u_st[s, t] == zonal_allocation.u_st[s, t])
+
+            model.setObjective(
+                gp.quicksum(
+                    seller_cost_dict[ls][s, t] * (y_stl[s, t, ls] - zonal_allocation.y_stl[s, t, ls])
+                    for s in sellers for t in periods for ls in blocks_sellers
+                ) +
+                gp.quicksum(
+                    seller_no_load_cost_dict[s, t] * (u_st[s, t] - zonal_allocation.u_st[s, t])
+                    for s in sellers for t in periods),
+                GRB.MINIMIZE
+            )
+
+        return model
+
+    def compare_zonal_vs_final_allocation(self, zonal_allocation: SellersAllocation,
+                                          final_allocation: SellersAllocation, file: str):
+        """
+        Create a CSV file comparing the zonal allocation and the final allocation obtained after redispatch.
+        """
+        rows = []
+
+        # u_st
+        for (s, t), v_z in zonal_allocation.u_st.items():
+            rows.append({
+                "var": "u_st", "seller": s, "period": t, "block": None,
+                "zonal": v_z, "final": final_allocation.u_st[(s, t)]
+            })
+
+        # y_st
+        for (s, t), v_z in zonal_allocation.y_st.items():
+            rows.append({
+                "var": "y_st", "seller": s, "period": t, "block": None,
+                "zonal": v_z, "final": final_allocation.y_st[(s, t)]
+            })
+
+        # y_stl
+        for (s, t, ls), v_z in zonal_allocation.y_stl.items():
+            rows.append({
+                "var": "y_stl", "seller": s, "period": t, "block": ls,
+                "zonal": v_z, "final": final_allocation.y_stl[(s, t, ls)]
+            })
+
+        df = pd.DataFrame(rows)
+        df["diff"] = df["final"] - df["zonal"]
+        df = df.sort_values(["var", "seller", "period", "block"]).reset_index(drop=True)
+
+        p = Path(file)
+        p.parent.mkdir(parents=True, exist_ok=True)
+        df.to_csv(p, index=False)
+
+    def compute_redispatch_costs(self, zonal_allocation: SellersAllocation, final_allocation: SellersAllocation,
+                                 seller_cost_dict, seller_no_load_cost_dict, periods, blocks_sellers, sellers,
+                                 file: str):
+        """
+        Compute the signed redispatch cost relative to the zonal allocation.
+        """
+        redispatch_costs = sum(
+            seller_cost_dict[ls][s, t] * (final_allocation.y_stl[s, t, ls] - zonal_allocation.y_stl[s, t, ls])
+            for s in sellers for t in periods for ls in blocks_sellers
+        ) + sum(
+            seller_no_load_cost_dict[s, t] * (final_allocation.u_st[s, t] - zonal_allocation.u_st[s, t])
+            for s in sellers for t in periods)
+
+        print('-' * 50)
+        print(f"Redispatch costs: {redispatch_costs}")
+        print('-' * 50)
+
+        f = open(file, 'w+')
+        f.write(f'Redispatch costs: {redispatch_costs}')
+        f.close()
+
+    def compute_redispatch_volumes(self, zonal_allocation: SellersAllocation, final_allocation: SellersAllocation,
+                                   periods, blocks_sellers, sellers, file: str):
+        """
+        Compute the total redispatch volume as the L1 norm of dispatch changes between the zonal solution and
+        the post-redispatch solution.
+        For each seller s, period t, and seller block l, the redispatch volume is | y_stl(final) − y_stl(zonal) |.
+        """
+        redispatch_volumes = sum(
+            abs(final_allocation.y_stl[s, t, ls] - zonal_allocation.y_stl[s, t, ls])
+            for s in sellers for t in periods for ls in blocks_sellers
+        )
+
+        print('-' * 50)
+        print(f"Redispatch volumes: {redispatch_volumes}")
+        print('-' * 50)
+
+        f = open(file, 'w+')
+        f.write(f'Redispatch volumes: {redispatch_volumes}')
+        f.close()
+
     def __str__(self):
         return 'DCOPF'

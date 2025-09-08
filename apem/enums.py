@@ -11,8 +11,9 @@ from apem.US_market_model.pricing.algorithms.elmp import ELMP
 from apem.US_market_model.pricing.algorithms.ip import IP
 from apem.US_market_model.pricing.algorithms.join import Join
 from apem.US_market_model.pricing.algorithms.min_mwp import MinMWP
+from apem.US_market_model.allocation.algorithms.zonal_clearing.redispatch.min_abs_cost import MinAbsCostRD
+from apem.US_market_model.allocation.algorithms.zonal_clearing.redispatch.min_abs_vol import MinAbsVolRD
 from apem.US_market_model.allocation.algorithms.zonal_clearing.redispatch.min_cost import MinCostRD
-from apem.US_market_model.allocation.algorithms.zonal_clearing.redispatch.min_vol import MinVolRD
 from apem.US_market_model.allocation.algorithms.zonal_clearing.zonal_NTC import Zonal_NTC
 from apem.US_market_model.allocation.algorithms.nodal_clearing.dcopf import DCOPF
 
@@ -22,14 +23,9 @@ class MarketModels(Enum):
     EU_model = EU_model
 
 
-# Only for apply_all_algorithms in execution_chain.py
 class PowerFlowModels(Enum):
     DCOPF = DCOPF()
-    Zonal_NTC = Zonal_NTC(zonal_configuration='zonal_DE4-refined',
-                          factor=0.8)
-    # set zonal_configuration to one of national, zonal_DE2-k, zonal_DE2-s, zonal_DE3, zonal_DE4, zonal_DE4-refined,
-    # as described in zonal_configuration.py
-    # the factor (between 0 and 1) describes the conservativeness of the NTC model
+    Zonal_NTC = Zonal_NTC()
 
 
 class PricingAlgorithms(Enum):
@@ -40,8 +36,9 @@ class PricingAlgorithms(Enum):
 
 
 class RedispatchAlgorithms(Enum):
+    MinAbsCostRD = MinAbsCostRD()
+    MinAbsVolRD = MinAbsVolRD()
     MinCostRD = MinCostRD()
-    MinVolRD = MinVolRD()
 
 
 class US_Datasets(Enum):

@@ -10,13 +10,11 @@ from apem.US_market_model.allocation.algorithms.zonal_clearing.redispatch.redisp
     RedispatchAlgorithm
 
 
-class MinCostRD(RedispatchAlgorithm):
+class MinAbsCostRD(RedispatchAlgorithm):
     """
-    Computes a redispatch solution that minimizes the total redispatch costs. Assumes that:
+    Computes a redispatch solution that minimizes the total absolute redispatch costs. Assumes that:
     - all generators can be redispatched
-    - redispatch costs are based on the production costs from the zonal clearing stage
-    - negative (downward) redispatch decreases the objective value
-    - positive (upward) redispatch increases the objective value
+    - redispatch costs are based on the production costs from the zonal clearing stage.
     """
 
     def compute_redispatch(self, nodal_scenario: Scenario, zonal_allocation: SellersAllocation,
@@ -31,4 +29,4 @@ class MinCostRD(RedispatchAlgorithm):
                            redispatch_threshold=redispatch_threshold)
 
     def __str__(self):
-        return 'MinCostRD'
+        return 'MinAbsCostRD'

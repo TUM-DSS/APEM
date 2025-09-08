@@ -37,8 +37,9 @@
         "no good"
     ],
     "_available_redispatch_algorithms": [
-        "MinCostRD",
-        "MinVolRD"
+        "MinAbsCostRD",
+        "MinAbsVolRD",
+        "MinCostRD"
     ],
     "_available_zonal_configurations": [
         "national",
@@ -51,15 +52,17 @@
     ],
     "verbosity": true,
     "scenario": {
-        "market_model": "EU_model",
-        "US_dataset": "ARPA",
+        "market_model": "US_model",
+        "US_dataset": "PyPSAEurSmall",
         "EU_dataset": "GME",
         "power_flow_model": {
-            "type": "DCOPF"
+            "type": "Zonal_NTC"
         },
         "cut_type": "price based",
         "pricing_algorithm": "IP",
-        "redispatch_algorithm": "MinCostRD"
+        "redispatch_algorithm": "MinCostRD",
+        "redispatch_constraint_units": false,
+        "redispatch_threshold": 0.001
     },
     "solver_configuration": {
         "MIP_gap": 1e-4,
