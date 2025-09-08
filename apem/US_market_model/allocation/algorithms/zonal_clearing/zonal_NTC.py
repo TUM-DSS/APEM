@@ -21,7 +21,7 @@ class Zonal_NTC(PowerFlowModel):
     Note: Works only with PyPSA data.
     """
 
-    def __init__(self, zonal_configuration: str, factor: float = 0.8):
+    def __init__(self, zonal_configuration: str = 'zonal_DE3', factor: float = 0.8):
         self.zonal_configuration = zonal_configuration
         self.factor = factor
 

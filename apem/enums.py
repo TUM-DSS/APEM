@@ -23,14 +23,9 @@ class MarketModels(Enum):
     EU_model = EU_model
 
 
-# Only for apply_all_algorithms in execution_chain.py
 class PowerFlowModels(Enum):
     DCOPF = DCOPF()
-    Zonal_NTC = Zonal_NTC(zonal_configuration='zonal_DE4-refined',
-                          factor=0.8)
-    # set zonal_configuration to one of national, zonal_DE2-k, zonal_DE2-s, zonal_DE3, zonal_DE4, zonal_DE4-refined,
-    # as described in zonal_configuration.py
-    # the factor (between 0 and 1) describes the conservativeness of the NTC model
+    Zonal_NTC = Zonal_NTC()
 
 
 class PricingAlgorithms(Enum):
