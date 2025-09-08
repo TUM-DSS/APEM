@@ -397,16 +397,32 @@ class DCOPF(PowerFlowModel):
                 else:
                     f = open(stats_file, 'w+')
                     f.write(f'Redispatch objective: {obj}')
-                    print(f'\n{redispatch_type} objective: {obj}\n')
-
                     f.close()
 
-                    redispatch_file = Path(stats_file).with_name(
+                    alloc_comparison_file = Path(stats_file).with_name(
                         f"{redispatch_type}_{redispatch_constraint_units}_{redispatch_threshold}_zonal_final_alloc_comparison.csv")
 
-                    self.zonal_vs_final_allocation_comparison(zonal_allocation=zonal_allocation,
-                                                              final_allocation=allocation.SellersAllocation,
-                                                              file=str(redispatch_file))
+                    redispatch_costs_file = Path(stats_file).with_name(
+                        f"{redispatch_type}_{redispatch_constraint_units}_{redispatch_threshold}_redispatch_costs.csv")
+
+                    redispatch_vols_file = Path(stats_file).with_name(
+                        f"{redispatch_type}_{redispatch_constraint_units}_{redispatch_threshold}_redispatch_vols.csv")
+
+                    self.compare_zonal_vs_final_allocation(zonal_allocation=zonal_allocation,
+                                                           final_allocation=allocation.SellersAllocation,
+                                                           file=str(alloc_comparison_file))
+
+                    self.compute_redispatch_costs(zonal_allocation=zonal_allocation,
+                                                  final_allocation=allocation.SellersAllocation,
+                                                  seller_cost_dict=seller_cost_dict,
+                                                  periods=periods, blocks_sellers=blocks_sellers, sellers=sellers,
+                                                  seller_no_load_cost_dict=seller_no_load_cost_dict,
+                                                  file=str(redispatch_costs_file))
+
+                    self.compute_redispatch_volumes(zonal_allocation=zonal_allocation,
+                                                    final_allocation=allocation.SellersAllocation,
+                                                    periods=periods, blocks_sellers=blocks_sellers, sellers=sellers,
+                                                    file=str(redispatch_vols_file))
 
             return allocation
 
@@ -427,8 +443,8 @@ class DCOPF(PowerFlowModel):
             error = Error(status)
             return error
 
-    def zonal_vs_final_allocation_comparison(self, zonal_allocation: SellersAllocation,
-                                             final_allocation: SellersAllocation, file: str):
+    def compare_zonal_vs_final_allocation(self, zonal_allocation: SellersAllocation,
+                                          final_allocation: SellersAllocation, file: str):
         """
         Create a CSV file comparing the zonal allocation and the final allocation obtained after redispatch.
         """
@@ -462,6 +478,43 @@ class DCOPF(PowerFlowModel):
         p = Path(file)
         p.parent.mkdir(parents=True, exist_ok=True)
         df.to_csv(p, index=False)
+
+    def compute_redispatch_costs(self, zonal_allocation: SellersAllocation, final_allocation: SellersAllocation,
+                                 seller_cost_dict, seller_no_load_cost_dict, periods, blocks_sellers, sellers,
+                                 file: str):
+        """
+        Compute the signed redispatch cost relative to the zonal allocation.
+        """
+        redispatch_costs = sum(
+            seller_cost_dict[ls][s, t] * (final_allocation.y_stl[s, t, ls] - zonal_allocation.y_stl[s, t, ls])
+            for s in sellers for t in periods for ls in blocks_sellers
+        ) + sum(
+            seller_no_load_cost_dict[s, t] * (final_allocation.u_st[s, t] - zonal_allocation.u_st[s, t])
+            for s in sellers for t in periods)
+
+        print(f"Redispatch costs: {redispatch_costs}")
+
+        f = open(file, 'w+')
+        f.write(f'Redispatch costs: {redispatch_costs}')
+        f.close()
+
+    def compute_redispatch_volumes(self, zonal_allocation: SellersAllocation, final_allocation: SellersAllocation,
+                                   periods, blocks_sellers, sellers, file: str):
+        """
+        Compute the total redispatch volume as the L1 norm of dispatch changes between the zonal solution and
+        the post-redispatch solution.
+        For each seller s, period t, and seller block l, the redispatch volume is | y_stl(final) − y_stl(zonal) |.
+        """
+        redispatch_volumes = sum(
+            abs(final_allocation.y_stl[s, t, ls] - zonal_allocation.y_stl[s, t, ls])
+            for s in sellers for t in periods for ls in blocks_sellers
+        )
+
+        print(f"Redispatch volumes: {redispatch_volumes}")
+
+        f = open(file, 'w+')
+        f.write(f'Redispatch volumes: {redispatch_volumes}')
+        f.close()
 
     def __str__(self):
         return 'DCOPF'
