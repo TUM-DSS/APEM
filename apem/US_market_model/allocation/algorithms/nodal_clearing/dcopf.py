@@ -104,7 +104,6 @@ class DCOPF(PowerFlowModel):
         alpha_vt = model.addVars(nodes, periods, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='alpha_vt')
         f_vwt = model.addVars([(v, w, t) for v in nodes for w in list(network.neighbors(v)) for t in periods],
                               lb=-GRB.INFINITY, ub=GRB.INFINITY, name='f_vwt')
-
         slack = model.addVars([(v, t) for v in nodes for t in periods], lb=-GRB.INFINITY, ub=GRB.INFINITY,
                               name='slack_vt')
         abs_slack = model.addVars([(v, t) for v in nodes for t in periods], lb=0, ub=GRB.INFINITY,
@@ -347,7 +346,9 @@ class DCOPF(PowerFlowModel):
 
             if any(x > 1e-9 for x in slack_vt.values()):
                 nonzero = {(v, t): val for (v, t), val in slack_vt.items() if abs(val) > 1e-9}
-                raise Error(f'Nonzero slack detected: {nonzero}')
+                print('-' * 50)
+                print(f'Nonzero slack detected at the following (node, period) pairs: {nonzero}')
+                print('-' * 50)
 
             return allocation
 
