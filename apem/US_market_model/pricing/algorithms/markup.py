@@ -89,7 +89,9 @@ class Markup(PricingAlgorithm):
                 u_fixed=u_fixed
             )
 
+            print('-' * 50)
             print(f"Best allocation found with threshold = {best_threshold}, welfare: {best_welfare}")
+            print('-' * 50)
 
             return final_allocation, pricing
 
