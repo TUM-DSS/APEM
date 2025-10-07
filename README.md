@@ -209,7 +209,6 @@ Use these patterns when adapting your own sources:
 * Susceptance `B` is computed from resistance/reactance and clamped: `B = Im(1/(R + jX))` with bounds `[0.01, 2]`.
 * See: `ParseARPA`.
 
-----
 ### Hooking your dataset into `config.json`
 1. Add your parser class (e.g., ParseMyDataset) in the `US_market_model/data/parsing` package.
 2. Add your dataset to `enums.py` in the `US_Datasets` class.
