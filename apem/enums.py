@@ -18,6 +18,7 @@ from apem.US_market_model.allocation.algorithms.zonal_clearing.zonal_NTC import 
 from apem.US_market_model.allocation.algorithms.nodal_clearing.dcopf import DCOPF
 from apem.US_market_model.allocation.algorithms.nodal_clearing.nodal_fbmc_included import NodalFBMC
 from apem.US_market_model.allocation.algorithms.zonal_clearing.zonal_fbmc_included import ZonalFBMC
+from apem.US_market_model.allocation.algorithms.zonal_clearing.zonal_fbmc import BaseCaseGenerator
 
 
 class MarketModels(Enum):
@@ -27,7 +28,6 @@ class MarketModels(Enum):
 
 class PowerFlowModels(Enum):
     DCOPF = DCOPF()
-    # NodalFBMC = NodalFBMC()
     Zonal_NTC = Zonal_NTC(zonal_configuration="zonal_DE4-refined", factor=0.8)
     ZonalFBMC = ZonalFBMC(zonal_configuration="zonal_DE4-refined", base_case_type="BC2")
 
@@ -52,3 +52,11 @@ class US_Datasets(Enum):
     PyPSAEurSmall = ParsePyPSAEurSmall()
     PyPSAEurLarge = ParsePyPSAEurLarge()
     ARPA = ParseARPA()
+
+
+class FBMCBaseCases(Enum):
+    BC1 = "BC1"
+    BC2 = "BC2"
+    BC3_1 = "BC3.1"
+    BC3_2 = "BC3.2"
+    BC4 = "BC4"

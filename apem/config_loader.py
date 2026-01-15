@@ -6,7 +6,7 @@ from apem.EU_market_model.euphemia.enums.datasets import EU_Datasets
 from apem.US_market_model.allocation.algorithms.nodal_clearing.dcopf import DCOPF
 from apem.US_market_model.allocation.algorithms.zonal_clearing.zonal_fbmc_included import ZonalFBMC
 from apem.US_market_model.allocation.algorithms.zonal_clearing.zonal_NTC import Zonal_NTC
-from apem.enums import MarketModels, PricingAlgorithms, RedispatchAlgorithms, US_Datasets
+from apem.enums import FBMCBaseCases, MarketModels, PricingAlgorithms, RedispatchAlgorithms, US_Datasets
 
 
 class ConfigLoader:
@@ -102,7 +102,10 @@ class ConfigLoader:
             return Zonal_NTC(zonal_configuration=zonal_config["type"], factor=zonal_config["factor"])
         if model_type == "Zonal_FBMC":
             zonal_config = self.config["zonal_configuration"]
-            return ZonalFBMC(zonal_configuration=zonal_config["type"], base_case_type=zonal_config["base_case"])
+            base_case = zonal_config["base_case"]
+            if base_case not in [c.value for c in FBMCBaseCases]:
+                raise ValueError(f"Invalid FBMC base case: {base_case}")
+            return ZonalFBMC(zonal_configuration=zonal_config["type"], base_case_type=base_case)
         if model_type == "DCOPF":
             return DCOPF()
         raise ValueError(f"Invalid power flow model: {model_type}")
