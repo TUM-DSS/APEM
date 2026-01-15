@@ -129,7 +129,7 @@ def analyse_results(
     os.makedirs(path, exist_ok=True)
 
     analysis = PriceAnalysis(scenario, allocation, pricing, configuration, base_scenario)
-    # Legacy helper not present in US PriceAnalysis; callers can use PriceAnalysis methods directly
+    analysis.compute_all_stats_and_plot_data(path, pf_model_value)
     return analysis
 
 
@@ -209,11 +209,12 @@ def solve_and_analyse_scenario(
             is_dcopf_like = isinstance(power_flow_model, (DCOPF, NodalFBMC))
             scenario_to_analyse = price_analysis.scenario if is_dcopf_like else price_analysis.base_scenario
             base_scenario = None if is_dcopf_like else price_analysis.base_scenario
-            zonal_config = power_flow_model.zonal_configuration if isinstance(power_flow_model, (Zonal_NTC, ZonalFBMC)) else ""
+            zonal_config = (
+                power_flow_model.zonal_configuration if isinstance(power_flow_model, (Zonal_NTC, ZonalFBMC)) else ""
+            )
 
-            # Skip heavy plotting/statistics in constrained environments
-            # scenario_to_analyse.analyse_scenario()
-            # scenario_to_analyse.plot_network(power_flow_model, zonal_config)
+            scenario_to_analyse.analyse_scenario()  # analyse base scenario
+            scenario_to_analyse.plot_network(power_flow_model, zonal_config)  # plot underlying network
 
         return analyse_results(
             price_analysis.scenario,

@@ -1,91 +1,173 @@
 import os
 import pandas as pd
-import matplotlib.pyplot as plt
-import matplotlib as mpl
+import matplotlib
 
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt  # noqa: E402
+import matplotlib as mpl
+import geopandas as gpd  # noqa: E402
+from shapely.geometry import Point, LineString  # noqa: E402
+
+from apem.US_market_model.utils.paths import RAW_DATA_DIR
 from apem.US_market_model.data.parsing.scenario import Scenario
 
 
 def plot_avg_prices(avg_prices: pd.DataFrame, scenario: Scenario, file_plot: str = "") -> None:
-    avg_prices.plot(xlim=(min(scenario.periods), max(scenario.periods)),
-                    xlabel='period', ylabel='€/MWh')
+    avg_prices.plot(xlim=(min(scenario.periods), max(scenario.periods)), xlabel="period", ylabel="€/MWh")
     plt.savefig(file_plot, dpi=300)
     plt.close()
 
 
-def plot_price_heatmap(file_heatmap: str, scenario: Scenario, avg_prices: dict = None, zonal_config: str = "", power_flow_model: str = ""):
-    """Creates a heatmap with the (average) nodal (or zonal) prices for the underlying network.
+def plot_price_heatmap(
+    file_heatmap: str,
+    scenario: Scenario,
+    avg_prices: dict = None,
+    zonal_config: str = "",
+    power_flow_model: str = "",
+) -> None:
+    """Creates a heatmap with the (average) nodal (or zonal) prices for the underlying network."""
 
-    Args:
-        file_heatmap (str): path to store the resulting heatmap
-        scenario (Scenario): the scenario object
-        avg_prices (dict, optional): average nodal (or zonal) prices
-        zonal_config (str, optional): whether Zonal_NTC was used
-    """
-
-    # Define power flow model and create results directory, if not exists
-    results_directory = os.path.join("US_results", f"{scenario.name}_results", power_flow_model or "DCOPF")
-    os.makedirs(results_directory, exist_ok=True)
-    zone_results_directory = os.path.join(results_directory, zonal_config) if zonal_config else results_directory
-
-    # Require prices to be provided to avoid circular imports
     if avg_prices is None or not avg_prices:
         print("plot_price_heatmap: no prices provided, skipping plot.")
         return
 
-    # If prices include periods (e.g., node-period keys or node strings with period), average by node
-    sample_key = next(iter(avg_prices.keys()))
-    if isinstance(sample_key, tuple) and len(sample_key) > 1:
-        tmp = {}
-        for (node, _), val in avg_prices.items():
-            tmp.setdefault(node, []).append(val)
-        avg_prices = {n: sum(vs) / len(vs) for n, vs in tmp.items()}
-    elif isinstance(sample_key, str) and " " in sample_key:
-        tmp = {}
-        for k, val in avg_prices.items():
-            node = k.split()[0]
-            tmp.setdefault(node, []).append(val)
-        avg_prices = {n: sum(vs) / len(vs) for n, vs in tmp.items()}
+    # Define power flow model and create results directory, if not exists
+    pf_model = power_flow_model or ("Zonal_NTC" if zonal_config else "DCOPF")
+    results_directory = os.path.join("US_results", f"{scenario.name}_results", pf_model)
+    os.makedirs(results_directory, exist_ok=True)
 
-    # Collect node positions and prices
-    nodes = [node for node in scenario.network.nodes if node in avg_prices]
-    if not nodes:
-        print("plot_price_heatmap: no nodes with prices, skipping plot.")
-        return
-    lats = [scenario.nodes_agents[n]["latitude"] for n in nodes]
-    lons = [scenario.nodes_agents[n]["longitude"] for n in nodes]
-    vals = [avg_prices[n] for n in nodes]
+    # Load average prices, if not provided
+    if avg_prices is None:
+        avg_prices = PriceAnalysis.avg_node_prices()
 
-    # Collect edges for simple line drawing
-    edges = [(u, v) for u, v in scenario.network.edges if u in avg_prices and v in avg_prices]
+    # Store zonal price information for plotting purposes
+    avg_prices_copy = avg_prices.copy()
 
+    # Get nodes and edges from the network
+    nodes = list(scenario.network.nodes)
+    edges = scenario.network.edges(data=True)
+
+    # Handle zonal mapping, if applicable
+    if zonal_config:
+        # Load csv file with node-to-zone mapping
+        df_zones = pd.read_csv(os.path.join(results_directory, zonal_config, "node_to_zone.csv"), dtype={"node": str, "zone": str})
+
+        # Filter nodes that are in the networkx graph
+        df_zones = df_zones[df_zones["node"].isin(nodes)]
+
+        # Merge and aggregate prices per node
+        df_prices = pd.DataFrame(list(avg_prices.items()), columns=["zone", "price"]).merge(df_zones, on="zone", how="inner")
+        avg_prices = df_prices.groupby("node")["price"].mean().to_dict()
+
+    else:
+        # Filter nodes based on available price data
+        nodes = [node for node in scenario.network.nodes if node in avg_prices]
+
+    CRS = "EPSG:4326"
+
+    # Create GeoDataFrame for nodes with longitude & latitude
+    geo_df = gpd.GeoDataFrame(
+        {
+            "node": nodes,
+            "latitude": [scenario.nodes_agents[node]["latitude"] for node in nodes],
+            "longitude": [scenario.nodes_agents[node]["longitude"] for node in nodes],
+        },
+        crs=CRS,
+        geometry=[Point(scenario.nodes_agents[node]["longitude"], scenario.nodes_agents[node]["latitude"]) for node in nodes],
+    )
+    geo_df["price"] = geo_df["node"].map(avg_prices)
+
+    if zonal_config:
+        geo_df = geo_df.merge(df_zones, on="node", how="left")
+
+    # Create GeoDataFrame for edges
+    line_df = gpd.GeoDataFrame(
+        {
+            "from_node": [u for u, v, data in edges],
+            "to_node": [v for u, v, data in edges],
+            "B": [data["B"] for u, v, data in edges],
+            "F_max": [data["F_max"] for u, v, data in edges],
+        },
+        crs=CRS,
+        geometry=[
+            LineString(
+                [
+                    Point(scenario.nodes_agents[u]["longitude"], scenario.nodes_agents[u]["latitude"]),
+                    Point(scenario.nodes_agents[v]["longitude"], scenario.nodes_agents[v]["latitude"]),
+                ]
+            )
+            for u, v, data in edges
+        ],
+    )
+
+    # Set up color scale for prices
+    norm = mpl.colors.Normalize(vmin=0, vmax=100)
+    cmap = mpl.colormaps["jet"]
+
+    # Clear previous plot and create figure
     plt.clf()
-    fig, ax = plt.subplots(figsize=(10, 8))
+    fig, ax = plt.subplots(figsize=(15, 15))
 
-    # Plot edges
-    for u, v in edges:
-        ax.plot(
-            [scenario.nodes_agents[u]["longitude"], scenario.nodes_agents[v]["longitude"]],
-            [scenario.nodes_agents[u]["latitude"], scenario.nodes_agents[v]["latitude"]],
-            color="lightgray",
-            linewidth=0.7,
-            zorder=1,
-        )
+    # Load and plot GADM map of Germany
+    map_germany = gpd.read_file(RAW_DATA_DIR / "gadm41_DEU_shp" / "gadm41_DEU_1.shp")
+    map_germany.plot(ax=ax, color="lightgray", alpha=0.5)
+    map_germany.boundary.plot(ax=ax, color="lightgray", linewidth=1.0)  # show state borders
 
-    # Plot nodes with price-based coloring
-    sc = ax.scatter(lons, lats, c=vals, cmap="jet", vmin=min(vals), vmax=max(vals), s=50, zorder=2, edgecolors="k", linewidths=0.2)
-    cbar = plt.colorbar(sc, ax=ax, label="€/MWh")
+    # Plot power lines
+    line_df.plot(ax=ax, color="gray", linewidth=1.0, alpha=0.7)
 
-    ax.set_xlabel("Longitude")
-    ax.set_ylabel("Latitude")
-    ax.set_title("Nodal prices")
-    ax.grid(True, alpha=0.3)
+    # Plot bus nodes with longitude & latitude and price-based color scale
+    geo_df.plot(
+        ax=ax,
+        markersize=100,
+        marker="o",
+        column="price",
+        cmap=cmap,
+        legend=False,  # disable automatic legend
+        vmin=0,
+        vmax=100,
+    )
 
-    plt.tight_layout()
+    # Add colorbar
+    cbar = plt.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax, ticks=[0, 20, 40, 60, 80, 100], label="€/MWh")
+    cbar.set_ticklabels(["≤0", "20", "40", "60", "80", "≥100"])
+    cbar.ax.tick_params(labelsize=13)
+    cbar.set_label("€/MWh", fontsize=13)
 
-    # If a path is provided, save; otherwise return the figure for interactive use
-    if file_heatmap:
-        plt.savefig(file_heatmap, bbox_inches="tight", dpi=300)
-        plt.close(fig)
-        return None
-    return fig
+    # Add text with price information (based on provided prices)
+    min_price = min(avg_prices_copy.values())
+    max_price = max(avg_prices_copy.values())
+    avg_price = sum(avg_prices_copy.values()) / len(avg_prices_copy)
+
+    ax.text(
+        0.05,
+        0.95,
+        f"Min: {min_price:.2f} €/MWh\nAvg: {avg_price:.2f} €/MWh\nMax: {max_price:.2f} €/MWh",
+        transform=ax.transAxes,
+        fontsize=13,
+        verticalalignment="top",
+        bbox=dict(facecolor="white", alpha=0.8, edgecolor="gray", boxstyle="round,pad=0.5"),
+        color="black",
+    )
+
+    if zonal_config:
+        # dissolve nodes per zone to get a single geometry per zone
+        zone_geo = geo_df.dissolve(by="zone")
+
+        for zone, price in avg_prices_copy.items():
+            # get the centroid of the combined geometry of the zone
+            point = zone_geo.loc[zone].geometry.centroid
+
+            ax.text(
+                x=point.x,
+                y=point.y,
+                s=f"Zone {zone}: {price:.2f} €/MWh",
+                fontsize=13,
+                ha="center",
+                color="black",
+            )
+
+    # Save heatmap
+    os.makedirs(os.path.dirname(file_heatmap), exist_ok=True)
+    plt.savefig(file_heatmap, bbox_inches="tight", dpi=300)
+    plt.close(fig)

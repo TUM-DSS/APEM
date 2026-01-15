@@ -124,49 +124,92 @@ class PriceAnalysis:
 
     def avg_price(self, file_avg: str = "", mode="w") -> float:
         prices = self.pricing.node_prices.values()
-        avg_price = round(sum(prices) / len(prices), 2)
+        avg = sum(prices) / len(prices) if len(prices) > 0 else 0
 
         if file_avg:
-            f = open(file_avg, mode)
-            f.write(f"Average price: {avg_price}\n")
-            f.close()
+            file = open(file_avg, mode)
+            file.write(f"Average price: {avg}\n\n")
+            file.close()
 
-        return avg_price
+        return avg
 
-    def plot_avg_prices(self, file_plot: str = "") -> None:
-        prices = self.pricing.node_prices
-        plot_avg_prices(prices, self.scenario, file_plot=file_plot)
+    def avg_prices_periods(self, file_plot: str = "", file_avg: str = "", mode="w") -> dict:
+        avg_prices = pd.DataFrame(columns=["period", "avg_price"])
+        for (_, t), p in self.pricing.node_prices.items():
+            avg_prices.loc[len(avg_prices)] = {"period": t, "avg_price": p}
 
-    def plot_price_heatmap(self, file_heatmap: str = "") -> None:
-        prices = self.pricing.node_prices
-        plot_price_heatmap(
-            file_heatmap=file_heatmap,
-            scenario=self.scenario,
-            avg_prices=prices,
-            zonal_config="",
-            power_flow_model="DCOPF",
-        )
+        avg_prices = avg_prices.groupby(["period"]).mean()
 
-    def plot_supply_demand(self, file_plot: str = "") -> None:
-        plot_supply_demand(self.scenario, file_plot=file_plot)
+        if file_plot:
+            plot_avg_prices(avg_prices, self.scenario, file_plot)
+
+        avg_prices_dict = {}
+        for period in avg_prices.index.values:
+            avg_prices_dict[period] = avg_prices.at[period, "avg_price"]
+
+        if file_avg:
+            file = open(file_avg, mode)
+            for period, price in avg_prices_dict.items():
+                file.write(f"Average price in period {period}: {price}\n")
+            file.write("\n")
+            file.close()
+
+        return avg_prices_dict
+
+    def avg_node_prices(self, file_avg: str = "", mode: str = "w") -> dict:
+        avg_prices = pd.DataFrame(columns=["node", "avg_price"])
+        for (v, _), p in self.pricing.node_prices.items():
+            avg_prices.loc[len(avg_prices)] = {"node": str(v), "avg_price": p}
+
+        avg_prices = avg_prices.groupby(["node"]).mean()
+
+        avg_prices_dict = {}
+        for node in avg_prices.index.values:
+            avg_prices_dict[node] = avg_prices.at[node, "avg_price"]
+
+        if file_avg:
+            file = open(file_avg, mode)
+            for node, price in avg_prices_dict.items():
+                file.write(f"Average price at node {node}: {price}\n")
+            file.write("\n")
+            file.close()
+
+        return avg_prices_dict
+
+    def compute_all_stats_and_plot_data(self, dir_stats: str, pf_model_value) -> None:
+        if self.scenario.name != "ARPA":
+            plot_supply_demand(dir_stats, self.scenario)
+
+        zonal_config = pf_model_value.zonal_configuration if isinstance(pf_model_value, (Zonal_NTC, ZonalFBMC)) else ""
+        zonal_path = zonal_config + "/" if zonal_config else ""
+
+        path = f"{dir_stats}/{pf_model_value}/{zonal_path}{self.pricing.used_algorithm}_results"
+        os.makedirs(path, exist_ok=True)
+
+        file_stats = f"{path}/{self.pricing.used_algorithm}_stats.txt"
+        self.compute_objectives(file_objectives=file_stats)
+        self.performance_statistics(file_stats=file_stats, mode="a")
+        self.avg_price(file_avg=file_stats, mode="a")
+        if self.scenario.name != "ARPA":
+            self.avg_prices_periods(
+                file_plot=f"{path}/{self.pricing.used_algorithm}_prices_periods.png",
+                file_avg=file_stats,
+                mode="a",
+            )
+        avg_prices = self.avg_node_prices(file_avg=file_stats, mode="a")
+
+        if self.scenario.name in ["PyPSA_Eur_Large", "PyPSA_Eur_Small"]:
+            nodal_scenario = self.base_scenario if zonal_config else self.scenario
+
+            plot_price_heatmap(
+                f"{path}/{self.pricing.used_algorithm}_heatmap.png",
+                nodal_scenario,
+                avg_prices,
+                zonal_config,
+                power_flow_model=str(pf_model_value),
+            )
 
     def analyse_results(self, folder_results: str, power_flow_model=None):
-        file_objectives = os.path.join(folder_results, f"{power_flow_model}_objectives.txt")
-        file_stats = os.path.join(folder_results, f"{power_flow_model}_stats.txt")
-        file_avg = os.path.join(folder_results, f"{power_flow_model}_avg.txt")
-        file_glocs = os.path.join(folder_results, f"{power_flow_model}_GLOCs.txt")
-        file_llocs = os.path.join(folder_results, f"{power_flow_model}_LLOCs.txt")
-        file_mwps = os.path.join(folder_results, f"{power_flow_model}_MWPs.txt")
-        file_supply_demand = os.path.join(folder_results, f"{power_flow_model}_supply_demand.pdf")
-
-        os.makedirs(folder_results, exist_ok=True)
-
-        print(f"Compute stats and plotting data...")
-        self.compute_objectives(file_objectives=file_objectives)
-        self.performance_statistics(file_stats=file_stats)
-        self.avg_price(file_avg=file_avg)
-        self.plot_avg_prices(file_plot=os.path.join(folder_results, f"{power_flow_model}_avg_prices.pdf"))
-        self.plot_price_heatmap(file_heatmap=os.path.join(folder_results, f"{power_flow_model}_heatmap.pdf"))
-        self.plot_supply_demand(file_plot=file_supply_demand)
-
+        """Backwards-compatible wrapper used by the execution chain."""
+        self.compute_all_stats_and_plot_data(folder_results, power_flow_model)
         return self.pricing
