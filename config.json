@@ -23,7 +23,6 @@
     ],
     "_available_power_flow_models": [
         "DCOPF",
-        "Nodal_FBMC",
         "Zonal_FBMC",
         "Zonal_NTC"
     ],
@@ -50,7 +49,6 @@
         "zonal_DE2-s",
         "zonal_DE3",
         "zonal_DE4",
-        "zonal_DE4-refined",
         "zonal_DE5"
     ],
     "_available_base_cases": [
@@ -63,10 +61,10 @@
     "verbosity": true,
     "scenario": {
         "market_model": "US_model",
-        "US_dataset": "ARPA",
+        "US_dataset": "PyPSAEurLarge",
         "EU_dataset": "GME",
         "power_flow_model": {
-            "type": "Zonal_FBMC"
+            "type": "DCOPF"
         },
         "cut_type": "price based",
         "pricing_algorithm": "IP",
@@ -87,7 +85,7 @@
         "output_flag": 0
     },
     "zonal_configuration": {
-        "type": "zonal_DE4-refined",
+        "type": "zonal_DE4",
         "factor": 0.8,
         "base_case": "BC4"
     }

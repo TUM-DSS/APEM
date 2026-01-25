@@ -1,7 +1,7 @@
 """
 Utility to run a matrix of APEM configurations to sanity‑check the pipeline.
 
-Current matrix (adjust in code if needed):
+Current matrix:
 - Datasets: IEEE_RTS, PJM, PyPSAEurSmall, PyPSAEurLarge, ARPA
 - Models per dataset:
   * DCOPF: all datasets

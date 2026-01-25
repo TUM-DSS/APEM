@@ -277,6 +277,10 @@ def solve_and_analyse_scenario(
     scenario = _retrieve_data(US_dataset)
     configuration = _create_configuration()
 
+    allowed_markup = {US_Datasets.IEEE_RTS, US_Datasets.PJM, US_Datasets.ARPA}
+    if US_dataset not in allowed_markup:
+        raise ValueError(f"Markup pricing is only supported for datasets {', '.join([d.name for d in allowed_markup])}.")
+
     zonal_part = _zonal_part(power_flow_model)
     base_path = f"US_results/{scenario}_results/{power_flow_model}"
     path = base_path + "/" + zonal_part
