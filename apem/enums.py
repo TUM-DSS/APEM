@@ -15,6 +15,7 @@ from apem.US_market_model.allocation.algorithms.zonal_clearing.redispatch.min_ab
 from apem.US_market_model.allocation.algorithms.zonal_clearing.redispatch.min_abs_vol import MinAbsVolRD
 from apem.US_market_model.allocation.algorithms.zonal_clearing.redispatch.min_cost import MinCostRD
 from apem.US_market_model.allocation.algorithms.zonal_clearing.zonal_NTC import Zonal_NTC
+from apem.US_market_model.allocation.algorithms.zonal_clearing.zonal_NTC_independent import Zonal_NTC_independent
 from apem.US_market_model.allocation.algorithms.nodal_clearing.dcopf import DCOPF
 from apem.US_market_model.allocation.algorithms.nodal_clearing.nodal_fbmc_included import NodalFBMC
 from apem.US_market_model.allocation.algorithms.zonal_clearing.zonal_fbmc_included import ZonalFBMC
@@ -29,6 +30,7 @@ class MarketModels(Enum):
 class PowerFlowModels(Enum):
     DCOPF = DCOPF()
     Zonal_NTC = Zonal_NTC(zonal_configuration="zonal_DE4", factor=0.8)
+    Zonal_NTC_independent = Zonal_NTC_independent(zonal_configuration="zonal_DE4", factor=0.8)
     ZonalFBMC = ZonalFBMC(zonal_configuration="zonal_DE4", base_case_type="BC2")
 
 

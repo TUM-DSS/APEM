@@ -9,6 +9,7 @@ from apem.US_market_model.allocation.algorithms.nodal_clearing.dcopf import DCOP
 from apem.US_market_model.allocation.algorithms.nodal_clearing.nodal_fbmc_included import NodalFBMC
 from apem.US_market_model.allocation.algorithms.zonal_clearing.zonal_fbmc_included import ZonalFBMC
 from apem.US_market_model.allocation.algorithms.zonal_clearing.zonal_NTC import Zonal_NTC
+from apem.US_market_model.allocation.algorithms.zonal_clearing.zonal_NTC_independent import Zonal_NTC_independent
 from apem.US_market_model.allocation.allocation import SellersAllocation, Allocation
 from apem.US_market_model.allocation.configuration import Configuration
 from apem.US_market_model.allocation.error import Error
@@ -53,7 +54,7 @@ def _zonal_part(power_flow_model: PowerFlowModel) -> str:
         if base_case:
             suffix += f"_{base_case}"
         return f"{suffix}/"
-    if isinstance(power_flow_model, Zonal_NTC):
+    if isinstance(power_flow_model, (Zonal_NTC, Zonal_NTC_independent)):
         factor = getattr(power_flow_model, "factor", None)
         factor_str = f"_f{factor}" if factor is not None else ""
         return f"{power_flow_model.zonal_configuration}{factor_str}/"
@@ -74,7 +75,7 @@ def _write_run_metadata(dataset: US_Datasets, scenario: Scenario, power_flow_mod
             f.write(f"zonal_path={zonal_part.rstrip('/')}\n")
         if isinstance(power_flow_model, ZonalFBMC):
             f.write(f"base_case={getattr(power_flow_model, 'base_case_type', '')}\n")
-        if isinstance(power_flow_model, Zonal_NTC):
+        if isinstance(power_flow_model, (Zonal_NTC, Zonal_NTC_independent)):
             f.write(f"factor={getattr(power_flow_model, 'factor', '')}\n")
         f.write(f"pricing_algorithm={pricing_algorithm.name}\n")
         f.write(f"redispatch_algorithm={redispatch_algorithm.name}\n")
@@ -87,7 +88,7 @@ def _solve_US_allocation_problem(
         extra = ""
         if isinstance(power_flow_model, ZonalFBMC):
             extra = f" base_case={getattr(power_flow_model, 'base_case_type', '')}"
-        if isinstance(power_flow_model, Zonal_NTC):
+        if isinstance(power_flow_model, (Zonal_NTC, Zonal_NTC_independent)):
             extra = f" factor={getattr(power_flow_model, 'factor', '')}"
         logger.info("allocation start dataset=%s model=%s%s", scenario, power_flow_model, extra)
 

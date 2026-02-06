@@ -5,6 +5,7 @@ from apem.EU_market_model.euphemia.enums.cut_types import CutTypes
 from apem.EU_market_model.euphemia.enums.datasets import EU_Datasets
 from apem.US_market_model.allocation.algorithms.nodal_clearing.dcopf import DCOPF
 from apem.US_market_model.allocation.algorithms.zonal_clearing.zonal_fbmc_included import ZonalFBMC
+from apem.US_market_model.allocation.algorithms.zonal_clearing.zonal_NTC_independent import Zonal_NTC_independent
 from apem.US_market_model.allocation.algorithms.zonal_clearing.zonal_NTC import Zonal_NTC
 from apem.enums import FBMCBaseCases, MarketModels, PricingAlgorithms, RedispatchAlgorithms, US_Datasets
 
@@ -39,6 +40,7 @@ class ConfigLoader:
         if self.raw_config["scenario"]["power_flow_model"]["type"] not in [
             "DCOPF",
             "Zonal_NTC",
+            "Zonal_NTC_independent",
             "Nodal_FBMC",
             "Zonal_FBMC",
         ]:
@@ -74,12 +76,15 @@ class ConfigLoader:
 
         # Validate zonal configuration when a zonal model is selected
         pf_type = self.raw_config["scenario"]["power_flow_model"]["type"]
-        if pf_type in ["Zonal_NTC", "Zonal_FBMC"]:
+        if pf_type in ["Zonal_NTC", "Zonal_NTC_independent", "Zonal_FBMC"]:
             zonal_config = self.raw_config["zonal_configuration"]
             available_configs = self.raw_config.get("_available_zonal_configurations", [])
             if available_configs and zonal_config["type"] not in available_configs:
                 raise ValueError(f"Invalid zonal configuration type: {zonal_config['type']}")
             if pf_type == "Zonal_NTC":
+                if not 0 <= zonal_config["factor"] <= 1:
+                    raise ValueError(f"Invalid zonal factor: {zonal_config['factor']}. Must be between 0 and 1.")
+            if pf_type == "Zonal_NTC_independent":
                 if not 0 <= zonal_config["factor"] <= 1:
                     raise ValueError(f"Invalid zonal factor: {zonal_config['factor']}. Must be between 0 and 1.")
             if pf_type == "Zonal_FBMC":
@@ -103,6 +108,9 @@ class ConfigLoader:
         if model_type == "Zonal_NTC":
             zonal_config = self.config["zonal_configuration"]
             return Zonal_NTC(zonal_configuration=zonal_config["type"], factor=zonal_config["factor"])
+        if model_type == "Zonal_NTC_independent":
+            zonal_config = self.config["zonal_configuration"]
+            return Zonal_NTC_independent(zonal_configuration=zonal_config["type"], factor=zonal_config["factor"])
         if model_type == "Zonal_FBMC":
             zonal_config = self.config["zonal_configuration"]
             base_case = zonal_config["base_case"]
