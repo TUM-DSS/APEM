@@ -77,18 +77,15 @@ class MinMWP(PricingAlgorithm):
         f_vwkt = getattr(allocation.TransmissionNetworkAllocation, "f_vwkt", None)
         u_st = allocation.SellersAllocation.u_st
 
-        # build directed multiedge list
-        if network.is_multigraph():
-            undirected_edges = list(network.edges(keys=True, data=True))  # (u, v, k, data)
-        else:
-            undirected_edges = [(u, v, None, data) for u, v, data in network.edges(data=True)]
+        # build directed multiedge list (works for simple graphs too)
+        undirected_edges = list(network.edges(keys=True, data=True)) if network.is_multigraph() else \
+            [(u, v, None, data) for u, v, data in network.edges(data=True)]
 
         directed_edges = []
         for idx, (u, v, k, data) in enumerate(undirected_edges):
             directed_edges.append((idx, u, v, k, data))
             directed_edges.append((idx, v, u, k, data))
 
-        # per-edge directed flows
         flow_et = {}
         for idx, (u, v, k, data) in enumerate(undirected_edges):
             for t in periods:
@@ -155,11 +152,9 @@ class MinMWP(PricingAlgorithm):
             <= 0
             for s in sellers
         )
-        # 3
         for (e, v, w, k, data) in directed_edges:
             for t in periods:
                 model.addConstr(-gamma_et[e, v, w, t] * flow_et[(e, v, w, t)] - lambda_et[e, v, w, t] <= 0)
-        # 4
         for v in nodes:
             if v == r_star:
                 continue
@@ -173,7 +168,6 @@ class MinMWP(PricingAlgorithm):
                     for (e, v2, w, k, data) in directed_edges if v2 == v
                 )
                 model.addConstr(inflow - outflow == 0)
-        # 5
         for t in periods:
             inflow = gp.quicksum(
                 data['B'] * (p_vt[w, t] + gamma_et[e, w, r_star, t])
@@ -205,7 +199,6 @@ class MinMWP(PricingAlgorithm):
             mwps_per_line = {}
             for (e, v, w, _, _) in directed_edges:
                 mwps_per_line[(v, w, e)] = round(sum(lambda_et[e, v, w, t].X for t in periods), 2)
-
             p_vt = {(v, t): p_vt[v, t].X for v in nodes for t in periods}
             gamma_vwt = {}
             for (e, v, w, _, _) in directed_edges:
