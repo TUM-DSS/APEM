@@ -4,6 +4,7 @@ import os
 import pandas as pd
 
 from apem.US_market_model.allocation.algorithms.zonal_clearing.zonal_NTC import Zonal_NTC
+from apem.US_market_model.allocation.algorithms.zonal_clearing.zonal_NTC_independent import Zonal_NTC_independent
 from apem.US_market_model.allocation.algorithms.zonal_clearing.zonal_fbmc_included import ZonalFBMC
 from apem.US_market_model.allocation.allocation import Allocation
 from apem.US_market_model.allocation.configuration import Configuration
@@ -183,7 +184,7 @@ class PriceAnalysis:
         if isinstance(pf_model_value, ZonalFBMC):
             base_case = getattr(pf_model_value, "base_case_type", "")
             zonal_config = f"{pf_model_value.zonal_configuration}_{base_case}" if base_case else pf_model_value.zonal_configuration
-        elif isinstance(pf_model_value, Zonal_NTC):
+        elif isinstance(pf_model_value, (Zonal_NTC, Zonal_NTC_independent)):
             factor = getattr(pf_model_value, "factor", None)
             factor_str = f"_f{factor}" if factor is not None else ""
             zonal_config = f"{pf_model_value.zonal_configuration}{factor_str}"
