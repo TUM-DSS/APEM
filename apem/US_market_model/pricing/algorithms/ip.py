@@ -306,13 +306,20 @@ class IP(PricingAlgorithm):
 
             p_vt = {(v, t): p_vt[v, t].X for v in nodes for t in periods}
             gamma_vwt = {}
-            for (e, v, w, _, _) in directed_edges:
+            gamma_vwkt = {}
+            for (e, v, w, k, _) in directed_edges:
                 for t in periods:
-                    gamma_vwt[(v, w, t)] = gamma_vwt.get((v, w, t), 0) + gamma_et[e, v, w, t].X
+                    gamma_val = gamma_et[e, v, w, t].X
+                    gamma_vwt[(v, w, t)] = gamma_vwt.get((v, w, t), 0) + gamma_val
+                    if k is None:
+                        gamma_vwkt[(v, w, t)] = gamma_val
+                    else:
+                        gamma_vwkt[(v, w, k, t)] = gamma_val
 
             pricing = Pricing(p_vt, gamma_vwt, str(self), runtime, num_vars, num_constrs,
                               llocs=LLOCS(total_llocs, llocs_buyers, llocs_sellers, llocs_network,
-                                          llocs_per_buyer, llocs_per_seller, llocs_per_line))
+                                          llocs_per_buyer, llocs_per_seller, llocs_per_line),
+                              line_congestion_prices_per_edge=gamma_vwkt)
 
             if file_prices:
                 write_prices(file_prices, pricing, scenario)
