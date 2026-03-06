@@ -78,8 +78,30 @@ class MinMWP(PricingAlgorithm):
         u_st = allocation.SellersAllocation.u_st
 
         # build directed multiedge list (works for simple graphs too)
-        undirected_edges = list(network.edges(keys=True, data=True)) if network.is_multigraph() else \
+        is_multigraph = network.is_multigraph()
+        undirected_edges = list(network.edges(keys=True, data=True)) if is_multigraph else \
             [(u, v, None, data) for u, v, data in network.edges(data=True)]
+
+        if is_multigraph:
+            if not f_vwkt:
+                if file_prices:
+                    write_prices_failure(file_prices, str(self), -2)
+                print(f'{self} pricing error with code -2: missing multigraph per-edge flows')
+                return Error(-2)
+            missing_flow_key = next(
+                (
+                    (u, v, k, t)
+                    for (u, v, k, _) in undirected_edges
+                    for t in periods
+                    if (u, v, k, t) not in f_vwkt
+                ),
+                None,
+            )
+            if missing_flow_key is not None:
+                if file_prices:
+                    write_prices_failure(file_prices, str(self), -2)
+                print(f'{self} pricing error with code -2: missing multigraph flow key {missing_flow_key}')
+                return Error(-2)
 
         directed_edges = []
         for idx, (u, v, k, data) in enumerate(undirected_edges):
@@ -89,7 +111,7 @@ class MinMWP(PricingAlgorithm):
         flow_et = {}
         for idx, (u, v, k, data) in enumerate(undirected_edges):
             for t in periods:
-                if f_vwkt is not None and (u, v, k, t) in f_vwkt:
+                if is_multigraph:
                     base = f_vwkt[(u, v, k, t)]
                 else:
                     base = f_vwt[(u, v, t)]
@@ -206,10 +228,7 @@ class MinMWP(PricingAlgorithm):
                 for t in periods:
                     gamma_val = gamma_et[e, v, w, t].X
                     gamma_vwt[(v, w, t)] = gamma_vwt.get((v, w, t), 0) + gamma_val
-                    if k is None:
-                        gamma_vwkt[(v, w, t)] = gamma_val
-                    else:
-                        gamma_vwkt[(v, w, k, t)] = gamma_val
+                    gamma_vwkt[(v, w, k, t)] = gamma_val
 
             pricing = Pricing(p_vt, gamma_vwt, str(self), runtime, num_vars, num_constrs,
                               mwps=MWPS(total_mwps, mwps_buyers, mwps_sellers, mwps_network,
