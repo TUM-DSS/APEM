@@ -67,12 +67,21 @@ class Zonal_NTC_aggregated(PowerFlowModel):
             # for each interconnector between two zones set
             # its capacity to the sum of the capacities of the cross-zonal lines multiplied by self.factor and
             # its susceptance to the minimum susceptance of any cross-zonal line
-            for v in base_scenario.network.nodes:
-                for w in base_scenario.network.nodes:
-                    if node_to_zone[v] < node_to_zone[w] and (v, w) in base_scenario.network.edges():
-                        lines[node_to_zone[v], node_to_zone[w]]['F_max'] += base_scenario.network[v][w]['F_max']
-                        lines[node_to_zone[v], node_to_zone[w]]['B'] = min(lines[node_to_zone[v], node_to_zone[w]]['B'],
-                                                                        base_scenario.network[v][w]['B'])
+            for v, w, data in base_scenario.network.edges(data=True):
+                # skip lines touching nodes without zone assignment (e.g., missing coordinates)
+                if v not in node_to_zone or w not in node_to_zone:
+                    continue
+
+                zone_v = node_to_zone[v]
+                zone_w = node_to_zone[w]
+
+                # intra-zonal lines are not represented in the zonal network
+                if zone_v == zone_w:
+                    continue
+
+                z1, z2 = sorted((zone_v, zone_w))
+                lines[z1, z2]['F_max'] += data['F_max']
+                lines[z1, z2]['B'] = min(lines[z1, z2]['B'], data['B'])
 
             # add edges to the aggregated network, only if B no longer is set to inf (i.e., if at least one line between
             # the zones existed in the base scenario)
