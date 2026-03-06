@@ -53,6 +53,12 @@ class Zonal_NTC_aggregated(PowerFlowModel):
             df_sellers.loc[df_sellers['node'] == node, 'node'] = zone
             df_buyers.loc[df_buyers['node'] == node, 'node'] = zone
 
+        if not zones:
+            raise ValueError(
+                f"{self}: no nodes could be mapped to zones for zonal_configuration={self.zonal_configuration}. "
+                "Ensure nodes_agents includes latitude/longitude for network nodes."
+            )
+
         # save node_to_zone assignment as .csv file (include factor for consistency with result paths)
         factor_str = f"_f{self.factor}" if self.factor is not None else ""
         results_path = f"US_results/{base_scenario.name}_results/Zonal_NTC_aggregated/{self.zonal_configuration}{factor_str}"

@@ -86,3 +86,29 @@ def test_solve_uses_dcopf_with_multigraph(mock_create, mock_dcopf, base_scenario
     mock_dcopf_instance.solve.assert_called_once()
     assert zonal_scenario is mock_zonal
     assert result is mock_alloc
+
+
+@patch("apem.US_market_model.allocation.algorithms.zonal_clearing.zonal_ntc_multiedge.os.makedirs")
+@patch("apem.US_market_model.allocation.algorithms.zonal_clearing.zonal_ntc_multiedge.pd.DataFrame.to_csv")
+def test_create_zonal_scenario_raises_when_no_nodes_mapped(mock_to_csv, mock_makedirs):
+    G = nx.MultiGraph()
+    G.add_edge("n1", "n2", F_max=50.0, B=5.0)
+
+    scenario = Scenario(
+        name="no_mapped_nodes_case",
+        df_buyers=pd.DataFrame({"buyer": [10], "node": ["n1"], "period": [1]}),
+        df_sellers=pd.DataFrame({"seller": [1], "node": ["n1"], "period": [1]}),
+        network=G,
+        nodes_agents={},  # no coordinates available for any network node
+        periods=[1],
+        blocks_buyers=range(0, 0),
+        blocks_sellers=range(0, 0),
+        r_star="n1",
+    )
+
+    ntc = Zonal_NTC_multiedge("zonal_DE3", factor=0.5)
+    with pytest.raises(ValueError, match="no nodes could be mapped to zones"):
+        ntc.create_zonal_scenario_NTC(scenario)
+
+    mock_makedirs.assert_not_called()
+    mock_to_csv.assert_not_called()
