@@ -165,6 +165,8 @@ class ParseIEEERTS(ParseData):
 
         :return: Scenario object
         """
+        # Reset parser state to keep repeated calls idempotent.
+        nodes_agents.clear()
         df_sellers = read_ieee_sellers()
         df_buyers = read_ieee_buyers()
         network = read_ieee_branches()
