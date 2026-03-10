@@ -21,11 +21,12 @@ def calculate_block_demand_surplus(master_problem):
     total_surplus = 0.0
     for _, row in master_problem.block_orders.iterrows():
         p = row['p']
-        if any(row[f'q{t}'] < 0 for t in range(1, 25)):
-            for t in range(1, 25):
+        zone = master_problem.resolve_zone(row.get("zone", master_problem.default_zone))
+        if any(row.get(f'q{t}', 0) < 0 for t in master_problem.periods):
+            for t in master_problem.periods:
                 acceptance = row['acceptance']
-                q = row[f'q{t}']
-                price = master_problem.prices[t]
+                q = row.get(f'q{t}', 0)
+                price = master_problem.get_price_value(t, zone)
                 surplus = acceptance * (price - p) * q
                 total_surplus += surplus
     return total_surplus

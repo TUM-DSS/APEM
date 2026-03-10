@@ -11,5 +11,7 @@ class EU_Datasets(Enum):
     GENERATED_LARGE = ParseEU(DATA_DIR / "generated_large", "Generated Large")
     OMIE = ParseEU(DATA_DIR / "omie", "OMIE")
     GME = ParseEU(DATA_DIR / "gme", "GME")
+    TEST_3NODE = ParseEU(DATA_DIR / "test_3node", "Test 3-Node")
+    TEST_3NODE_LOWCAP = ParseEU(DATA_DIR / "test_3node_lowcap", "Test 3-Node Low Capacity")
     IEEE_RTS = ParseEU(CONVERTED_DATASET_PATH_MAP[ParseIEEERTS], "IEEE_RTS")
     ARPA = ParseEU(CONVERTED_DATASET_PATH_MAP[ParseARPA], "ARPA")

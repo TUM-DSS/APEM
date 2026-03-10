@@ -5,6 +5,75 @@ import pandas as pd
 from apem.EU_market_model.euphemia.data.parsing.parse_data import ParseData
 from apem.EU_market_model.euphemia.data.parsing.zonal_scenario import ZonalScenario
 
+
+def ensure_zone_column(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Ensure the DataFrame has a canonical ``zone`` column.
+    If no zone-like column exists, all rows are assigned to one default zone.
+    """
+    zone_aliases = ("zone", "z", "bidding_zone", "country", "node")
+    copy = df.copy()
+
+    source_col = None
+    for candidate in zone_aliases:
+        if candidate in copy.columns:
+            source_col = candidate
+            break
+
+    if source_col is None:
+        copy["zone"] = "Z1"
+    elif source_col != "zone":
+        copy = copy.rename(columns={source_col: "zone"})
+
+    copy["zone"] = copy["zone"].fillna("Z1").astype(str)
+    return copy
+
+
+def parse_atc(path) -> pd.DataFrame:
+    """
+    Parse optional ATC network data from ``atc.csv``.
+    Expected columns (aliases supported): from_zone, to_zone, t, cap.
+    Optional: ramp_up, ramp_down.
+    """
+    atc_path = path / "atc.csv"
+    if not atc_path.exists():
+        return pd.DataFrame(columns=["from_zone", "to_zone", "t", "cap"])
+
+    atc = pd.read_csv(atc_path)
+    aliases = {
+        "from": "from_zone",
+        "to": "to_zone",
+        "source_zone": "from_zone",
+        "sink_zone": "to_zone",
+        "period": "t",
+        "time": "t",
+        "capacity": "cap",
+        "atc": "cap",
+    }
+    atc = atc.rename(columns={k: v for k, v in aliases.items() if k in atc.columns})
+
+    required = {"from_zone", "to_zone", "t", "cap"}
+    missing = required.difference(atc.columns)
+    if missing:
+        missing_cols = ", ".join(sorted(missing))
+        raise ValueError(f"Invalid atc.csv: missing required column(s): {missing_cols}")
+
+    keep_cols = ["from_zone", "to_zone", "t", "cap"]
+    for optional_col in ("ramp_up", "ramp_down"):
+        if optional_col in atc.columns:
+            keep_cols.append(optional_col)
+    atc = atc[keep_cols].copy()
+
+    atc["from_zone"] = atc["from_zone"].astype(str)
+    atc["to_zone"] = atc["to_zone"].astype(str)
+    atc["t"] = atc["t"].astype(int)
+    atc["cap"] = atc["cap"].astype(float)
+    if "ramp_up" in atc.columns:
+        atc["ramp_up"] = atc["ramp_up"].astype(float)
+    if "ramp_down" in atc.columns:
+        atc["ramp_down"] = atc["ramp_down"].astype(float)
+    return atc
+
 def transform_step_orders(orders: pd.DataFrame, periods: List[int], sell: bool, order_id: Optional[int] = None,
                           scalable: Optional[bool] = None) -> pd.DataFrame:
     """
@@ -55,19 +124,33 @@ class ParseEU(ParseData):
         self.title = title
 
     def parse_data(self, day=None) -> ZonalScenario:
-        step_orders = pd.read_csv(self.path / 'step_orders.csv')
-        block_orders = pd.read_csv(self.path / 'block_orders.csv')
+        step_orders = ensure_zone_column(pd.read_csv(self.path / 'step_orders.csv'))
+        block_orders = ensure_zone_column(pd.read_csv(self.path / 'block_orders.csv'))
         complex_orders = pd.read_csv(self.path / 'complex_orders.csv')
-        complex_step_orders = pd.read_csv(self.path / 'complex_step_orders.csv')
+        complex_step_orders = ensure_zone_column(pd.read_csv(self.path / 'complex_step_orders.csv'))
         scalable_complex_orders = pd.read_csv(self.path / 'scalable_complex_orders.csv')
-        scalable_step_orders = pd.read_csv(self.path / 'scalable_step_orders.csv')
-        piecewise_linear_orders = pd.read_csv(self.path / 'piecewise_linear_orders.csv')
+        scalable_step_orders = ensure_zone_column(pd.read_csv(self.path / 'scalable_step_orders.csv'))
+        piecewise_linear_orders = ensure_zone_column(pd.read_csv(self.path / 'piecewise_linear_orders.csv'))
         periods_df = pd.read_csv(self.path / 'periods.csv')
         periods = periods_df['period'].tolist()
+        atc = parse_atc(self.path)
 
-        step_orders_transformed = pd.concat([transform_step_orders(step_orders, periods, sell=True),
-                                             transform_step_orders(step_orders, periods, sell=False)],
-                                            ignore_index=True)
+        zones_path = self.path / "zones.csv"
+        if zones_path.exists():
+            zones_df = pd.read_csv(zones_path)
+            zone_col = "zone" if "zone" in zones_df.columns else (
+                "z" if "z" in zones_df.columns else zones_df.columns[0]
+            )
+            zones = zones_df[zone_col].dropna().astype(str).unique().tolist()
+        else:
+            zones = sorted(set(step_orders["zone"]).union(block_orders["zone"]).union(
+                complex_step_orders["zone"]).union(scalable_step_orders["zone"]).union(
+                piecewise_linear_orders["zone"]))
+
+        if not atc.empty:
+            zones = sorted(set(zones).union(atc["from_zone"]).union(atc["to_zone"]))
+        if not zones:
+            zones = ["Z1"]
 
         complex_ids = complex_orders['id'].tolist()
         complex_dfs = []
@@ -77,8 +160,6 @@ class ParseEU(ParseData):
             complex_dfs.append(
                 transform_step_orders(complex_step_orders, periods, sell=False, order_id=complex_id))
 
-        #complex_step_orders_transformed = pd.concat(complex_dfs)
-
         scalable_ids = scalable_complex_orders['id'].tolist()
         scalable_dfs = []
         for scalable_id in scalable_ids:
@@ -87,10 +168,16 @@ class ParseEU(ParseData):
             scalable_dfs.append(
                 transform_step_orders(scalable_step_orders, periods, sell=False, order_id=scalable_id, scalable=True))
 
-        #scalable_complex_step_orders_transformed = pd.concat(scalable_dfs)
-
-
-
-        return ZonalScenario(self.title, periods, step_orders, block_orders,
-                             complex_orders, complex_step_orders,
-                             scalable_complex_orders, scalable_step_orders, piecewise_linear_orders)
+        return ZonalScenario(
+            self.title,
+            periods,
+            step_orders,
+            block_orders,
+            complex_orders,
+            complex_step_orders,
+            scalable_complex_orders,
+            scalable_step_orders,
+            piecewise_linear_orders,
+            zones=zones,
+            atc=atc,
+        )

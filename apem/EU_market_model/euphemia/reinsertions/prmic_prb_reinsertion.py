@@ -134,12 +134,14 @@ def check_PRCO_PRSCO(self, id: int, is_complex: bool) -> bool:
     for _, step_order in step_orders.iterrows():
         # if step order is INM it could be accepted
         sign = 1 if step_order['q'] >= 0 else -1
-        step_acceptance = sign * (self.prices[step_order['t']] - step_order['p']) >= 0
+        step_zone = self.resolve_zone(step_order.get("zone", self.default_zone))
+        step_price = self.get_price_value(step_order['t'], step_zone)
+        step_acceptance = sign * (step_price - step_order['p']) >= 0
         if step_order['complex_order_id' if is_complex else 'scalable_order_id'] == id:
             variable_term = step_order['p'] if not is_complex else variable_term
 
             variable_expected_value += step_acceptance * variable_term * abs(step_order['q'])
-            actual_value += step_acceptance * abs(step_order['q']) * self.prices[step_order['t']]
+            actual_value += step_acceptance * abs(step_order['q']) * step_price
 
     expected_value = get(orders, 'fixed_term', id) + variable_expected_value
 
@@ -154,10 +156,11 @@ def check_PRB(self, order: int) -> bool:
         return True
 
     p = get(self.block_orders, 'p', order)
+    zone = self.get_order_zone(self.block_orders, order)
     q = {t: get(self.block_orders, f'q{t}', order) for t in self.periods}
     sale = True if sum(q.values()) > 0 else False
     # Calculate volume weighted average MCP
-    avg_mcp = sum(self.prices[t] * abs(q_t) / abs(sum(q.values())) for t, q_t in q.items())
+    avg_mcp = sum(self.get_price_value(t, zone) * abs(q_t) / abs(sum(q.values())) for t, q_t in q.items())
 
     if sale and p < avg_mcp or not sale and avg_mcp < p:
         return True

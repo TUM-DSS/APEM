@@ -1,6 +1,5 @@
 from gurobipy import GRB
 import gurobipy as gp
-import re
 
 from apem.EU_market_model.euphemia.pricing.price_determination_subproblem import PriceSubproblem
 import apem.EU_market_model.euphemia.cutting_strategies.no_good as no_good_cutting
@@ -18,8 +17,7 @@ def handle_price_based_cutting(self, callback_model) -> None:
 
     if price_subproblem.pricing_model.Status == GRB.OPTIMAL:
         # Update prices (No final prices!)
-        self.set_prices({int(re.search(r'\d+', var.varName).group()): var.X for var in
-                         price_subproblem.pricing_model.getVars()}, reinsertion=False)
+        self.set_prices(price_subproblem.extract_prices(), reinsertion=False)
 
         # Add price-based cut to block orders
         pab_blocks = self.get_block_bids(threshold=False)

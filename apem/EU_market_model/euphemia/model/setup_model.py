@@ -41,12 +41,6 @@ def add_objective(self) -> None:
                 / 2)
         for i in list(self.piecewise_linear_orders['id']))
 
-    # sign(type(sco))FixedTerm_sco B_ACCEPT_sco
-
-    # 7) tariff
-
-    # 8) max curtailment
-
     self.model.setObjective(
         -step_orders_obj - block_orders_obj - complex_orders_obj - scalable_orders_obj - piecewise_linear_orders_obj,
         GRB.MAXIMIZE)
@@ -57,22 +51,74 @@ def add_market_constraints(self) -> None:
     Formulate the market constraints of the Euphemia master problem for a given model.
     """
 
-    # supply - demand balance
-    self.model.addConstrs(
-        (gp.quicksum(self.accept_step[i] * get(self.step_orders, 'q', i)
-                     for i in list(self.step_orders['id']) if get(self.step_orders, 't', i) == t) +
-         gp.quicksum(self.accept_block[i] * get(self.block_orders, f'q{t}', i)
-                     for i in list(self.block_orders['id']) if get(self.block_orders, 'block_type', i) != 'flexible') +
-         gp.quicksum(self.accept_block[i] * self.flex_period[i, t] * get(self.block_orders, f'q{t}', i)
-                     for i in list(self.block_orders['id']) if get(self.block_orders, 'block_type', i) == 'flexible') +
-         gp.quicksum(self.accept_complex_step[i] * get(self.complex_step_orders, 'q', i)
-                     for i in list(self.complex_step_orders['id']) if get(self.complex_step_orders, 't', i) == t) +
-         gp.quicksum(self.accept_scalable_step[i] * get(self.scalable_step_orders, 'q', i)
-                     for i in list(self.scalable_step_orders['id']) if get(self.scalable_step_orders, 't', i) == t) +
-         gp.quicksum(self.accept_piecewise_linear[i] * get(self.piecewise_linear_orders, 'q', i) for i in
-                     list(self.piecewise_linear_orders['id']) if get(self.piecewise_linear_orders, 't', i) == t)
-         == 0
-         for t in self.periods), name='power_balance')
+    def order_zone(df, order_id):
+        if "zone" not in df.columns:
+            return self.default_zone
+        return self.resolve_zone(get(df, "zone", order_id))
+
+    if not self.network_constraints_enabled:
+        # single-zone market clearing
+        self.model.addConstrs(
+            (gp.quicksum(self.accept_step[i] * get(self.step_orders, 'q', i)
+                         for i in list(self.step_orders['id']) if get(self.step_orders, 't', i) == t) +
+             gp.quicksum(self.accept_block[i] * get(self.block_orders, f'q{t}', i)
+                         for i in list(self.block_orders['id']) if get(self.block_orders, 'block_type', i) != 'flexible') +
+             gp.quicksum(self.accept_block[i] * self.flex_period[i, t] * get(self.block_orders, f'q{t}', i)
+                         for i in list(self.block_orders['id']) if get(self.block_orders, 'block_type', i) == 'flexible') +
+             gp.quicksum(self.accept_complex_step[i] * get(self.complex_step_orders, 'q', i)
+                         for i in list(self.complex_step_orders['id']) if get(self.complex_step_orders, 't', i) == t) +
+             gp.quicksum(self.accept_scalable_step[i] * get(self.scalable_step_orders, 'q', i)
+                         for i in list(self.scalable_step_orders['id']) if get(self.scalable_step_orders, 't', i) == t) +
+             gp.quicksum(self.accept_piecewise_linear[i] * get(self.piecewise_linear_orders, 'q', i) for i in
+                         list(self.piecewise_linear_orders['id']) if get(self.piecewise_linear_orders, 't', i) == t)
+             == 0
+             for t in self.periods), name='power_balance')
+    else:
+        # zonal market clearing with directed ATC flows
+        self.model.addConstrs(
+            (
+                gp.quicksum(
+                    self.accept_step[i] * get(self.step_orders, "q", i)
+                    for i in list(self.step_orders["id"])
+                    if get(self.step_orders, "t", i) == t and order_zone(self.step_orders, i) == z
+                )
+                + gp.quicksum(
+                    self.accept_block[i] * get(self.block_orders, f"q{t}", i)
+                    for i in list(self.block_orders["id"])
+                    if get(self.block_orders, "block_type", i) != "flexible" and order_zone(self.block_orders, i) == z
+                )
+                + gp.quicksum(
+                    self.accept_block[i] * self.flex_period[i, t] * get(self.block_orders, f"q{t}", i)
+                    for i in list(self.block_orders["id"])
+                    if get(self.block_orders, "block_type", i) == "flexible" and order_zone(self.block_orders, i) == z
+                )
+                + gp.quicksum(
+                    self.accept_complex_step[i] * get(self.complex_step_orders, "q", i)
+                    for i in list(self.complex_step_orders["id"])
+                    if get(self.complex_step_orders, "t", i) == t and order_zone(self.complex_step_orders, i) == z
+                )
+                + gp.quicksum(
+                    self.accept_scalable_step[i] * get(self.scalable_step_orders, "q", i)
+                    for i in list(self.scalable_step_orders["id"])
+                    if get(self.scalable_step_orders, "t", i) == t and order_zone(self.scalable_step_orders, i) == z
+                )
+                + gp.quicksum(
+                    self.accept_piecewise_linear[i] * get(self.piecewise_linear_orders, "q", i)
+                    for i in list(self.piecewise_linear_orders["id"])
+                    if get(self.piecewise_linear_orders, "t", i) == t and order_zone(self.piecewise_linear_orders, i) == z
+                )
+                - gp.quicksum(
+                    self.f_atc[i, j, tt] for (i, j, tt) in self.atc_index if i == z and tt == t
+                )
+                + gp.quicksum(
+                    self.f_atc[i, j, tt] for (i, j, tt) in self.atc_index if j == z and tt == t
+                )
+                == 0
+                for z in self.zones
+                for t in self.periods
+            ),
+            name="zonal_power_balance",
+        )
 
     # block order acceptance
     # accept_block[i] = 0 or accept_block[i] >= MAR
@@ -184,11 +230,32 @@ def add_market_constraints(self) -> None:
 
 def add_network_constraints(self) -> None:
     """
-    Formulate the network constraints of the Euphemia master problem for a given model. TODO extend
+    Formulate optional ATC network constraints.
     """
-    # ATC
+    if not self.network_constraints_enabled:
+        return
 
-    # PTDF
+    # ATC capacity limits for directed interconnectors
+    self.model.addConstrs(
+        (self.f_atc[i, j, t] <= self.atc_cap[(i, j, t)] for (i, j, t) in self.atc_index),
+        name="atc_capacity",
+    )
 
-    # ramping
-    pass
+    # Optional directional flow ramping limits
+    if self.atc_ramp_up:
+        for (i, j), ramp_up in self.atc_ramp_up.items():
+            for prev_t, t in zip(self.periods[:-1], self.periods[1:]):
+                if (i, j, prev_t) in self.atc_cap and (i, j, t) in self.atc_cap:
+                    self.model.addConstr(
+                        self.f_atc[i, j, t] - self.f_atc[i, j, prev_t] <= ramp_up,
+                        name=f"atc_ramp_up_{i}_{j}_{t}",
+                    )
+
+    if self.atc_ramp_down:
+        for (i, j), ramp_down in self.atc_ramp_down.items():
+            for prev_t, t in zip(self.periods[:-1], self.periods[1:]):
+                if (i, j, prev_t) in self.atc_cap and (i, j, t) in self.atc_cap:
+                    self.model.addConstr(
+                        self.f_atc[i, j, prev_t] - self.f_atc[i, j, t] <= ramp_down,
+                        name=f"atc_ramp_down_{i}_{j}_{t}",
+                    )

@@ -58,6 +58,66 @@ class MasterProblem:
         self.scalable_complex_orders = self.scenario.scalable_complex_orders
         self.scalable_step_orders = self.scenario.scalable_step_orders
         self.piecewise_linear_orders = self.scenario.piecewise_linear_orders
+        self.default_zone = "Z1"
+
+        # Normalize zone labels across all zonal order tables.
+        for df in (
+            self.step_orders,
+            self.block_orders,
+            self.complex_step_orders,
+            self.scalable_step_orders,
+            self.piecewise_linear_orders,
+        ):
+            if "zone" not in df.columns:
+                df["zone"] = self.default_zone
+            df["zone"] = df["zone"].fillna(self.default_zone).astype(str)
+
+        scenario_zones = getattr(self.scenario, "zones", None)
+        if scenario_zones:
+            self.zones = sorted({str(z) for z in scenario_zones})
+        else:
+            self.zones = sorted(
+                set(self.step_orders["zone"])
+                .union(self.block_orders["zone"])
+                .union(self.complex_step_orders["zone"])
+                .union(self.scalable_step_orders["zone"])
+                .union(self.piecewise_linear_orders["zone"])
+            )
+        if not self.zones:
+            self.zones = [self.default_zone]
+        self.default_zone = self.zones[0]
+
+        self.atc = getattr(self.scenario, "atc", pd.DataFrame(columns=["from_zone", "to_zone", "t", "cap"]))
+        self.atc_cap = {}
+        self.atc_ramp_up = {}
+        self.atc_ramp_down = {}
+        if isinstance(self.atc, pd.DataFrame) and not self.atc.empty:
+            for _, row in self.atc.iterrows():
+                t = int(row["t"])
+                if t not in self.periods:
+                    continue
+                from_zone = str(row["from_zone"])
+                to_zone = str(row["to_zone"])
+                cap = float(row["cap"])
+                key = (from_zone, to_zone, t)
+                if key in self.atc_cap:
+                    self.atc_cap[key] = min(self.atc_cap[key], cap)
+                else:
+                    self.atc_cap[key] = cap
+
+                if "ramp_up" in row and pd.notna(row["ramp_up"]):
+                    self.atc_ramp_up[(from_zone, to_zone)] = float(row["ramp_up"])
+                if "ramp_down" in row and pd.notna(row["ramp_down"]):
+                    self.atc_ramp_down[(from_zone, to_zone)] = float(row["ramp_down"])
+
+            if self.atc_cap:
+                self.zones = sorted(
+                    set(self.zones).union({i for (i, _, _) in self.atc_cap}).union({j for (_, j, _) in self.atc_cap})
+                )
+
+        self.atc_index = sorted(self.atc_cap.keys())
+        self.network_constraints_enabled = bool(self.atc_index) and len(self.zones) > 1
+        self.zonal_pricing_enabled = self.network_constraints_enabled
 
         self.accept_step = self.model.addVars(list(self.step_orders['id']), vtype=GRB.CONTINUOUS, lb=0, ub=1,
                                               name='accept_step')
@@ -81,6 +141,7 @@ class MasterProblem:
         self.accept_piecewise_linear = self.model.addVars(list(self.piecewise_linear_orders['id']),
                                                           vtype=GRB.CONTINUOUS, lb=0, ub=1,
                                                           name='accept_piecewise_linear')
+        self.f_atc = self.model.addVars(self.atc_index, vtype=GRB.CONTINUOUS, lb=0, name="f_atc")
 
         self.add_acceptance_variables_to_dataframe()
 
@@ -226,6 +287,27 @@ class MasterProblem:
         if error:
             self.run_metadata["error"] = error
         self._write_run_metadata()
+
+    def resolve_zone(self, zone) -> str:
+        if pd.isna(zone):
+            return self.default_zone
+        zone_str = str(zone)
+        return zone_str if zone_str else self.default_zone
+
+    def get_order_zone(self, df: pd.DataFrame, order_id) -> str:
+        if "zone" not in df.columns:
+            return self.default_zone
+        return self.resolve_zone(get(df, "zone", order_id))
+
+    def get_price_value(self, t: int, zone: Optional[str] = None, reinsertion: Optional[bool] = False) -> float:
+        prices = self.prices_reinsertion if reinsertion else self.prices
+        if self.zonal_pricing_enabled:
+            resolved_zone = self.resolve_zone(zone)
+            if (resolved_zone, t) in prices:
+                return prices[(resolved_zone, t)]
+            if (self.default_zone, t) in prices:
+                return prices[(self.default_zone, t)]
+        return prices[t]
 
     def run(self) -> None:
         """
@@ -389,8 +471,7 @@ class MasterProblem:
                         os.fsync(file.fileno())
 
                     if objective_value > self.current_best_objective:
-                        self.set_prices({int(re.search(r'\d+', var.varName).group()): var.X for var in
-                                         price_subproblem.pricing_model.getVars()}, reinsertion=False)
+                        self.set_prices(price_subproblem.extract_prices(), reinsertion=False)
                         self.current_best_objective = objective_value
                         self.found_solution = True
 
@@ -507,6 +588,7 @@ class MasterProblem:
             accepted = get(self.block_orders, 'acceptance', i) > self.epsilon
             if not accepted:
                 continue
+            zone = self.get_order_zone(self.block_orders, i)
             p = get(self.block_orders, 'p', i)
             q = {t: get(self.block_orders, f'q{t}', i) for t in self.periods if get(self.block_orders, f'q{t}', i) != 0}
             sale = True if sum(q.values()) > 0 else False
@@ -527,11 +609,9 @@ class MasterProblem:
                 for t in self.periods:
                     q_t = get(self.block_orders, f'q{t}', i)
                     if q_t != 0:
-                        if not reinsertion:
-                            parent_surplus += get(self.block_orders, 'acceptance', i) * q_t * (self.prices[t] - p)
-                        else:
-                            parent_surplus += get(self.block_orders, 'acceptance', i) * q_t * (
-                                    self.prices_reinsertion[t] - p)
+                        parent_surplus += get(self.block_orders, 'acceptance', i) * q_t * (
+                            self.get_price_value(t, zone, reinsertion) - p
+                        )
 
                 family_surplus += parent_surplus
 
@@ -542,6 +622,7 @@ class MasterProblem:
 
                 for _, child in children_df.iterrows():
                     child_id = child['id']
+                    child_zone = self.get_order_zone(self.block_orders, child_id)
                     child_p = child['p']
                     child_accepted = get(self.block_orders, 'acceptance', child_id) > self.epsilon
 
@@ -550,12 +631,9 @@ class MasterProblem:
                         for t in self.periods:
                             child_q_t = get(self.block_orders, f'q{t}', child_id)
                             if child_q_t != 0:
-                                if not reinsertion:
-                                    child_surplus += get(self.block_orders, 'acceptance', child_id) * child_q_t * (
-                                            self.prices[t] - child_p)
-                                else:
-                                    child_surplus += get(self.block_orders, 'acceptance', child_id) * child_q_t * (
-                                            self.prices_reinsertion[t] - child_p)
+                                child_surplus += get(self.block_orders, 'acceptance', child_id) * child_q_t * (
+                                    self.get_price_value(t, child_zone, reinsertion) - child_p
+                                )
 
                         family_surplus += child_surplus
 
@@ -569,21 +647,17 @@ class MasterProblem:
             else:
                 # Normal block order logic (non-linked parent)
                 total_quantity = sum(abs(q_t) for q_t in q.values())
-                if not reinsertion:
-                    weighted_mcp = sum(
-                        self.prices[t] * abs(q_t) / total_quantity for t, q_t in zip(self.periods, q.values()))
-                else:
-                    weighted_mcp = sum(
-                        self.prices_reinsertion[t] * abs(q_t) / total_quantity for t, q_t in
-                        zip(self.periods, q.values()))
+                weighted_mcp = sum(
+                    self.get_price_value(t, zone, reinsertion) * abs(q_t) / total_quantity
+                    for t, q_t in q.items()
+                )
 
                 # set right weighted_mcp in case of flexible block order
                 if type == 'flexible':
                     # overwrite weighted MCP with correct value considering flex_period variable
                     active_period = calculate_flexible_order_active_period(master_problem=self,
                                                                            block_id=i)
-                    weighted_mcp = self.prices[active_period] * q[1] if not reinsertion else self.prices_reinsertion[
-                                                                                                 active_period] * q[1]
+                    weighted_mcp = self.get_price_value(active_period, zone, reinsertion)
 
                 if threshold:
                     if sale and weighted_mcp - self.delta_PAB < p < weighted_mcp or not sale and weighted_mcp < p < weighted_mcp - self.delta_PAB:
@@ -623,8 +697,6 @@ class MasterProblem:
         If threshold is False, return a list with complex orders that do not have the MIC/MP condition satisfied.
         If threshold is True, return a list of complex orders that are out-of-the-money by at least beta_MIC * expected.
         """
-        prices = self.prices if not reinsertion else self.prices_reinsertion
-
         mic_complex_order_ids = self.complex_orders.loc[self.complex_orders['condition'] == 'MIC', 'id'].tolist()
         mp_complex_order_ids = self.complex_orders.loc[self.complex_orders['condition'] == 'MP', 'id'].tolist()
 
@@ -649,7 +721,7 @@ class MasterProblem:
                     'id'].tolist()
 
                 actual += sum(
-                    prices[t] *
+                    self.get_price_value(t, self.get_order_zone(self.complex_step_orders, j), reinsertion) *
                     abs(get(self.complex_step_orders, 'q', j)) * get(self.complex_step_orders, 'acceptance', j)
                     for j in step_orders_t)
 
@@ -679,8 +751,6 @@ class MasterProblem:
         If threshold is True, return a list of scalable complex orders that are out-of-the-money by at least
         beta_MIC * expected.
         """
-        prices = self.prices if not reinsertion else self.prices_reinsertion
-
         mic_scalable_order_ids = self.scalable_complex_orders.loc[
             self.scalable_complex_orders['condition'] == 'MIC', 'id'].tolist()
         mp_scalable_order_ids = self.scalable_complex_orders.loc[
@@ -702,7 +772,7 @@ class MasterProblem:
                     'id'].tolist()
 
                 actual += sum(
-                    prices[t] *
+                    self.get_price_value(t, self.get_order_zone(self.scalable_step_orders, j), reinsertion) *
                     abs(get(self.scalable_step_orders, 'q', j)) * get(self.scalable_step_orders, 'acceptance', j)
                     for j in step_orders_t)
 
@@ -744,8 +814,6 @@ class MasterProblem:
             reinsertion: If True, use prices from reinsertion subproblem.
             complex: If True, evaluate complex orders; otherwise evaluate scalable complex orders.
         """
-        prices = self.prices if not reinsertion else self.prices_reinsertion
-
         # Select order and step dataframes depending on `complex` flag
         if complex:
             orders_df = self.complex_orders[
@@ -772,7 +840,8 @@ class MasterProblem:
                 q = step['q']
                 p = step['p']
                 accept = step['acceptance']
-                surplus += accept * q * (prices[t] - p)
+                step_zone = self.resolve_zone(step.get("zone", self.default_zone))
+                surplus += accept * q * (self.get_price_value(t, step_zone, reinsertion) - p)
 
             if (not threshold and surplus < 0) or (threshold and surplus < -self.delta_load_gradient):
                 res.append(order_id)

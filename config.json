@@ -15,6 +15,8 @@
         "GENERATED_LARGE",
         "OMIE",
         "GME",
+        "TEST_3NODE",
+        "TEST_3NODE_LOWCAP",
         "IEEE_RTS",
         "ARPA"
     ],
@@ -57,7 +59,7 @@
         "BC4"
     ],
     "run": {
-        "market_model": "US_model",
+        "market_model": "EU_model",
         "verbosity": true
     },
     "us_model": {
@@ -90,7 +92,7 @@
         }
     },
     "eu_model": {
-        "dataset": "GME",
+        "dataset": "TEST_3NODE_LOWCAP",
         "cut_type": "price based",
         "euphemia_configuration": {
             "disable_reinsertion": true,
