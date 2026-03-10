@@ -59,13 +59,13 @@
         "BC4"
     ],
     "run": {
-        "market_model": "EU_model",
+        "market_model": "US_model",
         "verbosity": true
     },
     "us_model": {
-        "dataset": "PyPSAEurLarge",
+        "dataset": "PyPSAEurSmall",
         "power_flow_model": {
-            "type": "DCOPF"
+            "type": "Zonal_NTC_multiedge"
         },
         "pricing_algorithm": "ELMP",
         "redispatch": {

@@ -19,7 +19,8 @@ from apem.US_market_model.data.parsing.scenario import Scenario
 from apem.US_market_model.pricing.analysis.price_analysis import PriceAnalysis
 from apem.US_market_model.pricing.analysis.pricing import Pricing
 from apem.config_loader import ConfigLoader
-from apem.enums import MarketModels, PowerFlowModels, PricingAlgorithms, RedispatchAlgorithms, US_Datasets
+from apem.core import MarketModels
+from apem.US_market_model.enums import PowerFlowModels, PricingAlgorithms, RedispatchAlgorithms, US_Datasets
 from apem.US_market_model.allocation.power_flow_model import PowerFlowModel
 
 logger = logging.getLogger(__name__)

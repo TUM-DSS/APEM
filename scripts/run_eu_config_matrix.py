@@ -22,7 +22,8 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from apem.execution_chain import solve_and_analyse_scenario
-from apem.enums import MarketModels, PricingAlgorithms, RedispatchAlgorithms, US_Datasets
+from apem.core import MarketModels
+from apem.US_market_model.enums import PricingAlgorithms, RedispatchAlgorithms, US_Datasets
 from apem.US_market_model.allocation.algorithms.nodal_clearing.dcopf import DCOPF
 from apem.EU_market_model.euphemia.enums.cut_types import CutTypes
 from apem.EU_market_model.euphemia.enums.datasets import EU_Datasets

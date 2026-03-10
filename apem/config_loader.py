@@ -3,12 +3,13 @@ from numbers import Integral, Real
 from typing import Any, Dict
 
 from apem.EU_market_model.euphemia.enums.cut_types import CutTypes
-from apem.EU_market_model.euphemia.enums.datasets import EU_Datasets
 from apem.US_market_model.allocation.algorithms.nodal_clearing.dcopf import DCOPF
 from apem.US_market_model.allocation.algorithms.zonal_clearing.zonal_fbmc_included import ZonalFBMC
 from apem.US_market_model.allocation.algorithms.zonal_clearing.zonal_ntc_multiedge import Zonal_NTC_multiedge
 from apem.US_market_model.allocation.algorithms.zonal_clearing.zonal_ntc_aggregated import Zonal_NTC_aggregated
-from apem.enums import FBMCBaseCases, MarketModels, PricingAlgorithms, RedispatchAlgorithms, US_Datasets
+from apem.EU_market_model.euphemia.enums.datasets import EU_Datasets
+from apem.core import MarketModels
+from apem.US_market_model.enums import FBMCBaseCases, PricingAlgorithms, RedispatchAlgorithms, US_Datasets
 
 
 class ConfigLoader:
