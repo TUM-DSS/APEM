@@ -60,10 +60,15 @@ class PriceSubproblem:
             }
         return {t: self.MCP[t].X for t in self.master_problem.periods}
 
+    def _emit(self, message: str) -> None:
+        if hasattr(self.master_problem, "_emit"):
+            self.master_problem._emit(message)
+
     def solve_price_determination_subproblem(self) -> None:
         """
         Core method of the price determination subproblem: formulate objective and constraints, optimize model.
         """
+        self._emit("Formulating price determination subproblem...")
 
         midpoint = (self.master_problem.price_upper_bound - self.master_problem.price_lower_bound) / 2
         if self.zonal_pricing:
@@ -90,8 +95,14 @@ class PriceSubproblem:
             self.add_complex_order_constraints()
             self.add_scalable_complex_order_constraints()
 
+        self.pricing_model.update()
+        self._emit(
+            f"Price subproblem formulated: vars={self.pricing_model.NumVars}, constrs={self.pricing_model.NumConstrs}"
+        )
         self.pricing_model.write(str(self.master_problem.paths["debug"] / "pricing_model.lp"))
+        self._emit("Starting price determination optimization...")
         self.pricing_model.optimize()
+        self._emit("Price determination optimization finished.")
 
     def add_step_order_constraints(self) -> None:
         """

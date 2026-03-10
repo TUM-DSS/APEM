@@ -339,13 +339,23 @@ class MasterProblem:
         run_status = "failed"
         run_error = None
         try:
+            self._emit("Formulating master problem (objective + constraints)...")
+            formulation_start = time.perf_counter()
             add_objective(self)
             add_market_constraints(self)
             add_network_constraints(self)
+            self.model.update()
+            formulation_elapsed = time.perf_counter() - formulation_start
+            self._emit(
+                f"Master problem formulated in {formulation_elapsed:.3f}s: vars={self.model.NumVars}, constrs={self.model.NumConstrs}"
+            )
             self.max_iterations = self.max_iterations if not self.reinsertion_run else self.reinsertion_max_iterations
 
-            self._emit("Solving master problem...")
+            self._emit("Starting master problem optimization...")
+            optimization_start = time.perf_counter()
             self.solve_master_problem()
+            optimization_elapsed = time.perf_counter() - optimization_start
+            self._emit(f"Master problem optimization finished in {optimization_elapsed:.3f}s.")
             self.model.write(str(self.paths["debug"] / "master_problem.lp"))
             self._emit(f"Master problem status: {self.model.Status}")
             if self.model.Status == GRB.Status.INFEASIBLE:
@@ -472,7 +482,7 @@ class MasterProblem:
                             writer.writerow(["variable", "value"])
                         for v in price_subproblem.pricing_model.getVars():
                             writer.writerow([v.varName, v.X])
-                            self._emit(f"{v.varName}: {v.X}")  # for console output and run log
+                            # self._emit(f"{v.varName}: {v.X}")  # for console output and run log
                         file.flush()
                         os.fsync(file.fileno())
 
