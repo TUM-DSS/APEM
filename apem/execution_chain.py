@@ -317,8 +317,9 @@ def solve_and_analyse_scenario(
             base_scenario = None if is_dcopf_like else price_analysis.base_scenario
             zonal_config = _zonal_part(power_flow_model).rstrip("/") if isinstance(power_flow_model, (Zonal_NTC_aggregated, Zonal_NTC_multiedge, ZonalFBMC)) else ""
 
-            scenario_to_analyse.analyse_scenario()  # analyse base scenario
-            scenario_to_analyse.plot_network(power_flow_model, zonal_config)  # plot underlying network
+            run_root = getattr(price_analysis, "results_root", None)
+            scenario_to_analyse.analyse_scenario(results_root=run_root)  # analyse base scenario
+            scenario_to_analyse.plot_network(power_flow_model, zonal_config, results_root=run_root)  # plot underlying network
 
         return analyse_results(
             price_analysis.scenario,

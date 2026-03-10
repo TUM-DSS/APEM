@@ -26,7 +26,7 @@ class Zonal_NTC_multiedge(PowerFlowModel):
         self.zonal_configuration = zonal_configuration
         self.factor = factor
 
-    def create_zonal_scenario_NTC(self, base_scenario: Scenario) -> Scenario:
+    def create_zonal_scenario_NTC(self, base_scenario: Scenario, results_root: Optional[str] = None) -> Scenario:
         """
         Convert a nodal scenario into a zonal one while keeping every
         cross‑zonal line as a separate edge.
@@ -63,7 +63,13 @@ class Zonal_NTC_multiedge(PowerFlowModel):
 
         # save node_to_zone assignment as .csv file (include factor for consistency with result paths)
         factor_str = f"_f{self.factor}" if self.factor is not None else ""
-        results_path = f"US_results/{base_scenario.name}_results/Zonal_NTC_multiedge/{self.zonal_configuration}{factor_str}"
+        if results_root:
+            results_path = results_root
+        else:
+            results_path = (
+                f"US_results/{base_scenario.name}_results/Zonal_NTC_multiedge/"
+                f"{self.zonal_configuration}{factor_str}"
+            )
         os.makedirs(results_path, exist_ok=True)
         node_to_zone_df = pd.DataFrame(list(node_to_zone.items()), columns=['node', 'zone'])
         node_to_zone_df.to_csv(os.path.join(results_path, "node_to_zone.csv"), index=False)
@@ -127,7 +133,8 @@ class Zonal_NTC_multiedge(PowerFlowModel):
               stats_file: Optional[str] = None, u_fixed: Optional[dict] = None) \
             -> Tuple[Scenario, Union[Allocation, Error]]:
         # create a zonal NTC scenario with explicit lines
-        zonal_scenario = self.create_zonal_scenario_NTC(base_scenario=scenario)
+        zone_results_root = os.path.dirname(os.path.dirname(results_file)) if results_file else None
+        zonal_scenario = self.create_zonal_scenario_NTC(base_scenario=scenario, results_root=zone_results_root)
 
         # solve a DCOPF problem for the constructed zonal network
         dcopf = DCOPF()

@@ -59,13 +59,13 @@
         "BC4"
     ],
     "run": {
-        "market_model": "EU_model",
+        "market_model": "US_model",
         "verbosity": true
     },
     "us_model": {
-        "dataset": "PyPSAEurSmall",
+        "dataset": "IEEE_RTS",
         "power_flow_model": {
-            "type": "Zonal_NTC_multiedge"
+            "type": "DCOPF"
         },
         "pricing_algorithm": "ELMP",
         "redispatch": {
@@ -95,7 +95,7 @@
         "dataset": "GME",
         "cut_type": "price based",
         "euphemia_configuration": {
-            "disable_reinsertion": false,
+            "disable_reinsertion": true,
             "calculate_corrected_welfare": true,
             "price_lower_bound": -500,
             "price_upper_bound": 4000,
