@@ -6,6 +6,9 @@ def PRMIC_PRB_reinsertion(self, is_prmic_reinsertion: bool):
 
     counter = 0
     activated_order_counter = 0
+    attempted_block_counter = 0
+    max_block_attempts = None if is_prmic_reinsertion else self.max_prb_reinsertion_attempts
+    stop_due_to_attempt_limit = False
     rejected_orders, paradoxically_rejected_orders = calculate_paradoxically_rejected_orders(self, is_prmic_reinsertion)
     print(f'Rejected orders: {rejected_orders}')
 
@@ -18,7 +21,19 @@ def PRMIC_PRB_reinsertion(self, is_prmic_reinsertion: bool):
         for order_type, ids in paradoxically_rejected_orders.items():
             break_outer_loop = False
             for id in ids:
+                if (
+                    not is_prmic_reinsertion
+                    and order_type == 'block'
+                    and max_block_attempts is not None
+                    and attempted_block_counter >= max_block_attempts
+                ):
+                    print(f"Reached PRB reinsertion attempt limit ({max_block_attempts}).")
+                    stop_due_to_attempt_limit = True
+                    break
+
                 print(f'{order_type} order {id} is paradoxically rejected. Attempting to activate it...')
+                if not is_prmic_reinsertion and order_type == 'block':
+                    attempted_block_counter += 1
                 # New model for current reinsertion run
                 reinsertion_run = MasterProblem(self.config)
                 reinsertion_run.reinsertion_run = True
@@ -75,6 +90,11 @@ def PRMIC_PRB_reinsertion(self, is_prmic_reinsertion: bool):
                 print(f'Up to this step {activated_order_counter} {"block" if not is_prmic_reinsertion else "(scalable) complex"} orders could be activated')
             if break_outer_loop:
                 break
+            if stop_due_to_attempt_limit:
+                break
+
+        if stop_due_to_attempt_limit:
+            break
 
         # Recalculate list with paradoxically rejected orders after reinsertion was successful
         if recalculate_list:
@@ -85,6 +105,8 @@ def PRMIC_PRB_reinsertion(self, is_prmic_reinsertion: bool):
 
     print(f'Reinsertion finished with paradoxically rejected order: {paradoxically_rejected_orders} left.')
     print(f'--- Activated {activated_order_counter} {"block" if not is_prmic_reinsertion else "(scalable) complex"} orders ---')
+    if not is_prmic_reinsertion:
+        print(f'--- Attempted {attempted_block_counter} block reinsertions ---')
 
 def calculate_paradoxically_rejected_orders(self, is_prmic_reinsertion: bool):
     rejected_orders = {'block': [], 'complex': [], 'scalable_complex': []}

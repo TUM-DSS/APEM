@@ -26,6 +26,7 @@ class EuphemiaConfig:
         self.epsilon = 1e-4  # Epsilon for Gurobi float values
         self.max_iterations = 50  # Iteration Limit
         self.reinsertion_max_iterations = 10  # Iteration limit for reinsertion runs
+        self.max_prb_reinsertion_attempts = None  # Optional cap for attempted PRB block reinsertions
         self.big_m = 10 ** 6  # Big-M value used in master/pricing formulations
 
         # Solver parameters
@@ -61,6 +62,7 @@ class EuphemiaConfig:
             "epsilon",
             "max_iterations",
             "reinsertion_max_iterations",
+            "max_prb_reinsertion_attempts",
             "big_m",
             "lazy_constraints",
             "output_flag",

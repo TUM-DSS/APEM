@@ -31,6 +31,7 @@ def test_apply_overrides_updates_known_fields(monkeypatch):
     overrides = {
         "max_iterations": 7,
         "reinsertion_max_iterations": 3,
+        "max_prb_reinsertion_attempts": 5,
         "output_flag": 1,
         "time_limit": 120,
         "mip_gap": 1e-5,
@@ -39,6 +40,7 @@ def test_apply_overrides_updates_known_fields(monkeypatch):
 
     assert config.max_iterations == 7
     assert config.reinsertion_max_iterations == 3
+    assert config.max_prb_reinsertion_attempts == 5
     assert config.output_flag == 1
     assert config.time_limit == 120
     assert config.mip_gap == 1e-5

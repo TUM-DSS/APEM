@@ -202,6 +202,7 @@ class ConfigLoader:
             "epsilon",
             "max_iterations",
             "reinsertion_max_iterations",
+            "max_prb_reinsertion_attempts",
             "big_m",
             "lazy_constraints",
             "output_flag",
@@ -216,14 +217,22 @@ class ConfigLoader:
             raise ValueError(f"Invalid euphemia_configuration key(s): {', '.join(unknown)}")
 
         bool_fields = {"disable_reinsertion", "calculate_corrected_welfare"}
-        int_fields = {"max_iterations", "reinsertion_max_iterations", "threads", "seed", "output_flag", "lazy_constraints"}
+        int_fields = {
+            "max_iterations",
+            "reinsertion_max_iterations",
+            "max_prb_reinsertion_attempts",
+            "threads",
+            "seed",
+            "output_flag",
+            "lazy_constraints",
+        }
         number_fields = {"price_lower_bound", "price_upper_bound", "beta_MIC", "delta_load_gradient", "delta_PAB", "epsilon", "big_m", "time_limit", "mip_gap"}
 
         for field in bool_fields:
             if field in cfg and not isinstance(cfg[field], bool):
                 raise ValueError(f"Invalid euphemia_configuration.{field}: must be boolean.")
         for field in int_fields:
-            if field in cfg and not self._is_int(cfg[field]):
+            if field in cfg and cfg[field] is not None and not self._is_int(cfg[field]):
                 raise ValueError(f"Invalid euphemia_configuration.{field}: must be integer.")
         for field in number_fields:
             if field in cfg and not self._is_number(cfg[field]):
@@ -241,6 +250,12 @@ class ConfigLoader:
             raise ValueError("Invalid euphemia_configuration.max_iterations: must be > 0.")
         if "reinsertion_max_iterations" in cfg and cfg["reinsertion_max_iterations"] <= 0:
             raise ValueError("Invalid euphemia_configuration.reinsertion_max_iterations: must be > 0.")
+        if (
+            "max_prb_reinsertion_attempts" in cfg
+            and cfg["max_prb_reinsertion_attempts"] is not None
+            and cfg["max_prb_reinsertion_attempts"] <= 0
+        ):
+            raise ValueError("Invalid euphemia_configuration.max_prb_reinsertion_attempts: must be > 0 or null.")
         if "big_m" in cfg and cfg["big_m"] <= 0:
             raise ValueError("Invalid euphemia_configuration.big_m: must be > 0.")
         if "threads" in cfg and cfg["threads"] < 0:

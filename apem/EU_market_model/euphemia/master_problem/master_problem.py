@@ -169,6 +169,7 @@ class MasterProblem:
         self.epsilon = config.epsilon
         self.max_iterations = config.max_iterations
         self.reinsertion_max_iterations = config.reinsertion_max_iterations
+        self.max_prb_reinsertion_attempts = config.max_prb_reinsertion_attempts
         self.cutting_strategy = config.cutting_strategy
         self.disable_reinsertion = config.disable_reinsertion
         self.calculate_corrected_welfare = config.calculate_corrected_welfare

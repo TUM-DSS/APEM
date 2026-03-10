@@ -59,7 +59,7 @@
         "BC4"
     ],
     "run": {
-        "market_model": "US_model",
+        "market_model": "EU_model",
         "verbosity": true
     },
     "us_model": {
@@ -92,11 +92,11 @@
         }
     },
     "eu_model": {
-        "dataset": "TEST_3NODE_LOWCAP",
+        "dataset": "GME",
         "cut_type": "price based",
         "euphemia_configuration": {
-            "disable_reinsertion": true,
-            "calculate_corrected_welfare": false,
+            "disable_reinsertion": false,
+            "calculate_corrected_welfare": true,
             "price_lower_bound": -500,
             "price_upper_bound": 4000,
             "beta_MIC": 0.1,
@@ -105,6 +105,7 @@
             "epsilon": 1e-4,
             "max_iterations": 50,
             "reinsertion_max_iterations": 10,
+            "max_prb_reinsertion_attempts": 10,
             "big_m": 1000000,
             "lazy_constraints": 1,
             "output_flag": 0,
