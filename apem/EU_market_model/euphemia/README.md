@@ -1,7 +1,7 @@
 # EUPHEMIA (Pan-European Hybrid Electricity Market Integration Algorithm)
 
 ### Quick Start
-For a quick start run the method `solve_euphemia(dataset, cutting_strategy)` from `execution_chain.py`
+For a quick start run the method `solve_euphemia(dataset, cutting_strategy)` from `runner.py`
 Parameters:
 - dataset: choose from `Datasets`
 - cutting_stratgey: choose a cutting strategy from `CutType` (NG=No-Good, CB=Combinatorial-Benders, PB=Price-Based)

@@ -9,7 +9,7 @@ from apem.EU_market_model.euphemia.data.parsing.parse_eu import transform_step_o
 from apem.EU_market_model.euphemia.enums.cut_types import CutTypes
 from apem.EU_market_model.euphemia.enums.datasets import EU_Datasets
 from apem.EU_market_model.euphemia.euphemia_config import EuphemiaConfig
-from apem.EU_market_model.euphemia.execution_chain import solve_euphemia
+from apem.EU_market_model.euphemia.runner import solve_euphemia
 
 
 def _dummy_conversion(periods=(1, 2, 3, 4)):
@@ -69,8 +69,8 @@ def test_set_dataset_updates_dataset_name_and_scenario():
     assert config.scenario == parsed_scenario
 
 
-@patch("apem.EU_market_model.euphemia.execution_chain.MasterProblem")
-@patch("apem.EU_market_model.euphemia.execution_chain.EuphemiaConfig")
+@patch("apem.EU_market_model.euphemia.runner.MasterProblem")
+@patch("apem.EU_market_model.euphemia.runner.EuphemiaConfig")
 def test_solve_euphemia_wires_config_and_runs(config_cls, master_problem_cls):
     """solve_euphemia should apply overrides, set dataset/cut type, and run master problem."""
     config = config_cls.return_value
@@ -86,8 +86,8 @@ def test_solve_euphemia_wires_config_and_runs(config_cls, master_problem_cls):
     euphemia.run.assert_called_once_with()
 
 
-@patch("apem.EU_market_model.euphemia.execution_chain.MasterProblem")
-@patch("apem.EU_market_model.euphemia.execution_chain.EuphemiaConfig")
+@patch("apem.EU_market_model.euphemia.runner.MasterProblem")
+@patch("apem.EU_market_model.euphemia.runner.EuphemiaConfig")
 def test_solve_euphemia_none_overrides_defaults_to_empty_dict(config_cls, master_problem_cls):
     """Passing None overrides should call apply_overrides with an empty dict."""
     config = config_cls.return_value
