@@ -11,6 +11,10 @@ path = RAW_DATA_DIR / "pypsa_eur_large"
 
 class ParsePyPSAEurLarge(ParseData):
     def parse_data(self) -> Scenario:
+        """Parse the ParsePyPSAEurLarge data. The ParsePyPSAEurLarge data available in this repository is for 01.03.2013.
+
+        :return: Scenario object
+        """
         df_sellers = pd.read_csv(path / 'sellers.csv', dtype={'node': str})
         df_buyers = pd.read_csv(path / 'buyers.csv', dtype={
             'node': str,
