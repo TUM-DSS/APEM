@@ -1,14 +1,21 @@
 from types import SimpleNamespace
 from unittest.mock import patch
 
+import gurobipy as gp
 import pandas as pd
 import pytest
 
 from apem.EU_market_model.euphemia.data.conversion.data_conversion import DataConversion
-from apem.EU_market_model.euphemia.data.parsing.parse_eu import transform_step_orders
+from apem.EU_market_model.euphemia.data.parsing.parse_eu import (
+    ParseEU,
+    parse_fb_constraints,
+    parse_fb_ptdf,
+    transform_step_orders,
+)
 from apem.EU_market_model.euphemia.enums.cut_types import CutTypes
 from apem.EU_market_model.euphemia.enums.datasets import EU_Datasets
 from apem.EU_market_model.euphemia.euphemia_config import EuphemiaConfig
+from apem.EU_market_model.euphemia.pricing.price_determination_subproblem import PriceSubproblem
 from apem.EU_market_model.euphemia.runner import solve_euphemia
 
 
@@ -21,6 +28,29 @@ def _dummy_conversion(periods=(1, 2, 3, 4)):
         blocks_sellers=[1],
     )
     return DataConversion(scenario)
+
+
+def _base_pricing_master(network_model: str) -> SimpleNamespace:
+    return SimpleNamespace(
+        M=10**6,
+        current_alloc_solution={},
+        epsilon=1e-4,
+        zonal_pricing_enabled=True,
+        zones=["Z1", "Z2"],
+        periods=[1],
+        price_lower_bound=-500,
+        price_upper_bound=4000,
+        network_constraints_enabled=True,
+        network_model=network_model,
+        atc_index=[],
+        atc_cap={},
+        f_atc={},
+        fb_index=[],
+        fb_lb={},
+        fb_ram={},
+        fb_ptdf_map={},
+        net_position={},
+    )
 
 
 def test_apply_overrides_updates_known_fields(monkeypatch):
@@ -47,12 +77,31 @@ def test_apply_overrides_updates_known_fields(monkeypatch):
 
 
 def test_apply_overrides_rejects_unknown_keys(monkeypatch):
-    """Unknown euphemia override fields should raise a clear error."""
+    """Unknown Euphemia override fields should raise a clear error."""
     monkeypatch.setattr(EuphemiaConfig, "set_dataset", lambda self, dataset: None)
     config = EuphemiaConfig()
 
     with pytest.raises(ValueError, match="Invalid Euphemia configuration key"):
         config.apply_overrides({"does_not_exist": 123})
+
+
+def test_apply_overrides_normalizes_network_model_to_uppercase(monkeypatch):
+    """network_model should be accepted case-insensitively and normalized."""
+    monkeypatch.setattr(EuphemiaConfig, "set_dataset", lambda self, dataset: None)
+    config = EuphemiaConfig()
+
+    config.apply_overrides({"network_model": "fbmc"})
+
+    assert config.network_model == "FBMC"
+
+
+def test_apply_overrides_rejects_invalid_network_model(monkeypatch):
+    """network_model must be ATC or FBMC."""
+    monkeypatch.setattr(EuphemiaConfig, "set_dataset", lambda self, dataset: None)
+    config = EuphemiaConfig()
+
+    with pytest.raises(ValueError, match="network_model must be 'ATC' or 'FBMC'"):
+        config.apply_overrides({"network_model": "invalid"})
 
 
 def test_set_dataset_updates_dataset_name_and_scenario():
@@ -152,6 +201,70 @@ def test_transform_step_orders_filters_by_scalable_order_id():
     assert transformed["scalable_order_id"].tolist() == ["A", "A"]
 
 
+def test_parse_fb_constraints_accepts_aliases_and_optional_lb(tmp_path):
+    fb_constraints = tmp_path / "fb_constraints.csv"
+    fb_constraints.write_text(
+        "constraint_id,period,capacity,min_ram\n"
+        "CNEC_1,1,123.5,-80\n",
+        encoding="utf-8",
+    )
+
+    parsed = parse_fb_constraints(tmp_path)
+
+    assert parsed.columns.tolist() == ["cnec_id", "t", "ram", "lb"]
+    assert parsed.iloc[0].to_dict() == {"cnec_id": "CNEC_1", "t": 1, "ram": 123.5, "lb": -80.0}
+
+
+def test_parse_fb_constraints_missing_file_returns_empty_dataframe(tmp_path):
+    parsed = parse_fb_constraints(tmp_path)
+
+    assert parsed.empty
+    assert parsed.columns.tolist() == ["cnec_id", "t", "ram"]
+
+
+def test_parse_fb_ptdf_accepts_aliases(tmp_path):
+    fb_ptdf = tmp_path / "fb_ptdf.csv"
+    fb_ptdf.write_text(
+        "constraint_id,time,bidding_zone,factor\n"
+        "CNEC_1,2,Z9,0.25\n",
+        encoding="utf-8",
+    )
+
+    parsed = parse_fb_ptdf(tmp_path)
+
+    assert parsed.columns.tolist() == ["cnec_id", "t", "zone", "ptdf"]
+    assert parsed.iloc[0].to_dict() == {"cnec_id": "CNEC_1", "t": 2, "zone": "Z9", "ptdf": 0.25}
+
+
+def test_parse_eu_adds_zones_from_fb_ptdf(tmp_path):
+    (tmp_path / "periods.csv").write_text("period\n1\n", encoding="utf-8")
+    (tmp_path / "zones.csv").write_text("zone\nZ1\n", encoding="utf-8")
+    (tmp_path / "step_orders.csv").write_text("id,t,p,q,zone\n1,1,10,1,Z1\n", encoding="utf-8")
+    (tmp_path / "block_orders.csv").write_text("id,block_type,code_prm,p,q1,MAR,zone\n", encoding="utf-8")
+    (tmp_path / "complex_orders.csv").write_text(
+        "id,step_orders,fixed_term,variable_term,condition,load_gradient\n", encoding="utf-8"
+    )
+    (tmp_path / "complex_step_orders.csv").write_text("id,complex_order_id,t,p,q,zone\n", encoding="utf-8")
+    (tmp_path / "scalable_complex_orders.csv").write_text(
+        "id,step_orders,fixed_term,condition,load_gradient,MAP1\n", encoding="utf-8"
+    )
+    (tmp_path / "scalable_step_orders.csv").write_text("id,scalable_order_id,t,p,q,zone\n", encoding="utf-8")
+    (tmp_path / "piecewise_linear_orders.csv").write_text("id,t,p0,p1,q,zone\n", encoding="utf-8")
+    (tmp_path / "fb_constraints.csv").write_text("cnec_id,t,ram\nC1,1,100\n", encoding="utf-8")
+    (tmp_path / "fb_ptdf.csv").write_text(
+        "cnec_id,t,zone,ptdf\n"
+        "C1,1,Z1,1.0\n"
+        "C1,1,Z9,-1.0\n",
+        encoding="utf-8",
+    )
+
+    scenario = ParseEU(tmp_path, "tmp").parse_data()
+
+    assert scenario.zones == ["Z1", "Z9"]
+    assert list(scenario.fb_constraints.columns) == ["cnec_id", "t", "ram"]
+    assert list(scenario.fb_ptdf.columns) == ["cnec_id", "t", "zone", "ptdf"]
+
+
 def test_block_signature_ignores_identifier_fields():
     conv = _dummy_conversion(periods=(1, 2))
 
@@ -219,3 +332,92 @@ def test_generate_contiguous_patterns_properties():
     assert all(sum(pattern) == 4 for pattern in patterns)
     # There is exactly one contiguous ON segment (>1) per pattern.
     assert all(sum(1 for v in pattern if v > 1) == 1 for pattern in patterns)
+
+
+def test_price_subproblem_add_atc_coupling_builds_active_set_constraints():
+    master = _base_pricing_master(network_model="ATC")
+    var_model = gp.Model()
+    var_model.setParam("OutputFlag", 0)
+    flow_var = var_model.addVar(name="f_atc[Z1,Z2,1]")
+    var_model.update()
+
+    master.atc_index = [("Z1", "Z2", 1)]
+    master.atc_cap = {("Z1", "Z2", 1): 100.0}
+    master.f_atc = {("Z1", "Z2", 1): flow_var}
+    master.current_alloc_solution = {flow_var.VarName: [40.0]}
+
+    pricing = PriceSubproblem(master)
+    pricing.pricing_model.setParam("OutputFlag", 0)
+    pricing.add_atc_price_consistency_constraints()
+    pricing.pricing_model.update()
+
+    names = {c.ConstrName for c in pricing.pricing_model.getConstrs()}
+    assert "atc_price_Z1_Z2_1_0_eq1" in names
+    assert "atc_price_Z1_Z2_1_0_eq2" in names
+
+
+def test_price_subproblem_add_atc_coupling_is_noop_in_fbmc_mode():
+    master = _base_pricing_master(network_model="FBMC")
+    var_model = gp.Model()
+    var_model.setParam("OutputFlag", 0)
+    flow_var = var_model.addVar(name="f_atc[Z1,Z2,1]")
+    var_model.update()
+
+    master.atc_index = [("Z1", "Z2", 1)]
+    master.atc_cap = {("Z1", "Z2", 1): 100.0}
+    master.f_atc = {("Z1", "Z2", 1): flow_var}
+    master.current_alloc_solution = {flow_var.VarName: [0.0]}
+
+    pricing = PriceSubproblem(master)
+    pricing.pricing_model.setParam("OutputFlag", 0)
+    pricing.add_atc_price_consistency_constraints()
+    pricing.pricing_model.update()
+
+    assert pricing.pricing_model.NumConstrs == 0
+
+
+def test_price_subproblem_add_fbmc_coupling_builds_stationarity_and_dual_fixing():
+    master = _base_pricing_master(network_model="FBMC")
+    var_model = gp.Model()
+    var_model.setParam("OutputFlag", 0)
+    np_z1 = var_model.addVar(name="net_position[Z1,1]")
+    np_z2 = var_model.addVar(name="net_position[Z2,1]")
+    var_model.update()
+
+    master.net_position = {("Z1", 1): np_z1, ("Z2", 1): np_z2}
+    master.current_alloc_solution = {np_z1.VarName: [10.0], np_z2.VarName: [-10.0]}
+    master.fb_index = [("C1", 1)]
+    master.fb_ram = {("C1", 1): 100.0}
+    master.fb_lb = {("C1", 1): -100.0}
+    master.fb_ptdf_map = {("C1", 1, "Z1"): 1.0, ("C1", 1, "Z2"): 0.0}
+
+    pricing = PriceSubproblem(master)
+    pricing.pricing_model.setParam("OutputFlag", 0)
+    pricing.add_fbmc_price_consistency_constraints()
+    pricing.pricing_model.update()
+
+    constr_names = {c.ConstrName for c in pricing.pricing_model.getConstrs()}
+    assert "fbmc_mcp_stationarity_Z1_1" in constr_names
+    assert "fbmc_mcp_stationarity_Z2_1" in constr_names
+    assert "fbmc_mu_up_zero_if_nonbinding_C1_1" in constr_names
+    assert "fbmc_mu_lo_zero_if_nonbinding_C1_1" in constr_names
+
+    var_names = {v.VarName for v in pricing.pricing_model.getVars()}
+    assert "fbmc_lambda[1]" in var_names
+    assert "fbmc_mu_up[C1,1]" in var_names
+    assert "fbmc_mu_lo[C1,1]" in var_names
+
+
+def test_price_subproblem_add_fbmc_coupling_is_noop_in_atc_mode():
+    master = _base_pricing_master(network_model="ATC")
+    master.fb_index = [("C1", 1)]
+    master.fb_ram = {("C1", 1): 100.0}
+    master.fb_ptdf_map = {("C1", 1, "Z1"): 1.0, ("C1", 1, "Z2"): -1.0}
+
+    pricing = PriceSubproblem(master)
+    pricing.pricing_model.setParam("OutputFlag", 0)
+    pricing.add_fbmc_price_consistency_constraints()
+    pricing.pricing_model.update()
+
+    assert pricing.pricing_model.NumConstrs == 0
+    assert all(not v.VarName.startswith("fbmc_") for v in pricing.pricing_model.getVars())

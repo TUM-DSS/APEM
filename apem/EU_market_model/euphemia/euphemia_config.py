@@ -83,4 +83,7 @@ class EuphemiaConfig:
 
         for key, value in overrides.items():
             setattr(self, key, value)
-            
+
+        self.network_model = str(self.network_model).upper()
+        if self.network_model not in {"ATC", "FBMC"}:
+            raise ValueError("Invalid Euphemia configuration key value: network_model must be 'ATC' or 'FBMC'.")
