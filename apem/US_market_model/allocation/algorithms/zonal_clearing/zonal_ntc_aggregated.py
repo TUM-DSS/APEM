@@ -128,7 +128,10 @@ class Zonal_NTC_aggregated(PowerFlowModel):
             -> Tuple[Scenario, Union[Allocation, Error]]:
         # create a zonal NTC scenario
         zone_results_root = os.path.dirname(os.path.dirname(results_file)) if results_file else None
-        zonal_scenario = self.create_zonal_scenario_NTC(base_scenario=scenario, results_root=zone_results_root)
+        if zone_results_root:
+            zonal_scenario = self.create_zonal_scenario_NTC(base_scenario=scenario, results_root=zone_results_root)
+        else:
+            zonal_scenario = self.create_zonal_scenario_NTC(base_scenario=scenario)
 
         # solve a DCOPF problem for the constructed zonal network
         dcopf = DCOPF()

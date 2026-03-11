@@ -169,7 +169,10 @@ class ZonalFBMC(PowerFlowModel):
 
         try:
             zone_results_root = os.path.dirname(os.path.dirname(results_file)) if results_file else None
-            zonal_scenario = self.create_zonal_scenario_FBMC(scenario, results_root=zone_results_root)
+            if zone_results_root:
+                zonal_scenario = self.create_zonal_scenario_FBMC(scenario, results_root=zone_results_root)
+            else:
+                zonal_scenario = self.create_zonal_scenario_FBMC(scenario)
             # 1. Convert Scenario to PyPSA Network and calculate PTDF
             network = create_pypsa_network_from_scenario(scenario)
             network = fix_missing_generator_timeseries(network)
