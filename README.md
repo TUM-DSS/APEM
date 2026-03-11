@@ -301,3 +301,69 @@ Use these patterns when adapting your own sources:
 1. Add your parser class (e.g., ParseMyDataset) in the `US_market_model/data/parsing` package.
 2. Add your dataset to `enums.py` in the `US_Datasets` class.
 3. Select your dataset in `config.json`.
+
+## Using Your Own Data for the EU Model
+
+Besides the datasets already bundled in APEM, you can run `EU_model` with your own Euphemia-style CSV dataset.
+This section describes the expected dataset folder and how to register it.
+
+---
+
+### What APEM expects at runtime
+
+`EU_model` uses `ParseEU` and expects a dataset folder with CSV files that are loaded into a `ZonalScenario`.
+
+Folder location:
+
+```text
+apem/EU_market_model/euphemia/data/datasets/<your_dataset_name>/
+```
+
+Required files:
+
+- `periods.csv` with column: `period`
+- `step_orders.csv` with columns: `id,t,p,q,zone`
+- `block_orders.csv` with columns:
+  - `id,block_type,code_prm,p,MAR,zone`
+  - plus one quantity column per period: `q1..qT` (matching `periods.csv`)
+- `complex_orders.csv` with columns: `id,step_orders,fixed_term,variable_term,condition,load_gradient`
+- `complex_step_orders.csv` with columns: `id,complex_order_id,t,p,q,zone`
+- `scalable_complex_orders.csv` with columns:
+  - `id,step_orders,fixed_term,condition,load_gradient`
+  - plus one MAP column per period: `MAP1..MAPT`
+- `scalable_step_orders.csv` with columns: `id,scalable_order_id,t,p,q,zone`
+- `piecewise_linear_orders.csv` with columns: `id,t,p0,p1,q,zone`
+
+Optional files:
+
+- `zones.csv` with column `zone` (or `z`); if missing, zones are inferred from order tables
+- `atc.csv` with columns `from_zone,to_zone,t,cap` (optional: `ramp_up`, `ramp_down`)
+
+Notes:
+
+- `zone` can also be provided as aliases such as `z`, `bidding_zone`, `country`, or `node`; it is normalized to `zone`.
+- If you do not use a specific order family (for example complex orders), keep the CSV present with header-only columns.
+- If `atc.csv` is omitted, the model runs as a single-zone clearing problem.
+
+### Quick template
+
+Use [`test_3node`](./apem/EU_market_model/euphemia/data/datasets/test_3node/) as a minimal reference dataset.
+Copy the folder structure and replace contents with your own orders/periods/zones/ATC.
+
+### Hooking your dataset into `config.json`
+
+1. Add your dataset entry to [`datasets.py`](./apem/EU_market_model/euphemia/enums/datasets.py), e.g.:
+
+```python
+MY_DATASET = ParseEU(DATA_DIR / "my_dataset", "My Dataset")
+```
+
+2. Set `run.market_model` to `EU_model` and choose your dataset under `eu_model.dataset` in [`config.json`](./config.json).
+3. Run:
+
+```bash
+python main.py
+```
+
+For Euphemia internals and run-output details, see
+[`apem/EU_market_model/euphemia/README.md`](./apem/EU_market_model/euphemia/README.md).
