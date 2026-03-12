@@ -15,6 +15,7 @@ from apem.EU_market_model.euphemia.data.parsing.parse_eu import (
 from apem.EU_market_model.euphemia.enums.cut_types import CutTypes
 from apem.EU_market_model.euphemia.enums.datasets import EU_Datasets
 from apem.EU_market_model.euphemia.euphemia_config import EuphemiaConfig
+from apem.EU_market_model.euphemia.master_problem.master_problem import MasterProblem
 from apem.EU_market_model.euphemia.pricing.price_determination_subproblem import PriceSubproblem
 from apem.EU_market_model.euphemia.runner import solve_euphemia
 
@@ -421,3 +422,12 @@ def test_price_subproblem_add_fbmc_coupling_is_noop_in_atc_mode():
 
     assert pricing.pricing_model.NumConstrs == 0
     assert all(not v.VarName.startswith("fbmc_") for v in pricing.pricing_model.getVars())
+
+
+def test_resolve_zone_strips_quote_characters():
+    master = object.__new__(MasterProblem)
+    master.default_zone = "Z1"
+
+    assert MasterProblem.resolve_zone(master, " 'Z2' ") == "Z2"
+    assert MasterProblem.resolve_zone(master, '"Z3"') == "Z3"
+    assert MasterProblem.resolve_zone(master, None) == "Z1"

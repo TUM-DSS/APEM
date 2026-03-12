@@ -39,6 +39,14 @@ def _new_run_id() -> str:
     return f"{timestamp}_{uuid4().hex[:8]}"
 
 
+def _normalize_zone(zone: object, default_zone: str) -> str:
+    """Return a canonical zone label and strip accidental quote characters."""
+    if pd.isna(zone):
+        return default_zone
+    zone_str = str(zone).strip().strip("'\"").strip()
+    return zone_str if zone_str else default_zone
+
+
 class MasterProblem:
     """
     Formulate and solve the Euphemia master problem.
@@ -71,11 +79,11 @@ class MasterProblem:
         ):
             if "zone" not in df.columns:
                 df["zone"] = self.default_zone
-            df["zone"] = df["zone"].fillna(self.default_zone).astype(str)
+            df["zone"] = df["zone"].apply(lambda zone: _normalize_zone(zone, self.default_zone))
 
         scenario_zones = getattr(self.scenario, "zones", None)
         if scenario_zones:
-            self.zones = sorted({str(z) for z in scenario_zones})
+            self.zones = sorted({_normalize_zone(z, self.default_zone) for z in scenario_zones})
         else:
             self.zones = sorted(
                 set(self.step_orders["zone"])
@@ -100,8 +108,8 @@ class MasterProblem:
                 t = int(row["t"])
                 if t not in self.periods:
                     continue
-                from_zone = str(row["from_zone"])
-                to_zone = str(row["to_zone"])
+                from_zone = _normalize_zone(row["from_zone"], self.default_zone)
+                to_zone = _normalize_zone(row["to_zone"], self.default_zone)
                 cap = float(row["cap"])
                 key = (from_zone, to_zone, t)
                 if key in self.atc_cap:
@@ -146,7 +154,7 @@ class MasterProblem:
                 if t not in self.periods:
                     continue
                 cnec_id = str(row["cnec_id"])
-                zone = str(row["zone"])
+                zone = _normalize_zone(row["zone"], self.default_zone)
                 self.fb_ptdf_map[(cnec_id, t, zone)] = self.fb_ptdf_map.get((cnec_id, t, zone), 0.0) + float(row["ptdf"])
 
             if self.fb_ptdf_map:
@@ -339,10 +347,7 @@ class MasterProblem:
         self._write_run_metadata()
 
     def resolve_zone(self, zone) -> str:
-        if pd.isna(zone):
-            return self.default_zone
-        zone_str = str(zone)
-        return zone_str if zone_str else self.default_zone
+        return _normalize_zone(zone, self.default_zone)
 
     def get_order_zone(self, df: pd.DataFrame, order_id) -> str:
         if "zone" not in df.columns:
@@ -524,12 +529,11 @@ class MasterProblem:
                     # Write MCPs to file
                     file_path = self.paths["prices"] / "prices.csv"
                     file_exists = file_path.exists() and file_path.stat().st_size > 0
-                    with open(file_path, "a", newline="", buffering=1, encoding="utf-8") as file:  # 'a' = append
-                        writer = csv.writer(file)
+                    with open(file_path, "a", buffering=1, encoding="utf-8") as file:  # 'a' = append
                         if not file_exists:
-                            writer.writerow(["variable", "value"])
+                            file.write("variable,value\n")
                         for v in price_subproblem.pricing_model.getVars():
-                            writer.writerow([v.varName, v.X])
+                            file.write(f"{v.varName},{v.X}\n")
                             # self._emit(f"{v.varName}: {v.X}")  # for console output and run log
                         file.flush()
                         os.fsync(file.fileno())
