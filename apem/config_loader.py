@@ -176,6 +176,13 @@ class ConfigLoader:
         if not isinstance(self.raw_config["us_solver_configuration"], dict):
             raise ValueError("Invalid us_solver_configuration: expected an object.")
 
+        cfg = self.raw_config["us_solver_configuration"]
+        if "slack_penalty" in cfg:
+            if not self._is_number(cfg["slack_penalty"]):
+                raise ValueError("Invalid us_solver_configuration.slack_penalty: must be numeric.")
+            if cfg["slack_penalty"] <= 0:
+                raise ValueError("Invalid us_solver_configuration.slack_penalty: must be > 0.")
+
     @staticmethod
     def _is_number(value: Any) -> bool:
         return isinstance(value, Real) and not isinstance(value, bool)

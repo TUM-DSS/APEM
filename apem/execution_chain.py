@@ -52,6 +52,7 @@ def _create_configuration() -> Configuration:
         relaxation=config.get("relaxation", False),
         output_flag=config.get("output_flag", 0),
         verbosity=config.get("verbosity", True),
+        slack_penalty=config.get("slack_penalty", 1e15),
     )
 
 

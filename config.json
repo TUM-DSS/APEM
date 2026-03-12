@@ -59,7 +59,7 @@
         "BC4"
     ],
     "run": {
-        "market_model": "EU_model",
+        "market_model": "US_model",
         "verbosity": true
     },
     "us_model": {
@@ -83,7 +83,8 @@
             "presparsify": -1,
             "strict_supply_demand_eq": true,
             "relaxation": false,
-            "output_flag": 0
+            "output_flag": 0,
+            "slack_penalty": 1e15
         },
         "zonal_configuration": {
             "type": "zonal_DE2-s",

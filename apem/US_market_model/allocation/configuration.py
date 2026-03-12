@@ -4,7 +4,7 @@ class Configuration:
     The configuration parameters are applied to both the allocation and pricing problems.
     """
     def __init__(self, MIP_gap, optimality_tol, time_limit, work_limit, threads, presparsify, strict_supply_demand_eq,
-                 relaxation, output_flag, verbosity):
+                 relaxation, output_flag, verbosity, slack_penalty=1e15):
         self.MIP_gap = MIP_gap
         self.optimality_tol = optimality_tol
         self.time_limit = time_limit
@@ -15,6 +15,7 @@ class Configuration:
         self.relaxation = relaxation
         self.output_flag = output_flag
         self.verbosity = verbosity
+        self.slack_penalty = slack_penalty
         
     def apply_to_model(self, model):
         """

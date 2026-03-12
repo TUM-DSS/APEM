@@ -16,7 +16,7 @@ from apem.US_market_model.allocation.power_flow_model import PowerFlowModel
 from apem.US_market_model.data.parsing.scenario import Scenario
 from apem.US_market_model.utils.extraction import preprocess_as_dict
 
-M = 10 ** 15
+DEFAULT_SLACK_PENALTY = 10 ** 15
 
 
 class DCOPF(PowerFlowModel):
@@ -52,6 +52,7 @@ class DCOPF(PowerFlowModel):
             model = gp.Model(f'DCOPF-LP-Scenario-{scenario}')
         else:
             model = gp.Model(f'DCOPF-MILP-Scenario-{scenario}')
+        slack_penalty = getattr(configuration, "slack_penalty", DEFAULT_SLACK_PENALTY)
 
         # apply Gurobi configuration parameters
         configuration.apply_to_model(model)
@@ -143,13 +144,14 @@ class DCOPF(PowerFlowModel):
                     for s in sellers
                     for t in periods
                 )
-                - M * gp.quicksum(abs_slack[v, t] for v in nodes for t in periods),
+                - slack_penalty * gp.quicksum(abs_slack[v, t] for v in nodes for t in periods),
                 GRB.MAXIMIZE
             )
         else:
             self.add_redispatch_constraints_objective(redispatch_type, model, scenario, y_stl, u_st, abs_slack,
                                                       seller_cost_dict, seller_no_load_cost_dict, zonal_allocation,
-                                                      redispatch_constraint_units, redispatch_threshold)
+                                                      redispatch_constraint_units, redispatch_threshold,
+                                                      slack_penalty)
 
         # 1
         model.addConstrs(
@@ -428,7 +430,8 @@ class DCOPF(PowerFlowModel):
                                              y_stl: Dict, u_st: Dict, abs_slack: Any, seller_cost_dict: Dict,
                                              seller_no_load_cost_dict: Dict, zonal_allocation: SellersAllocation,
                                              redispatch_constraint_units: bool = False,
-                                             redispatch_threshold: float = 0.001) -> gp.Model:
+                                             redispatch_threshold: float = 0.001,
+                                             slack_penalty: float = DEFAULT_SLACK_PENALTY) -> gp.Model:
         """
         Include redispatch constraints and objective in the DCOPF model.
 
@@ -446,6 +449,7 @@ class DCOPF(PowerFlowModel):
         :param zonal_allocation: Reference allocation
         :param redispatch_constraint_units: If True and a seller's max_prod < redispatch_threshold, set u_st == zonal_allocation.u_st
         :param redispatch_threshold: Production threshold for filtering which units can be redispatched
+        :param slack_penalty: Penalty coefficient for absolute nodal slack in objective
         :return: updated model
         """
 
@@ -477,7 +481,7 @@ class DCOPF(PowerFlowModel):
                         seller_no_load_cost_dict[s, t] * u_diff_st[s, t]
                         for s in sellers for t in periods)
                     +
-                    M * gp.quicksum(abs_slack[v, t] for v in scenario.network.nodes for t in periods),
+                    slack_penalty * gp.quicksum(abs_slack[v, t] for v in scenario.network.nodes for t in periods),
                     GRB.MINIMIZE
                 )
 
@@ -495,7 +499,7 @@ class DCOPF(PowerFlowModel):
                         diff_stl[s, t, ls]
                         for s in sellers for t in periods for ls in blocks_sellers
                     ) +
-                    M * gp.quicksum(abs_slack[v, t] for v in scenario.network.nodes for t in periods),
+                    slack_penalty * gp.quicksum(abs_slack[v, t] for v in scenario.network.nodes for t in periods),
                     GRB.MINIMIZE
                 )
 
@@ -518,7 +522,7 @@ class DCOPF(PowerFlowModel):
                     seller_no_load_cost_dict[s, t] * (u_st[s, t] - zonal_allocation.u_st[s, t])
                     for s in sellers for t in periods)
                 +
-                M * gp.quicksum(abs_slack[v, t] for v in scenario.network.nodes for t in periods),
+                slack_penalty * gp.quicksum(abs_slack[v, t] for v in scenario.network.nodes for t in periods),
                 GRB.MINIMIZE
             )
 
