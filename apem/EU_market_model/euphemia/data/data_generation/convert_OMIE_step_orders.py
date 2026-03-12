@@ -39,5 +39,14 @@ def convert_omie_to_step_orders(input_path: str, output_path: str, days: list[st
     converted.to_csv(output_path, index=False)
     print(f"Converted file saved to: {output_path}")
 
-# Example usage:
-convert_omie_to_step_orders(DATA_DIR / "omie/raw_data/supply_demand_curves.csv", DATA_DIR / "omie/step_orders.csv", days=None)
+
+def main() -> None:
+    convert_omie_to_step_orders(
+        DATA_DIR / "omie/raw_data/supply_demand_curves.csv",
+        DATA_DIR / "omie/step_orders.csv",
+        days=None,
+    )
+
+
+if __name__ == "__main__":
+    main()

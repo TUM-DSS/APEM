@@ -1,10 +1,12 @@
 import logging
 import os
+from datetime import datetime, timezone
 from typing import Optional, Union
+from uuid import uuid4
 
 from apem.EU_market_model.euphemia.enums.cut_types import CutTypes
 from apem.EU_market_model.euphemia.enums.datasets import EU_Datasets
-from apem.EU_market_model.euphemia.execution_chain import solve_euphemia
+from apem.EU_market_model.euphemia.runner import solve_euphemia
 from apem.US_market_model.allocation.algorithms.nodal_clearing.dcopf import DCOPF
 from apem.US_market_model.allocation.algorithms.nodal_clearing.nodal_fbmc_included import NodalFBMC
 from apem.US_market_model.allocation.algorithms.zonal_clearing.zonal_fbmc_included import ZonalFBMC
@@ -17,12 +19,19 @@ from apem.US_market_model.data.parsing.scenario import Scenario
 from apem.US_market_model.pricing.analysis.price_analysis import PriceAnalysis
 from apem.US_market_model.pricing.analysis.pricing import Pricing
 from apem.config_loader import ConfigLoader
-from apem.enums import MarketModels, PowerFlowModels, PricingAlgorithms, RedispatchAlgorithms, US_Datasets
+from apem.core import MarketModels
+from apem.US_market_model.enums import PowerFlowModels, PricingAlgorithms, RedispatchAlgorithms, US_Datasets
 from apem.US_market_model.allocation.power_flow_model import PowerFlowModel
 
 logger = logging.getLogger(__name__)
 if not logger.handlers:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
+
+
+def _new_run_id() -> str:
+    """Create a unique run id with UTC timestamp and random suffix."""
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    return f"{timestamp}_{uuid4().hex[:8]}"
 
 
 def _retrieve_data(dataset: US_Datasets) -> Scenario:
@@ -31,7 +40,7 @@ def _retrieve_data(dataset: US_Datasets) -> Scenario:
 
 def _create_configuration() -> Configuration:
     """Create a Configuration instance using the current configuration."""
-    config = ConfigLoader().get_solver_configuration()
+    config = ConfigLoader().get_us_solver_configuration()
     return Configuration(
         MIP_gap=config.get("MIP_gap", 1e-4),
         optimality_tol=config.get("optimality_tol", 1e-6),
@@ -63,12 +72,14 @@ def _zonal_part(power_flow_model: PowerFlowModel) -> str:
 
 def _write_run_metadata(dataset: US_Datasets, scenario: Scenario, power_flow_model: PowerFlowModel,
                         pricing_algorithm: PricingAlgorithms, redispatch_algorithm: RedispatchAlgorithms,
-                        zonal_part: str) -> None:
+                        zonal_part: str, run_root: str, run_id: str) -> None:
     """Persist a quick summary of the run configuration alongside results."""
-    base_dir = f"US_results/{scenario}_results"
+    base_dir = run_root
     os.makedirs(base_dir, exist_ok=True)
     meta_path = os.path.join(base_dir, "run_config.txt")
     with open(meta_path, "w") as f:
+        f.write(f"run_id={run_id}\n")
+        f.write(f"created_at_utc={datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')}\n")
         f.write(f"dataset={dataset.name}\n")
         f.write(f"power_flow_model={power_flow_model}\n")
         if zonal_part:
@@ -82,7 +93,11 @@ def _write_run_metadata(dataset: US_Datasets, scenario: Scenario, power_flow_mod
 
 
 def _solve_US_allocation_problem(
-    scenario: Scenario, power_flow_model: PowerFlowModel, configuration: Configuration, u_fixed: Optional[dict] = None
+    scenario: Scenario,
+    power_flow_model: PowerFlowModel,
+    configuration: Configuration,
+    run_root: str,
+    u_fixed: Optional[dict] = None,
 ):
     if configuration.verbosity:
         extra = ""
@@ -93,7 +108,7 @@ def _solve_US_allocation_problem(
         logger.info("allocation start dataset=%s model=%s%s", scenario, power_flow_model, extra)
 
     zonal_part = _zonal_part(power_flow_model)
-    base_path = f"US_results/{scenario}_results/{power_flow_model}"
+    base_path = f"{run_root}/{power_flow_model}"
     path = base_path + "/" + zonal_part + "allocation_results"
     os.makedirs(path, exist_ok=True)
 
@@ -115,13 +130,14 @@ def _solve_US_redispatch_problem(
     configuration: Configuration,
     redispatch_constraint_units: bool,
     redispatch_threshold: float,
+    run_root: str,
 ) -> Union[Allocation, Error]:
     if configuration.verbosity:
         logger.info("redispatch start algo=%s model=%s dataset=%s", redispatch_algorithm, power_flow_model, scenario)
     redispatch_algorithm = redispatch_algorithm.value
 
     zonal_part = _zonal_part(power_flow_model)
-    base_path = f"US_results/{scenario}_results/{power_flow_model}"
+    base_path = f"{run_root}/{power_flow_model}"
     path = base_path + "/" + zonal_part + "allocation_results/redispatch"
     os.makedirs(path, exist_ok=True)
 
@@ -141,6 +157,7 @@ def _solve_US_pricing_problem(
     pricing_algorithm: PricingAlgorithms,
     power_flow_model: PowerFlowModel,
     configuration: Configuration,
+    run_root: str,
     prices=None,
 ) -> Pricing:
     if configuration.verbosity:
@@ -149,7 +166,7 @@ def _solve_US_pricing_problem(
     pricing_algorithm = pricing_algorithm.value
 
     zonal_part = _zonal_part(power_flow_model)
-    path = f"US_results/{scenario}_results/{power_flow_model}/{zonal_part}{pricing_algorithm}_results"
+    path = f"{run_root}/{power_flow_model}/{zonal_part}{pricing_algorithm}_results"
     os.makedirs(path, exist_ok=True)
 
     pricing = pricing_algorithm.compute_prices(
@@ -169,9 +186,10 @@ def analyse_results(
     configuration: Configuration,
     pf_model_value,
     base_scenario: Optional[Scenario] = None,
+    results_root: Optional[str] = None,
 ) -> PriceAnalysis:
     """Performs several analyses."""
-    path = f"US_results/{scenario}_results"
+    path = results_root or f"US_results/{scenario}_results"
     os.makedirs(path, exist_ok=True)
 
     analysis = PriceAnalysis(scenario, allocation, pricing, configuration, base_scenario)
@@ -190,17 +208,37 @@ def solve_US_scenario(
     """Computes allocation and pricing for some scenario."""
     scenario = _retrieve_data(dataset)
     configuration = _create_configuration()
+    run_id = _new_run_id()
+    run_root = f"US_results/{scenario}_results/{run_id}"
     zonal_part = _zonal_part(power_flow_model)
-    _write_run_metadata(dataset, scenario, power_flow_model, pricing_algorithm, redispatch_algorithm, zonal_part)
+    _write_run_metadata(
+        dataset,
+        scenario,
+        power_flow_model,
+        pricing_algorithm,
+        redispatch_algorithm,
+        zonal_part,
+        run_root=run_root,
+        run_id=run_id,
+    )
 
     if isinstance(power_flow_model, DCOPF):
-        allocation = _solve_US_allocation_problem(scenario, power_flow_model, configuration)
+        allocation = _solve_US_allocation_problem(scenario, power_flow_model, configuration, run_root=run_root)
         if isinstance(allocation, Error):
             raise RuntimeError(f"{power_flow_model} allocation failed with status {allocation.status}.")
-        pricing = _solve_US_pricing_problem(scenario, allocation, pricing_algorithm, power_flow_model, configuration)
+        pricing = _solve_US_pricing_problem(
+            scenario,
+            allocation,
+            pricing_algorithm,
+            power_flow_model,
+            configuration,
+            run_root=run_root,
+        )
         if isinstance(pricing, Error) or getattr(pricing, "status", 0) != 1:
             raise RuntimeError(f"{power_flow_model} pricing failed with status {getattr(pricing, 'status', 'unknown')}.")
-        return PriceAnalysis(scenario, allocation, pricing, configuration)
+        analysis = PriceAnalysis(scenario, allocation, pricing, configuration)
+        analysis.results_root = run_root
+        return analysis
 
     if dataset not in [US_Datasets.PyPSAEurLarge, US_Datasets.PyPSAEurSmall]:
         raise ValueError(
@@ -208,7 +246,12 @@ def solve_US_scenario(
             f"{power_flow_model}. Zonal prices can only be computed for the PyPSA datasets."
         )
 
-    zonal_scenario, allocation = _solve_US_allocation_problem(scenario, power_flow_model, configuration)
+    zonal_scenario, allocation = _solve_US_allocation_problem(
+        scenario,
+        power_flow_model,
+        configuration,
+        run_root=run_root,
+    )
 
     _solve_US_redispatch_problem(
         zonal_scenario,
@@ -219,10 +262,20 @@ def solve_US_scenario(
         zonal_allocation=allocation.SellersAllocation,
         redispatch_constraint_units=redispatch_constraint_units,
         redispatch_threshold=redispatch_threshold,
+        run_root=run_root,
     )
 
-    pricing = _solve_US_pricing_problem(zonal_scenario, allocation, pricing_algorithm, power_flow_model, configuration)
-    return PriceAnalysis(zonal_scenario, allocation, pricing, configuration, scenario)
+    pricing = _solve_US_pricing_problem(
+        zonal_scenario,
+        allocation,
+        pricing_algorithm,
+        power_flow_model,
+        configuration,
+        run_root=run_root,
+    )
+    analysis = PriceAnalysis(zonal_scenario, allocation, pricing, configuration, scenario)
+    analysis.results_root = run_root
+    return analysis
 
 
 def solve_and_analyse_scenario(
@@ -239,7 +292,8 @@ def solve_and_analyse_scenario(
 ):
     """Computes allocation and pricing for some scenario and performs several analyses."""
     if market_model == MarketModels.EU_model:
-        solve_euphemia(EU_dataset, cut_type)
+        euphemia_config = ConfigLoader().get_euphemia_configuration()
+        solve_euphemia(EU_dataset, cut_type, euphemia_config)
         return
 
     if market_model != MarketModels.US_model:
@@ -263,8 +317,9 @@ def solve_and_analyse_scenario(
             base_scenario = None if is_dcopf_like else price_analysis.base_scenario
             zonal_config = _zonal_part(power_flow_model).rstrip("/") if isinstance(power_flow_model, (Zonal_NTC_aggregated, Zonal_NTC_multiedge, ZonalFBMC)) else ""
 
-            scenario_to_analyse.analyse_scenario()  # analyse base scenario
-            scenario_to_analyse.plot_network(power_flow_model, zonal_config)  # plot underlying network
+            run_root = getattr(price_analysis, "results_root", None)
+            scenario_to_analyse.analyse_scenario(results_root=run_root)  # analyse base scenario
+            scenario_to_analyse.plot_network(power_flow_model, zonal_config, results_root=run_root)  # plot underlying network
 
         return analyse_results(
             price_analysis.scenario,
@@ -273,17 +328,31 @@ def solve_and_analyse_scenario(
             price_analysis.configuration,
             power_flow_model,
             base_scenario,
+            results_root=getattr(price_analysis, "results_root", None),
         )
 
     scenario = _retrieve_data(US_dataset)
     configuration = _create_configuration()
+    run_id = _new_run_id()
+    run_root = f"US_results/{scenario}_results/{run_id}"
+    zonal_part = _zonal_part(power_flow_model)
+    os.makedirs(run_root, exist_ok=True)
+    _write_run_metadata(
+        US_dataset,
+        scenario,
+        power_flow_model,
+        pricing_algorithm,
+        redispatch_algorithm,
+        zonal_part,
+        run_root=run_root,
+        run_id=run_id,
+    )
 
     allowed_markup = {US_Datasets.IEEE_RTS, US_Datasets.PJM, US_Datasets.ARPA}
     if US_dataset not in allowed_markup:
         raise ValueError(f"Markup pricing is only supported for datasets {', '.join([d.name for d in allowed_markup])}.")
 
-    zonal_part = _zonal_part(power_flow_model)
-    base_path = f"US_results/{scenario}_results/{power_flow_model}"
+    base_path = f"{run_root}/{power_flow_model}"
     path = base_path + "/" + zonal_part
     os.makedirs(path, exist_ok=True)
 
@@ -300,6 +369,7 @@ def solve_and_analyse_scenario(
         configuration=configuration,
         base_scenario=scenario,
     )
+    price_analysis.results_root = run_root
 
     analyse_results(
         price_analysis.scenario,
@@ -307,4 +377,5 @@ def solve_and_analyse_scenario(
         price_analysis.pricing,
         price_analysis.configuration,
         power_flow_model,
+        results_root=run_root,
     )

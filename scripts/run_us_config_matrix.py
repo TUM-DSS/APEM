@@ -25,7 +25,8 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from apem.execution_chain import solve_and_analyse_scenario
-from apem.enums import MarketModels, PricingAlgorithms, RedispatchAlgorithms, US_Datasets, FBMCBaseCases
+from apem.core import MarketModels
+from apem.US_market_model.enums import PricingAlgorithms, RedispatchAlgorithms, US_Datasets, FBMCBaseCases
 from apem.US_market_model.allocation.algorithms.nodal_clearing.dcopf import DCOPF
 from apem.US_market_model.allocation.algorithms.zonal_clearing.zonal_ntc_aggregated import Zonal_NTC_aggregated
 from apem.US_market_model.allocation.algorithms.zonal_clearing.zonal_ntc_multiedge import Zonal_NTC_multiedge

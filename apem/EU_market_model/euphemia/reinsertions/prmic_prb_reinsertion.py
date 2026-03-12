@@ -2,10 +2,21 @@ from apem.EU_market_model.euphemia.utils.extraction import get
 
 
 def PRMIC_PRB_reinsertion(self, is_prmic_reinsertion: bool):
+    """
+    Run reinsertion for paradoxically rejected orders after a feasible solution.
+
+    When ``is_prmic_reinsertion`` is ``False``, the routine targets PRBs
+    (paradoxically rejected block orders) and can be limited by
+    ``max_prb_reinsertion_attempts``. When ``True``, it targets PRMIC/PRSCO
+    (complex and scalable-complex) orders.
+    """
     from apem.EU_market_model.euphemia.master_problem.master_problem import MasterProblem
 
     counter = 0
     activated_order_counter = 0
+    attempted_block_counter = 0
+    max_block_attempts = None if is_prmic_reinsertion else self.max_prb_reinsertion_attempts
+    stop_due_to_attempt_limit = False
     rejected_orders, paradoxically_rejected_orders = calculate_paradoxically_rejected_orders(self, is_prmic_reinsertion)
     print(f'Rejected orders: {rejected_orders}')
 
@@ -18,7 +29,19 @@ def PRMIC_PRB_reinsertion(self, is_prmic_reinsertion: bool):
         for order_type, ids in paradoxically_rejected_orders.items():
             break_outer_loop = False
             for id in ids:
+                if (
+                    not is_prmic_reinsertion
+                    and order_type == 'block'
+                    and max_block_attempts is not None
+                    and attempted_block_counter >= max_block_attempts
+                ):
+                    print(f"Reached PRB reinsertion attempt limit ({max_block_attempts}).")
+                    stop_due_to_attempt_limit = True
+                    break
+
                 print(f'{order_type} order {id} is paradoxically rejected. Attempting to activate it...')
+                if not is_prmic_reinsertion and order_type == 'block':
+                    attempted_block_counter += 1
                 # New model for current reinsertion run
                 reinsertion_run = MasterProblem(self.config)
                 reinsertion_run.reinsertion_run = True
@@ -75,6 +98,11 @@ def PRMIC_PRB_reinsertion(self, is_prmic_reinsertion: bool):
                 print(f'Up to this step {activated_order_counter} {"block" if not is_prmic_reinsertion else "(scalable) complex"} orders could be activated')
             if break_outer_loop:
                 break
+            if stop_due_to_attempt_limit:
+                break
+
+        if stop_due_to_attempt_limit:
+            break
 
         # Recalculate list with paradoxically rejected orders after reinsertion was successful
         if recalculate_list:
@@ -85,8 +113,17 @@ def PRMIC_PRB_reinsertion(self, is_prmic_reinsertion: bool):
 
     print(f'Reinsertion finished with paradoxically rejected order: {paradoxically_rejected_orders} left.')
     print(f'--- Activated {activated_order_counter} {"block" if not is_prmic_reinsertion else "(scalable) complex"} orders ---')
+    if not is_prmic_reinsertion:
+        print(f'--- Attempted {attempted_block_counter} block reinsertions ---')
 
 def calculate_paradoxically_rejected_orders(self, is_prmic_reinsertion: bool):
+    """
+    Collect rejected orders and filter those that are paradoxically rejected.
+
+    Returns:
+        tuple[dict, dict]: ``(rejected_orders, paradoxically_rejected_orders)``
+        keyed by ``block``, ``complex``, and ``scalable_complex``.
+    """
     rejected_orders = {'block': [], 'complex': [], 'scalable_complex': []}
     paradoxically_rejected_orders = {'block': [], 'complex': [], 'scalable_complex': []}
     # Calculate rejected orders
@@ -121,6 +158,12 @@ def calculate_paradoxically_rejected_orders(self, is_prmic_reinsertion: bool):
 
 
 def check_PRCO_PRSCO(self, id: int, is_complex: bool) -> bool:
+    """
+    Check whether a rejected complex/scalable-complex order is paradoxical.
+
+    The test compares an expected value against value at current prices,
+    respecting the order ``condition`` (MIC/MP) and skipping ``load gradient``.
+    """
     orders = self.complex_orders if is_complex else self.scalable_complex_orders
     step_orders = self.complex_step_orders if is_complex else self.scalable_step_orders
     variable_term = get(orders, 'variable_term', id) if is_complex else None
@@ -134,12 +177,14 @@ def check_PRCO_PRSCO(self, id: int, is_complex: bool) -> bool:
     for _, step_order in step_orders.iterrows():
         # if step order is INM it could be accepted
         sign = 1 if step_order['q'] >= 0 else -1
-        step_acceptance = sign * (self.prices[step_order['t']] - step_order['p']) >= 0
+        step_zone = self.resolve_zone(step_order.get("zone", self.default_zone))
+        step_price = self.get_price_value(step_order['t'], step_zone)
+        step_acceptance = sign * (step_price - step_order['p']) >= 0
         if step_order['complex_order_id' if is_complex else 'scalable_order_id'] == id:
             variable_term = step_order['p'] if not is_complex else variable_term
 
             variable_expected_value += step_acceptance * variable_term * abs(step_order['q'])
-            actual_value += step_acceptance * abs(step_order['q']) * self.prices[step_order['t']]
+            actual_value += step_acceptance * abs(step_order['q']) * step_price
 
     expected_value = get(orders, 'fixed_term', id) + variable_expected_value
 
@@ -149,15 +194,22 @@ def check_PRCO_PRSCO(self, id: int, is_complex: bool) -> bool:
         return actual_value <= expected_value
 
 def check_PRB(self, order: int) -> bool:
+    """
+    Check whether a rejected block order is paradoxical at current prices.
+
+    Flexible blocks are always considered candidates. Other block orders are
+    evaluated using their volume-weighted average MCP versus bid price.
+    """
     # Always try flexible orders
     if get(self.block_orders, f'block_type', order) == 'flexible':
         return True
 
     p = get(self.block_orders, 'p', order)
+    zone = self.get_order_zone(self.block_orders, order)
     q = {t: get(self.block_orders, f'q{t}', order) for t in self.periods}
     sale = True if sum(q.values()) > 0 else False
     # Calculate volume weighted average MCP
-    avg_mcp = sum(self.prices[t] * abs(q_t) / abs(sum(q.values())) for t, q_t in q.items())
+    avg_mcp = sum(self.get_price_value(t, zone) * abs(q_t) / abs(sum(q.values())) for t, q_t in q.items())
 
     if sale and p < avg_mcp or not sale and avg_mcp < p:
         return True

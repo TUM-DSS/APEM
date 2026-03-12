@@ -1,7 +1,14 @@
 import gurobipy as gp
 
-from apem.EU_market_model import euphemia as no_good_cutting
+import apem.EU_market_model.euphemia.cutting_strategies.no_good as no_good_cutting
 from apem.EU_market_model.euphemia.enums.order_types import OrderType
+
+
+def _log(self, message: str) -> None:
+    if hasattr(self, "run_logger"):
+        self.run_logger.info(message)
+    elif hasattr(self, "_emit"):
+        self._emit(message)
 
 
 def add_combinatorial_benders_cut(self, callback_model, price_subproblem) -> None:
@@ -13,7 +20,7 @@ def add_combinatorial_benders_cut(self, callback_model, price_subproblem) -> Non
     terms = []
     for constr in price_subproblem.pricing_model.getConstrs():
         if constr.IISConstr:
-            print(f"Infeasible constraint: {constr}")
+            _log(self, f"Infeasible constraint: {constr}")
             constr_name = constr.ConstrName
 
             if constr_name in price_subproblem.constraint_meta_data.keys():
@@ -29,6 +36,6 @@ def add_combinatorial_benders_cut(self, callback_model, price_subproblem) -> Non
 
     if terms:
         callback_model.cbLazy(gp.quicksum(terms) >= 1)
-        print(f'Added combinatorial benders cut {sum(terms)} >= 1')
+        _log(self, f"Added combinatorial benders cut {gp.quicksum(terms)} >= 1")
     else:
         no_good_cutting.add_no_good_cut(self=self, callback_model=callback_model)

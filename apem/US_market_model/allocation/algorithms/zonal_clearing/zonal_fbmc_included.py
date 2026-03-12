@@ -50,7 +50,7 @@ class ZonalFBMC(PowerFlowModel):
         self.base_case_type = base_case_type
         super().__init__()
 
-    def create_zonal_scenario_FBMC(self, base_scenario: Scenario) -> Scenario:
+    def create_zonal_scenario_FBMC(self, base_scenario: Scenario, results_root: Optional[str] = None) -> Scenario:
         """
         Create a zonal scenario from the base nodal scenario.
         
@@ -138,7 +138,7 @@ class ZonalFBMC(PowerFlowModel):
             }
 
         # Save zone mappings for later use
-        results_path = f"US_results/{base_scenario.name}_results/Zonal_FBMC/{self.zonal_configuration}"
+        results_path = results_root or f"US_results/{base_scenario.name}_results/Zonal_FBMC/{self.zonal_configuration}"
         os.makedirs(results_path, exist_ok=True)
         node_to_zone_df = pd.DataFrame(list(node_to_zone.items()), columns=['node', 'zone'])
         node_to_zone_df.to_csv(os.path.join(results_path, "node_to_zone.csv"), index=False)
@@ -168,7 +168,11 @@ class ZonalFBMC(PowerFlowModel):
         """
 
         try:
-            zonal_scenario = self.create_zonal_scenario_FBMC(scenario)
+            zone_results_root = os.path.dirname(os.path.dirname(results_file)) if results_file else None
+            if zone_results_root:
+                zonal_scenario = self.create_zonal_scenario_FBMC(scenario, results_root=zone_results_root)
+            else:
+                zonal_scenario = self.create_zonal_scenario_FBMC(scenario)
             # 1. Convert Scenario to PyPSA Network and calculate PTDF
             network = create_pypsa_network_from_scenario(scenario)
             network = fix_missing_generator_timeseries(network)

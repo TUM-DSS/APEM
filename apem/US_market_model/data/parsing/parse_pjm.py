@@ -132,7 +132,7 @@ def read_pjm_branches():
 class ParsePJM(ParseData):
 
     def parse_data(self, day=None) -> Scenario:
-        """Parse the PJM data.
+        """Parse the PJM data. The PJM data available in this repository is for 28.02.2023.
 
         :return: Scenario object
         """

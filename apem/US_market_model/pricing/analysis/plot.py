@@ -24,6 +24,7 @@ def plot_price_heatmap(
     avg_prices: dict = None,
     zonal_config: str = "",
     power_flow_model: str = "",
+    results_root: str = "",
 ) -> None:
     """Creates a heatmap with the (average) nodal (or zonal) prices for the underlying network."""
 
@@ -33,7 +34,8 @@ def plot_price_heatmap(
 
     # Define power flow model and create results directory, if not exists
     pf_model = power_flow_model or ("Zonal_NTC_aggregated" if zonal_config else "DCOPF")
-    results_directory = os.path.join("US_results", f"{scenario.name}_results", pf_model)
+    base_dir = results_root or os.path.join("US_results", f"{scenario.name}_results")
+    results_directory = os.path.join(base_dir, pf_model)
     os.makedirs(results_directory, exist_ok=True)
 
     # Load average prices, if not provided
