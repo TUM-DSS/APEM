@@ -10,7 +10,6 @@ class EuphemiaConfig:
     def __init__(self):
         self.scenario = None
         self.set_dataset(EU_Datasets.GENERATED_SMALL)  # "Generated Small" as base dataset
-        self.dataset = None
 
         # Core Euphemia behavior
         self.disable_reinsertion = True  # Disable automatic start of reinsertions

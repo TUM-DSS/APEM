@@ -89,6 +89,8 @@ class MasterProblem:
         self.default_zone = self.zones[0]
 
         self.network_model = str(getattr(config, "network_model", "ATC")).upper()
+        if self.network_model not in {"ATC", "FBMC"}:
+            raise ValueError(f"Unsupported network_model '{self.network_model}'. Use 'ATC' or 'FBMC'.")
         self.atc = getattr(self.scenario, "atc", pd.DataFrame(columns=["from_zone", "to_zone", "t", "cap"]))
         self.atc_cap = {}
         self.atc_ramp_up = {}
