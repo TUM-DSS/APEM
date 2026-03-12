@@ -45,24 +45,45 @@
 ## Usage
 **Note:** Make sure to always activate your virtual environment before running the code!
 
-Before running the code, update the [`config.json`](./config.json) file to create a configuration that will be run.
-
-The most important section is `scenario`, which defines the dataset, market model, power flow model, pricing, and redispatch algorithm.
+Before running the code, update the [`config.json`](./config.json) file.
+The config is model-scoped:
+- `run`: global run selection
+- `us_model`: US-model-specific settings
+- `eu_model`: EU-model-specific settings
+Only this model-scoped format is supported.
 
 ```jsonc
-"scenario": {
-    "market_model": "EU_model",    // choose from _available_market_models
-    "US_dataset": "ARPA",          // choose from _available_US_datasets
-    "EU_dataset": "GME",           // choose from _available_EU_datasets
-    "power_flow_model": {
-        "type": "DCOPF"            // choose from _available_power_flow_models
+{
+  "run": {
+    "market_model": "EU_model",  // US_model or EU_model
+    "verbosity": true
+  },
+  "us_model": {
+    "dataset": "ARPA",
+    "power_flow_model": { "type": "DCOPF" },
+    "pricing_algorithm": "IP",
+    "redispatch": {
+      "algorithm": "MinCostRD",
+      "constraint_units": false,
+      "threshold": 0.001,
+      "alpha": 0.01
     },
-    "cut_type": "price based",     // choose from _available_cut_types
-    "pricing_algorithm": "IP",     // choose from _available_pricing_algorithms
-    "redispatch_algorithm": "MinCostRD",  // choose from _available_redispatch_algorithms 
-    "redispatch_constraint_units": false, // controls whether some units should not be redispatched
-    "redispatch_threshold": 0.001, // in MW, controls what units can be redispatched
-    "alpha": 0.01 // markup used for markup pricing, should be between 0 and 1
+    "solver_configuration": {
+      "time_limit": 3600
+    },
+    "zonal_configuration": {
+      "type": "zonal_DE2-s",
+      "factor": 0.8,
+      "base_case": "BC4"
+    }
+  },
+  "eu_model": {
+    "dataset": "GME",
+    "cut_type": "price based",
+    "euphemia_configuration": {
+      "max_iterations": 50
+    }
+  }
 }
 ```
 
@@ -71,14 +92,19 @@ The most important section is `scenario`, which defines the dataset, market mode
 - **Market models**: `US_model`, `EU_model`
 - **Datasets**
   - US: `IEEE_RTS`, `PJM`, `PyPSAEurSmall`, `PyPSAEurLarge`, `ARPA`
-  - EU: `Generated Small`, `Generated Large`, `OMIE`, `GME`, `IEEE_RTS`, `ARPA`, `PyPSAEurSmall`, `PyPSAEurLarge`, `PJM`
+  - EU: `Generated Small`, `Generated Large`, `OMIE`, `GME`, `IEEE_RTS`, `ARPA`
 - **Power flow models** (only for ``US_model``): `DCOPF`, `Zonal_NTC_aggregated`, `Zonal_NTC_multiedge`, `Zonal_FBMC` (base cases: `BC1`, `BC2`, `BC3.1`, `BC3.2`, `BC4`)
 - **Cut types** (only for `EU_model`): `price based`, `combinatorial benders`, `no good`
 - **Pricing algorithms** (only for `US_model`): `ELMP`, `IP`, `MinMWP`, `Join`
 - **Redispatch algorithms** (only for `US_model/Zonal_NTC_aggregated`): `MinCostRD`, `MinAbsCostRD`, `MinAbsVolRD`
 - **Zonal configurations** (only for `US_model/Zonal_NTC_aggregated`, `US_model/Zonal_NTC_multiedge` and `US_model/Zonal_FBMC`): `national`, `zonal_DE2-k`, `zonal_DE2-s`, `zonal_DE3`, `zonal_DE4`, `zonal_DE5`
 
-Other global settings like solver tolerances and runtime limits can be adjusted under `"solver_configuration"`. Zonal-specific settings are under `"zonal_configuration"`.
+US-model solver settings like tolerances and runtime limits can be adjusted under `us_model.solver_configuration`.
+EU-model-specific hyperparameters can be adjusted under `eu_model.euphemia_configuration` (for example `max_iterations`,
+`reinsertion_max_iterations`, price bounds, cut thresholds, and Gurobi parameters such as `time_limit`, `mip_gap`,
+`threads`, `seed`, `output_flag`).
+For EU-model internals (module structure, API, and run output contract), see [`apem/EU_market_model/euphemia/README.md`](./apem/EU_market_model/euphemia/README.md).
+Zonal-specific settings are under `us_model.zonal_configuration`.
 
 ---
 To run the configuration, execute:
@@ -89,6 +115,68 @@ python main.py
 Once the execution is done, a new `results` folder will be created storing detailed allocation and pricing results.
 
 **Note:** If you ever run into the error "ModuleNotFoundError: No module named 'src'", this can likely be resolved by setting the PYTHONPATH inside your virtual environment. To do this, add the following line to <venv_name>/bin/activate: `export PYTHONPATH=/<path-to-APEM>`.
+
+## US-to-EU Dataset Conversion (Euphemia)
+
+APEM includes a converter that transforms US-style `Scenario` data into the CSV format expected by the Euphemia implementation (`step_orders.csv`, `block_orders.csv`, etc.).
+
+Use this when you want to run `EU_model` on converted datasets such as `IEEE_RTS` or `ARPA`.
+In this repository, the `EU_model` versions of `IEEE_RTS` and `ARPA` are obtained via this conversion step (US parser output converted into Euphemia input CSVs).
+
+### High-level entrypoint: `run_us_eu_conversion.py`
+
+File: `apem/EU_market_model/euphemia/data/conversion/run_us_eu_conversion.py`
+
+Run with its default (`ParseIEEERTS`):
+
+```bash
+python -m apem.EU_market_model.euphemia.data.conversion.run_us_eu_conversion
+```
+
+Run for a specific US parser:
+
+```bash
+python - <<'PY'
+from apem.US_market_model.data.parsing.parse_arpa import ParseARPA
+from apem.EU_market_model.euphemia.data.conversion.run_us_eu_conversion import run_us_eu_conversion
+
+run_us_eu_conversion(
+    ParseARPA,
+    generate_uptime_patterns=True,
+    reduce_linked_blocks=True,
+    use_contiguous_patterns=True,
+    compress_identical_blocks=True,
+)
+PY
+```
+
+### Advanced customization
+
+If you need custom conversion behavior, use `DataConversion` directly:
+`apem/EU_market_model/euphemia/data/conversion/data_conversion.py`.
+For standard usage, prefer `run_us_eu_conversion(...)`.
+
+### What gets written
+
+The high-level converter writes these files:
+
+- `periods.csv`
+- `step_orders.csv`
+- `block_orders.csv`
+- `scalable_complex_orders.csv`
+- `scalable_step_orders.csv`
+- `complex_orders.csv` (empty placeholder)
+- `complex_step_orders.csv` (empty placeholder)
+- `piecewise_linear_orders.csv` (empty placeholder)
+
+Output folders are chosen via `CONVERTED_DATASET_PATH_MAP` in
+`apem/EU_market_model/euphemia/utils/paths.py` (for example `.../data/datasets/ieee_rts`).
+
+### Notes
+
+- `generate_uptime_patterns=True` regenerates files in `.../data/conversion/patterns/`.
+- `compress_identical_blocks=True` merges identical linked-block chains to reduce model size.
+- Conversion complexity can be high on large instances: one seller can generate many commitment-pattern-based exclusive and linked block bids, so conversion time and output size can grow quickly with the number of units, periods, and bid blocks.
 
 ## Using Your Own Data for the US Model
 
@@ -213,3 +301,71 @@ Use these patterns when adapting your own sources:
 1. Add your parser class (e.g., ParseMyDataset) in the `US_market_model/data/parsing` package.
 2. Add your dataset to `enums.py` in the `US_Datasets` class.
 3. Select your dataset in `config.json`.
+
+## Using Your Own Data for the EU Model
+
+Besides the datasets already bundled in APEM, you can run `EU_model` with your own Euphemia-style CSV dataset.
+This section describes the expected dataset folder and how to register it.
+
+---
+
+### What APEM expects at runtime
+
+`EU_model` uses `ParseEU` and expects a dataset folder with CSV files that are loaded into a `ZonalScenario`.
+
+Folder location:
+
+```text
+apem/EU_market_model/euphemia/data/datasets/<your_dataset_name>/
+```
+
+Required files:
+
+- `periods.csv` with column: `period`
+- `step_orders.csv` with columns: `id,t,p,q,zone`
+- `block_orders.csv` with columns:
+  - `id,block_type,code_prm,p,MAR,zone`
+  - plus one quantity column per period: `q1..qT` (matching `periods.csv`)
+- `complex_orders.csv` with columns: `id,step_orders,fixed_term,variable_term,condition,load_gradient`
+- `complex_step_orders.csv` with columns: `id,complex_order_id,t,p,q,zone`
+- `scalable_complex_orders.csv` with columns:
+  - `id,step_orders,fixed_term,condition,load_gradient`
+  - plus one MAP column per period: `MAP1..MAPT`
+- `scalable_step_orders.csv` with columns: `id,scalable_order_id,t,p,q,zone`
+- `piecewise_linear_orders.csv` with columns: `id,t,p0,p1,q,zone`
+
+Optional files:
+
+- `zones.csv` with column `zone` (or `z`); if missing, zones are inferred from order tables
+- `atc.csv` with columns `from_zone,to_zone,t,cap` (optional: `ramp_up`, `ramp_down`)
+
+Notes:
+
+- `zone` can also be provided as aliases such as `z`, `bidding_zone`, `country`, or `node`; it is normalized to `zone`.
+- If you do not use a specific order family (for example complex orders), keep the CSV present with header-only columns.
+- If `atc.csv` is omitted, the model runs as a single-zone clearing problem.
+
+### Quick template
+
+Use [`test_3node`](./apem/EU_market_model/euphemia/data/datasets/test_3node/) as a minimal reference dataset.
+Copy the folder structure and replace contents with your own orders/periods/zones/ATC.
+
+### Hooking your dataset into `config.json`
+
+1. Add your dataset entry to [`datasets.py`](./apem/EU_market_model/euphemia/enums/datasets.py), e.g.:
+
+```python
+MY_DATASET = ParseEU(DATA_DIR / "my_dataset", "My Dataset")
+```
+
+2. Set `run.market_model` to `EU_model` and choose your dataset under `eu_model.dataset` in [`config.json`](./config.json).
+3. Run:
+
+```bash
+python main.py
+```
+
+For Euphemia internals and run-output details, see
+[`apem/EU_market_model/euphemia/README.md`](./apem/EU_market_model/euphemia/README.md).
+For EU order-type semantics, see the
+[`Order Types Glossary`](./apem/EU_market_model/euphemia/README.md#order-types-glossary).

@@ -216,6 +216,7 @@ class PriceAnalysis:
                 avg_prices,
                 zonal_config,
                 power_flow_model=str(pf_model_value),
+                results_root=dir_stats,
             )
 
     def analyse_results(self, folder_results: str, power_flow_model=None):

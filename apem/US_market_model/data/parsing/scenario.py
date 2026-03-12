@@ -31,7 +31,7 @@ class Scenario:
     def __str__(self):
         return self.name
 
-    def analyse_scenario(self) -> None:
+    def analyse_scenario(self, results_root: str = "") -> None:
         """
         Computes scenario statistics.
         """
@@ -56,7 +56,7 @@ class Scenario:
             res_supply_proportion = round(res_sellers['max_prod'].sum() / supply, 2)
 
         # Define and create results directory, if not exists
-        results_directory = f"./US_results/{self.name}_results"
+        results_directory = results_root or f"./US_results/{self.name}_results"
         os.makedirs(results_directory, exist_ok=True)
 
         # Write contents to scenario.txt file
@@ -87,7 +87,7 @@ class Scenario:
 
         f.close()
 
-    def plot_network(self, power_flow_model, zonal_config: str = "") -> None:
+    def plot_network(self, power_flow_model, zonal_config: str = "", results_root: str = "") -> None:
         """
         Plots the electricity network for the underlying scenario.
         
@@ -96,7 +96,8 @@ class Scenario:
         """
 
         # Define power flow model and create results directory, if not exists
-        results_directory = os.path.join("US_results", f"{self.name}_results", str(power_flow_model))
+        base_dir = results_root or os.path.join("US_results", f"{self.name}_results")
+        results_directory = os.path.join(base_dir, str(power_flow_model))
         os.makedirs(results_directory, exist_ok=True)
         zone_results_directory = os.path.join(results_directory, zonal_config) if zonal_config else results_directory
 
@@ -136,7 +137,6 @@ class Scenario:
                     node_to_zone_path = alt_path
             if not os.path.exists(node_to_zone_path):
                 print(f"plot_network: node_to_zone.csv not found for {zonal_config}, skipping plot.")
-                plt.close(fig)
                 return
             df_zones = pd.read_csv(node_to_zone_path, dtype={"node": str, "zone": str})
 
