@@ -26,3 +26,4 @@ def solve_euphemia(
     config.cutting_strategy = cut_type
     euphemia = MasterProblem(config)
     euphemia.run()
+    return str(euphemia.run_root)

@@ -69,7 +69,8 @@ Only this model-scoped format is supported.
       "alpha": 0.01
     },
     "solver_configuration": {
-      "time_limit": 3600
+      "time_limit": 3600,
+      "slack_penalty": 1e15
     },
     "zonal_configuration": {
       "type": "zonal_DE2-s",
@@ -99,7 +100,7 @@ Only this model-scoped format is supported.
 - **Redispatch algorithms** (only for `US_model/Zonal_NTC_aggregated`): `MinCostRD`, `MinAbsCostRD`, `MinAbsVolRD`
 - **Zonal configurations** (only for `US_model/Zonal_NTC_aggregated`, `US_model/Zonal_NTC_multiedge` and `US_model/Zonal_FBMC`): `national`, `zonal_DE2-k`, `zonal_DE2-s`, `zonal_DE3`, `zonal_DE4`, `zonal_DE5`
 
-US-model solver settings like tolerances and runtime limits can be adjusted under `us_model.solver_configuration`.
+US-model solver settings like tolerances, runtime limits, and slack-penalty scaling can be adjusted under `us_model.solver_configuration`.
 EU-model-specific hyperparameters can be adjusted under `eu_model.euphemia_configuration` (for example `max_iterations`,
 `reinsertion_max_iterations`, price bounds, cut thresholds, and Gurobi parameters such as `time_limit`, `mip_gap`,
 `threads`, `seed`, `output_flag`).
@@ -113,6 +114,11 @@ python main.py
 ```
 
 Once the execution is done, a new `results` folder will be created storing detailed allocation and pricing results.
+
+For US-model-specific evaluation and comparison workflows, see the example scripts in
+[`scripts/US_model`](./scripts/US_model). These cover, for example, comparisons of
+pricing algorithms, lost opportunity costs, redispatch costs, and cost-based
+comparisons across power-flow models.
 
 **Note:** If you ever run into the error "ModuleNotFoundError: No module named 'src'", this can likely be resolved by setting the PYTHONPATH inside your virtual environment. To do this, add the following line to <venv_name>/bin/activate: `export PYTHONPATH=/<path-to-APEM>`.
 

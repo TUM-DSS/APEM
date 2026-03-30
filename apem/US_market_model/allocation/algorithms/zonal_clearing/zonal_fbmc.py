@@ -284,6 +284,9 @@ class ZonalDispatchModel:
         model.optimize()
         if model.Status == GRB.OPTIMAL:
             all_vars_for_saving = [{"variable": v.VarName, "value": v.X} for v in model.getVars()]
+            p_tz_df = pd.DataFrame({z: {t: p_tz[z, t].X for t in snapshots} for z in zones})
+            flow_zonal_component_df = zonal_ptdf.dot(p_tz_df.T).T
+            final_line_flow_df = (flow_zonal_component_df + delta_F).rename(columns=str)
 
             # Fix integer variables and re-solve as LP to get duals
             for v in model.getVars():
@@ -295,9 +298,32 @@ class ZonalDispatchModel:
             return {
                 "objective_value": model.ObjVal,
                 "p_gen": pd.DataFrame({g: {t: p_gen[g, t].X for t in snapshots} for g in generators}),
-                "p_tz": pd.DataFrame({z: {t: p_tz[z, t].X for t in snapshots} for z in zones}),
+                "p_tz": p_tz_df,
                 "u": pd.DataFrame({g: {t: u[g, t].X for t in snapshots} for g in generators}),
                 "nse_tz": pd.DataFrame({z: {t: nse_tz[z, t].X for t in snapshots} for z in zones}),
+                "final_line_flow": final_line_flow_df,
+                "fbmc_network_data": {
+                    "constraint_ids": [str(line_id) for line_id in L_z],
+                    "zonal_ptdf": zonal_ptdf.loc[L_z, zones].rename(index=str, columns=str),
+                    "capacity_upper": pd.DataFrame(
+                        {
+                            str(line_id): {
+                                t: network.lines.at[line_id, 's_nom']
+                                for t in snapshots
+                            }
+                            for line_id in L_z
+                        }
+                    ),
+                    "capacity_lower": pd.DataFrame(
+                        {
+                            str(line_id): {
+                                t: -network.lines.at[line_id, 's_nom']
+                                for t in snapshots
+                            }
+                            for line_id in L_z
+                        }
+                    ),
+                },
                 "model": model,
                 "duals": {"zonal_price": pd.DataFrame(
                     {z: {t: relaxed.getConstrByName(f"zonal_balance_{z}_{t}").Pi for t in snapshots} for z in zones})},
