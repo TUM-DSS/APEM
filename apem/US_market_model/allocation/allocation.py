@@ -143,9 +143,6 @@ class Allocation:
 
         return accepted_supply - accepted_demand
 
-    def consumed_reactive_power_per_node_period(self, node: int, period: int) -> float:
-        pass
-
     def generated_real_power_per_node_period(self, node: int, period: int) -> float:
         """
         Compute total real power generated in specified node and period.
@@ -156,6 +153,3 @@ class Allocation:
         """
         sellers = self.dataset.nodes_agents[node]['sellers']
         return sum(self.SellersAllocation.y_st[s, period] for s in sellers)
-
-    def generated_reactive_power_per_node_period(self, node: int, period: int) -> float:
-        pass
