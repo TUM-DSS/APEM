@@ -1,8 +1,8 @@
-"""
-Utility to run a full matrix of APEM EU_model configurations.
+﻿"""
+Utility to run a full matrix of APEM order-book-based-model configurations.
 
 Matrix:
-- Datasets (EU_Datasets):
+- Datasets (OrderBookBased_Datasets):
   GENERATED_SMALL, GENERATED_LARGE, OMIE, GME,
   TEST_3NODE, TEST_3NODE_LOWCAP,
   IEEE_RTS, ARPA
@@ -25,10 +25,10 @@ if str(ROOT) not in sys.path:
 
 from apem.execution_chain import solve_and_analyse_scenario
 from apem.core import MarketModels
-from apem.US_market_model.enums import PricingAlgorithms, RedispatchAlgorithms, US_Datasets
-from apem.US_market_model.allocation.algorithms.nodal_clearing.dcopf import DCOPF
-from apem.EU_market_model.euphemia.enums.cut_types import CutTypes
-from apem.EU_market_model.euphemia.enums.datasets import EU_Datasets
+from apem.unit_based_model.enums import PricingAlgorithms, RedispatchAlgorithms, UnitBased_Datasets
+from apem.unit_based_model.allocation.algorithms.nodal_clearing.dcopf import DCOPF
+from apem.order_book_based_model.euphemia.enums.cut_types import CutTypes
+from apem.order_book_based_model.euphemia.enums.datasets import OrderBookBased_Datasets
 
 
 def _ensure_matplotlib_dir() -> None:
@@ -39,31 +39,31 @@ def _ensure_matplotlib_dir() -> None:
         os.environ["MPLCONFIGDIR"] = cache_dir
 
 
-def run_single(dataset: EU_Datasets, cut_type: CutTypes) -> None:
-    """Run one EU_model configuration through solve_and_analyse_scenario."""
+def run_single(dataset: OrderBookBased_Datasets, cut_type: CutTypes) -> None:
+    """Run one order-book-based-model configuration through solve_and_analyse_scenario."""
     _ensure_matplotlib_dir()
     solve_and_analyse_scenario(
-        US_dataset=US_Datasets.IEEE_RTS,  # unused for EU_model but required by signature
-        EU_dataset=dataset,
-        market_model=MarketModels.EU_model,
-        power_flow_model=DCOPF(),  # unused for EU_model but required by signature
+        unit_based_dataset=UnitBased_Datasets.IEEE_RTS,  # unused for order-book-based-model runs
+        order_book_based_dataset=dataset,
+        market_model=MarketModels.order_book_based_model,
+        power_flow_model=DCOPF(),  # unused for order-book-based-model runs
         cut_type=cut_type,
-        pricing_algorithm=PricingAlgorithms.IP,  # unused for EU_model
-        redispatch_algorithm=RedispatchAlgorithms.MinCostRD,  # unused for EU_model
-        redispatch_constraint_units=False,  # unused for EU_model
-        redispatch_threshold=0.0,  # unused for EU_model
-        alpha=0.0,  # unused for EU_model
+        pricing_algorithm=PricingAlgorithms.IP,  # unused for order-book-based-model runs
+        redispatch_algorithm=RedispatchAlgorithms.MinCostRD,  # unused for order-book-based-model runs
+        redispatch_constraint_units=False,  # unused for order-book-based-model runs
+        redispatch_threshold=0.0,  # unused for order-book-based-model runs
+        alpha=0.0,  # unused for order-book-based-model runs
     )
 
 
-def _matrix() -> Iterable[Tuple[EU_Datasets, CutTypes]]:
+def _matrix() -> Iterable[Tuple[OrderBookBased_Datasets, CutTypes]]:
     """Return all dataset x cut-type combinations."""
-    return [(dataset, cut_type) for dataset in EU_Datasets for cut_type in CutTypes]
+    return [(dataset, cut_type) for dataset in OrderBookBased_Datasets for cut_type in CutTypes]
 
 
 def main() -> None:
     _ensure_matplotlib_dir()
-    runs: List[Tuple[EU_Datasets, CutTypes]] = list(_matrix())
+    runs: List[Tuple[OrderBookBased_Datasets, CutTypes]] = list(_matrix())
     successes = []
     failures = []
 
@@ -72,11 +72,11 @@ def main() -> None:
         try:
             run_single(dataset, cut_type)
             successes.append((dataset, cut_type))
-            print(f"✔ Success: {dataset.name} | {cut_type.value}")
+            print(f"âœ” Success: {dataset.name} | {cut_type.value}")
         except Exception as exc:  # noqa: BLE001
             traceback.print_exc()
             failures.append((dataset, cut_type, exc))
-            print(f"✖ Failed: {dataset.name} | {cut_type.value} | {exc}")
+            print(f"âœ– Failed: {dataset.name} | {cut_type.value} | {exc}")
 
     print("\n=== Summary ===")
     print(f"Total runs: {len(runs)}")
@@ -89,3 +89,5 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
