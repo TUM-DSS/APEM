@@ -75,7 +75,7 @@
             "alpha": 0.01
         },
         "solver_configuration": {
-            "MIP_gap": 1e-4,
+            "MIP_gap": 0,
             "optimality_tol": 1e-6,
             "time_limit": 3600,
             "work_limit": 3600,

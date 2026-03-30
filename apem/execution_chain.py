@@ -28,6 +28,13 @@ if not logger.handlers:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
 
+def _announce_results_path(results_root: Optional[str]) -> None:
+    """Print the run output directory to the console."""
+    if not results_root:
+        return
+    logger.info("Results written to: %s", os.path.abspath(results_root))
+
+
 def _new_run_id() -> str:
     """Create a unique run id with UTC timestamp and random suffix."""
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
@@ -294,7 +301,8 @@ def solve_and_analyse_scenario(
     """Computes allocation and pricing for some scenario and performs several analyses."""
     if market_model == MarketModels.EU_model:
         euphemia_config = ConfigLoader().get_euphemia_configuration()
-        solve_euphemia(EU_dataset, cut_type, euphemia_config)
+        results_root = solve_euphemia(EU_dataset, cut_type, euphemia_config)
+        _announce_results_path(results_root)
         return
 
     if market_model != MarketModels.US_model:
@@ -322,7 +330,7 @@ def solve_and_analyse_scenario(
             scenario_to_analyse.analyse_scenario(results_root=run_root)  # analyse base scenario
             scenario_to_analyse.plot_network(power_flow_model, zonal_config, results_root=run_root)  # plot underlying network
 
-        return analyse_results(
+        analysis = analyse_results(
             price_analysis.scenario,
             price_analysis.allocation,
             price_analysis.pricing,
@@ -331,6 +339,8 @@ def solve_and_analyse_scenario(
             base_scenario,
             results_root=getattr(price_analysis, "results_root", None),
         )
+        _announce_results_path(getattr(price_analysis, "results_root", None))
+        return analysis
 
     scenario = _retrieve_data(US_dataset)
     configuration = _create_configuration()
@@ -372,7 +382,7 @@ def solve_and_analyse_scenario(
     )
     price_analysis.results_root = run_root
 
-    analyse_results(
+    analysis = analyse_results(
         price_analysis.scenario,
         price_analysis.allocation,
         price_analysis.pricing,
@@ -380,3 +390,5 @@ def solve_and_analyse_scenario(
         power_flow_model,
         results_root=run_root,
     )
+    _announce_results_path(run_root)
+    return analysis
