@@ -1,4 +1,5 @@
 import os
+import re
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -13,7 +14,21 @@ def plot_results(all_results, testing_data_set, saving=1, show_plots=1):
         saving (int): Flag to save the plots.
         show_plots (int): Flag to show the plots.
     """
-    average_price_keys = [f'Average price in period {x}' for x in list(range(1, 25))]
+    average_price_rows = [
+        item for item in all_results
+        if isinstance(item[0], str) and item[0].startswith('Average price in period ')
+    ]
+    average_price_rows.sort(
+        key=lambda item: int(re.search(r'(\d+)$', item[0]).group(1))
+    )
+    average_price_keys = [item[0] for item in average_price_rows]
+    period_labels = [
+        int(re.search(r'(\d+)$', key).group(1))
+        for key in average_price_keys
+    ]
+
+    if not average_price_keys:
+        raise ValueError('No average price per period rows found.')
 
     # Prepare plot data
     elmp, ip, join = [], [], []
@@ -34,7 +49,7 @@ def plot_results(all_results, testing_data_set, saving=1, show_plots=1):
     plt.plot(join, '-o', label='Join')
     plt.title(f'Average Costs per Hour; {testing_data_set}')
     plt.xlabel('Hour')
-    plt.xticks(ticks=range(24), labels=range(1, 25))
+    plt.xticks(ticks=range(len(period_labels)), labels=period_labels)
     plt.ylim([0, 100])
     plt.ylabel('Costs €/MWh')
     plt.legend()
@@ -146,25 +161,32 @@ def plot_results(all_results, testing_data_set, saving=1, show_plots=1):
         allocation_results_df = pd.read_excel(xls, sheet_name='Allocation Results')
 
     # Extract welfare values
-    welfare_values = []
+    welfare_pairs = []
     for _, row in allocation_results_df.iterrows():
         line = row[0]  # assuming the first column contains the data
         if isinstance(line, str) and line.startswith("Welfare period"):
-            value = line.split(":")[1].strip()
-            welfare_values.append(float(value))
+            period_match = re.search(r'Welfare period\s+(\d+)', line)
+            if period_match is None:
+                continue
+            period = int(period_match.group(1))
+            value = line.split(":", 1)[1].strip()
+            welfare_pairs.append((period, float(value)))
 
-    # Check if exactly 24 welfare values are found
-    if len(welfare_values) != 24:
-        print("Error: Expected 24 welfare period values, found:", len(welfare_values))
+    if not welfare_pairs:
+        print("Error: No welfare period values found.")
         return
+
+    welfare_pairs.sort(key=lambda item: item[0])
+    welfare_periods = [period for period, _ in welfare_pairs]
+    welfare_values = [value for _, value in welfare_pairs]
 
     # Plot the welfare values
     plt.figure(figsize=(10, 6))
-    plt.plot(range(1, 25), welfare_values, marker='o', linestyle='-')
-    plt.title(f'Welfare Over 24 Periods for {testing_data_set}')
+    plt.plot(welfare_periods, welfare_values, marker='o', linestyle='-')
+    plt.title(f'Welfare Over {len(welfare_periods)} Periods for {testing_data_set}')
     plt.xlabel('Period')
     plt.ylabel('Welfare Value')
-    plt.xticks(range(1, 25))
+    plt.xticks(welfare_periods)
     plt.grid(True)
     plt.tight_layout()
     plt.show()
