@@ -203,8 +203,7 @@ class ZonalFBMC(PowerFlowModel):
                 return Error(-1)
 
             # 4. Convert results to Allocation object
-            allocation = create_allocation_from_zonal_results(zonal_results, network, zonal_scenario, self,
-                                                              p_bus_expected, nodal_ptdf)
+            allocation = create_allocation_from_zonal_results(zonal_results, network, zonal_scenario, self)
 
             if stats_file and zonal_results.get('model'):
                 os.makedirs(os.path.dirname(stats_file), exist_ok=True)
@@ -264,11 +263,10 @@ class ZonalFBMC(PowerFlowModel):
 
 
 def create_allocation_from_zonal_results(zonal_results: dict, network: pypsa.Network,
-                                         zonal_scenario: Scenario, power_flow_model: 'ZonalFBMC',
-                                         p_bus_expected: pd.DataFrame, nodal_ptdf: pd.DataFrame) -> Allocation:
+                                         zonal_scenario: Scenario, power_flow_model: 'ZonalFBMC') -> Allocation:
     """
     Creates a purely ZONAL allocation object that matches the zonal_scenario.
-    It synthesizes inter-zonal flows by aggregating the nodal flows from the Base Case.
+    It synthesizes inter-zonal flows by aggregating the solved FBMC line loadings.
     """
     model = zonal_results.get('model')
     if model is None or model.Status != GRB.OPTIMAL:
@@ -278,6 +276,8 @@ def create_allocation_from_zonal_results(zonal_results: dict, network: pypsa.Net
     p_gen_df = zonal_results['p_gen']
     u_df = zonal_results['u']
     nse_tz_df = zonal_results['nse_tz']
+    final_line_flow_df = zonal_results['final_line_flow'].rename(columns=str)
+    fbmc_network_data = zonal_results['fbmc_network_data']
     zonal_prices_df = zonal_results['duals']['zonal_price']
     startup_df = (u_df.diff().fillna(u_df.iloc[0])).clip(lower=0)
 
@@ -285,8 +285,7 @@ def create_allocation_from_zonal_results(zonal_results: dict, network: pypsa.Net
     snapshot_to_period = {snap: p for p, snap in zip(periods, network.snapshots)}
     node_to_zone, _ = get_zone_maps(network, power_flow_model.node_zone_mapper, power_flow_model.zonal_configuration)
 
-    # --- 2. Synthesize Zonal f_vwt from Base Case Nodal Flows ---
-    nodal_flow_df = nodal_ptdf.dot(p_bus_expected.T).T
+    # --- 2. Synthesize zonal f_vwt from solved FBMC line loadings ---
     f_vwt = {}
 
     # Initialize all edges in the zonal network with zero flow
@@ -295,8 +294,8 @@ def create_allocation_from_zonal_results(zonal_results: dict, network: pypsa.Net
             f_vwt[(v, w, t)] = 0.0
             f_vwt[(w, v, t)] = 0.0
 
-    # Aggregate nodal flows onto the zonal interconnectors
-    for line_name, flows_over_time in nodal_flow_df.items():
+    # Aggregate solved line flows onto the zonal interconnectors
+    for line_name, flows_over_time in final_line_flow_df.items():
         if line_name in network.lines.index:
             line_info = network.lines.loc[line_name]
             node_v, node_w = line_info.bus0, line_info.bus1
@@ -380,7 +379,7 @@ def create_allocation_from_zonal_results(zonal_results: dict, network: pypsa.Net
                     remaining_demand_to_fulfill -= accepted_for_block
 
     # --- 4. Instantiate and return the final ZONAL Allocation ---
-    return Allocation(
+    allocation = Allocation(
         welfare=model.ObjVal,
         x_bt=x_bt,
         y_st=y_st,
@@ -400,3 +399,33 @@ def create_allocation_from_zonal_results(zonal_results: dict, network: pypsa.Net
         num_bin_vars=model.NumBinVars,
         dataset=zonal_scenario
     )
+
+    fb_constraint_ids = [str(line_id) for line_id in fbmc_network_data['constraint_ids']]
+    zonal_ptdf_df = fbmc_network_data['zonal_ptdf']
+    capacity_upper_df = fbmc_network_data['capacity_upper']
+    capacity_lower_df = fbmc_network_data['capacity_lower']
+    allocation.TransmissionNetworkAllocation.fbmc_data = {
+        "constraint_ids": fb_constraint_ids,
+        "ptdf": {
+            (str(line_id), str(zone_id)): float(zonal_ptdf_df.at[str(line_id), str(zone_id)])
+            for line_id in fb_constraint_ids
+            for zone_id in zonal_scenario.network.nodes
+        },
+        "flow": {
+            (str(line_id), snapshot_to_period[snapshot]): float(final_line_flow_df.at[snapshot, line_id])
+            for line_id in final_line_flow_df.columns
+            for snapshot in final_line_flow_df.index
+        },
+        "capacity_upper": {
+            (str(line_id), snapshot_to_period[snapshot]): float(capacity_upper_df.at[snapshot, str(line_id)])
+            for line_id in fb_constraint_ids
+            for snapshot in capacity_upper_df.index
+        },
+        "capacity_lower": {
+            (str(line_id), snapshot_to_period[snapshot]): float(capacity_lower_df.at[snapshot, str(line_id)])
+            for line_id in fb_constraint_ids
+            for snapshot in capacity_lower_df.index
+        },
+    }
+
+    return allocation

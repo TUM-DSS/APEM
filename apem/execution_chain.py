@@ -197,6 +197,11 @@ def analyse_results(
     results_root: Optional[str] = None,
 ) -> PriceAnalysis:
     """Performs several analyses."""
+    if isinstance(pricing, Error) or getattr(pricing, "status", 0) != 1:
+        raise RuntimeError(
+            f"Cannot analyse results because pricing failed with status {getattr(pricing, 'status', 'unknown')}."
+        )
+
     path = results_root or f"US_results/{scenario}_results"
     os.makedirs(path, exist_ok=True)
 
@@ -260,8 +265,10 @@ def solve_US_scenario(
         configuration,
         run_root=run_root,
     )
+    if isinstance(allocation, Error):
+        raise RuntimeError(f"{power_flow_model} allocation failed with status {allocation.status}.")
 
-    _solve_US_redispatch_problem(
+    redispatch_result = _solve_US_redispatch_problem(
         zonal_scenario,
         power_flow_model,
         redispatch_algorithm=redispatch_algorithm,
@@ -272,6 +279,10 @@ def solve_US_scenario(
         redispatch_threshold=redispatch_threshold,
         run_root=run_root,
     )
+    if isinstance(redispatch_result, Error):
+        raise RuntimeError(
+            f"{power_flow_model} redispatch failed with status {redispatch_result.status}."
+        )
 
     pricing = _solve_US_pricing_problem(
         zonal_scenario,
@@ -281,6 +292,8 @@ def solve_US_scenario(
         configuration,
         run_root=run_root,
     )
+    if isinstance(pricing, Error) or getattr(pricing, "status", 0) != 1:
+        raise RuntimeError(f"{power_flow_model} pricing failed with status {getattr(pricing, 'status', 'unknown')}.")
     analysis = PriceAnalysis(zonal_scenario, allocation, pricing, configuration, scenario)
     analysis.results_root = run_root
     return analysis

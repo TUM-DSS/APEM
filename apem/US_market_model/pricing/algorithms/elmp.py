@@ -8,6 +8,11 @@ from apem.US_market_model.allocation.allocation import Allocation
 from apem.US_market_model.allocation.configuration import Configuration
 from apem.US_market_model.allocation.error import Error
 from apem.US_market_model.data.parsing.scenario import Scenario
+from apem.US_market_model.pricing.algorithms.fbmc_support import (
+    add_fbmc_gamma_composition_constraints,
+    add_fbmc_price_coupling_constraints,
+    get_fbmc_pricing_data,
+)
 from apem.US_market_model.pricing.algorithms.pricing_algorithm import PricingAlgorithm
 from apem.US_market_model.pricing.analysis.pricing import GLOCS, Pricing
 from apem.US_market_model.pricing.analysis.write_prices import write_prices, write_prices_failure
@@ -86,6 +91,8 @@ class ELMP(PricingAlgorithm):
         f_vwt = allocation.TransmissionNetworkAllocation.f_vwt
         f_vwkt = getattr(allocation.TransmissionNetworkAllocation, "f_vwkt", None)
         u_st = allocation.SellersAllocation.u_st
+        fbmc_data = get_fbmc_pricing_data(allocation)
+        use_fbmc_network = fbmc_data is not None
 
         epsilon_up_btl = model.addVars(buyers, periods, blocks_buyers, ub=GRB.INFINITY,
                                        name='epsilon_up_b_t_l')
@@ -103,59 +110,67 @@ class ELMP(PricingAlgorithm):
         epsilon_up_st = model.addVars(sellers, periods, ub=GRB.INFINITY, name='epsilon_up_s_t')
 
         p_vt = model.addVars(nodes, periods, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='p_vt')
-        # build directed multiedge list
-        is_multigraph = network.is_multigraph()
-        if is_multigraph:
-            undirected_edges = list(network.edges(keys=True, data=True))  # (u,v,k,data)
+        if use_fbmc_network:
+            fb_constraint_ids = fbmc_data["constraint_ids"]
+            flow_lt = fbmc_data["flow"]
+            capacity_upper_lt = fbmc_data["capacity_upper"]
+            capacity_lower_lt = fbmc_data["capacity_lower"]
+            gamma_lt = model.addVars(fb_constraint_ids, periods, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='gamma_l_t')
         else:
-            undirected_edges = [(u, v, None, data) for u, v, data in network.edges(data=True)]
+            is_multigraph = network.is_multigraph()
+            if is_multigraph:
+                undirected_edges = list(network.edges(keys=True, data=True))  # (u,v,k,data)
+            else:
+                undirected_edges = [(u, v, None, data) for u, v, data in network.edges(data=True)]
 
-        if is_multigraph:
-            if not f_vwkt:
-                if file_prices:
-                    write_prices_failure(file_prices, str(self), -2)
-                print(f'{self} pricing error with code -2: missing multigraph per-edge flows')
-                return Error(-2)
-            missing_flow_key = next(
-                (
-                    (u, v, k, t)
-                    for (u, v, k, _) in undirected_edges
-                    for t in periods
-                    if (u, v, k, t) not in f_vwkt
-                ),
-                None,
-            )
-            if missing_flow_key is not None:
-                if file_prices:
-                    write_prices_failure(file_prices, str(self), -2)
-                print(f'{self} pricing error with code -2: missing multigraph flow key {missing_flow_key}')
-                return Error(-2)
+            if is_multigraph:
+                if not f_vwkt:
+                    if file_prices:
+                        write_prices_failure(file_prices, str(self), -2)
+                    print(f'{self} pricing error with code -2: missing multigraph per-edge flows')
+                    return Error(-2)
+                missing_flow_key = next(
+                    (
+                        (u, v, k, t)
+                        for (u, v, k, _) in undirected_edges
+                        for t in periods
+                        if (u, v, k, t) not in f_vwkt
+                    ),
+                    None,
+                )
+                if missing_flow_key is not None:
+                    if file_prices:
+                        write_prices_failure(file_prices, str(self), -2)
+                    print(f'{self} pricing error with code -2: missing multigraph flow key {missing_flow_key}')
+                    return Error(-2)
 
-        directed_edges = []
-        for idx, (u, v, k, data) in enumerate(undirected_edges):
-            directed_edges.append((idx, u, v, k, data))
-            directed_edges.append((idx, v, u, k, data))
+            directed_edges = []
+            for idx, (u, v, k, data) in enumerate(undirected_edges):
+                directed_edges.append((idx, u, v, k, data))
+                directed_edges.append((idx, v, u, k, data))
 
-        # per-edge flows
-        flow_et = {}
-        for idx, (u, v, k, data) in enumerate(undirected_edges):
-            for t in periods:
-                if is_multigraph:
-                    base = f_vwkt[(u, v, k, t)]
-                else:
-                    base = f_vwt[(u, v, t)]
-                flow_et[(idx, u, v, t)] = base
-                flow_et[(idx, v, u, t)] = -base
+            flow_et = {}
+            for idx, (u, v, k, data) in enumerate(undirected_edges):
+                for t in periods:
+                    if is_multigraph:
+                        base = f_vwkt[(u, v, k, t)]
+                    else:
+                        base = f_vwt[(u, v, t)]
+                    flow_et[(idx, u, v, t)] = base
+                    flow_et[(idx, v, u, t)] = -base
 
-        gamma_et = model.addVars([(e, v, w, t) for (e, v, w, _, _) in directed_edges for t in periods],
-                                 lb=-GRB.INFINITY, ub=GRB.INFINITY, name='gamma_e_t')
+            gamma_et = model.addVars([(e, v, w, t) for (e, v, w, _, _) in directed_edges for t in periods],
+                                     lb=-GRB.INFINITY, ub=GRB.INFINITY, name='gamma_e_t')
         if fixed_prices:
             model.addConstrs(p_vt[v, t] == fixed_prices.node_prices[v, t] for v in nodes for t in periods)
-
-        epsilon_down_et = model.addVars([(e, v, w, t) for (e, v, w, _, _) in directed_edges for t in periods],
-                                        lb=-GRB.INFINITY, ub=0, name='epsilon_down_e_t')
-        epsilon_up_et = model.addVars([(e, v, w, t) for (e, v, w, _, _) in directed_edges for t in periods],
-                                      ub=GRB.INFINITY, name='epsilon_up_e_t')
+        if use_fbmc_network:
+            epsilon_down_lt = model.addVars(fb_constraint_ids, periods, lb=-GRB.INFINITY, ub=0, name='epsilon_down_l_t')
+            epsilon_up_lt = model.addVars(fb_constraint_ids, periods, ub=GRB.INFINITY, name='epsilon_up_l_t')
+        else:
+            epsilon_down_et = model.addVars([(e, v, w, t) for (e, v, w, _, _) in directed_edges for t in periods],
+                                            lb=-GRB.INFINITY, ub=0, name='epsilon_down_e_t')
+            epsilon_up_et = model.addVars([(e, v, w, t) for (e, v, w, _, _) in directed_edges for t in periods],
+                                          ub=GRB.INFINITY, name='epsilon_up_e_t')
 
         chi_up_st = model.addVars(sellers, periods, ub=GRB.INFINITY, name='chi_up_s_t')
         chi_down_st = model.addVars(sellers, periods, lb=-GRB.INFINITY, ub=0, name='chi_down_s_t')
@@ -168,15 +183,22 @@ class ELMP(PricingAlgorithm):
 
         lambda_b = model.addVars(buyers, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='lambda_b')
         lambda_s = model.addVars(sellers, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='lambda_s')
-        lambda_et = model.addVars([(e, v, w, t) for (e, v, w, _, _) in directed_edges for t in periods],
-                                  lb=-GRB.INFINITY, ub=GRB.INFINITY, name='lambda_e_t')
+        if use_fbmc_network:
+            lambda_lt = model.addVars(fb_constraint_ids, periods, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='lambda_l_t')
+        else:
+            lambda_et = model.addVars([(e, v, w, t) for (e, v, w, _, _) in directed_edges for t in periods],
+                                      lb=-GRB.INFINITY, ub=GRB.INFINITY, name='lambda_e_t')
 
         model.update()
 
         model.setObjective(
             gp.quicksum(lambda_b[b] for b in buyers)
             + gp.quicksum(lambda_s[s] for s in sellers)
-            + gp.quicksum(lambda_et[e, v, w, t] for (e, v, w, _, _) in directed_edges for t in periods),
+            + (
+                gp.quicksum(lambda_lt[line_id, t] for line_id in fb_constraint_ids for t in periods)
+                if use_fbmc_network
+                else gp.quicksum(lambda_et[e, v, w, t] for (e, v, w, _, _) in directed_edges for t in periods)
+            ),
             GRB.MINIMIZE
         )
         # 1
@@ -230,51 +252,60 @@ class ELMP(PricingAlgorithm):
             >= 0
             for s in sellers
         )
-        # 3
-        for (e, v, w, k, data) in directed_edges:
-            for t in periods:
-                model.addConstr(
-                    lambda_et[e, v, w, t]
-                    - epsilon_up_et[e, v, w, t] * data['F_max']
-                    - epsilon_down_et[e, v, w, t] * (-data['F_max'])
-                    + gamma_et[e, v, w, t] * flow_et[(e, v, w, t)]
-                    >= 0
-                )
-        # 4
-        for v in nodes:
-            if v == r_star:
-                continue
+        if use_fbmc_network:
+            for line_id in fb_constraint_ids:
+                for t in periods:
+                    model.addConstr(
+                        lambda_lt[line_id, t]
+                        - epsilon_up_lt[line_id, t] * capacity_upper_lt[(line_id, t)]
+                        - epsilon_down_lt[line_id, t] * capacity_lower_lt[(line_id, t)]
+                        + gamma_lt[line_id, t] * flow_lt[(line_id, t)]
+                        >= 0
+                    )
+            add_fbmc_price_coupling_constraints(model, p_vt, r_t, gamma_lt, nodes, periods, fbmc_data)
+            add_fbmc_gamma_composition_constraints(model, gamma_lt, epsilon_up_lt, epsilon_down_lt, periods, fbmc_data)
+        else:
+            for (e, v, w, k, data) in directed_edges:
+                for t in periods:
+                    model.addConstr(
+                        lambda_et[e, v, w, t]
+                        - epsilon_up_et[e, v, w, t] * data['F_max']
+                        - epsilon_down_et[e, v, w, t] * (-data['F_max'])
+                        + gamma_et[e, v, w, t] * flow_et[(e, v, w, t)]
+                        >= 0
+                    )
+            for v in nodes:
+                if v == r_star:
+                    continue
+                for t in periods:
+                    inflow = gp.quicksum(
+                        data['B'] * (p_vt[w, t] + gamma_et[e, w, v, t])
+                        for (e, w, v2, k, data) in directed_edges
+                        if v2 == v
+                    )
+                    outflow = gp.quicksum(
+                        data['B'] * (p_vt[v, t] + gamma_et[e, v, w, t])
+                        for (e, v2, w, k, data) in directed_edges
+                        if v2 == v
+                    )
+                    model.addConstr(inflow - outflow == 0)
             for t in periods:
                 inflow = gp.quicksum(
-                    data['B'] * (p_vt[w, t] + gamma_et[e, w, v, t])
+                    data['B'] * (p_vt[w, t] + gamma_et[e, w, r_star, t])
                     for (e, w, v2, k, data) in directed_edges
-                    if v2 == v
+                    if v2 == r_star
                 )
                 outflow = gp.quicksum(
-                    data['B'] * (p_vt[v, t] + gamma_et[e, v, w, t])
+                    data['B'] * (p_vt[r_star, t] + gamma_et[e, r_star, w, t])
                     for (e, v2, w, k, data) in directed_edges
-                    if v2 == v
+                    if v2 == r_star
                 )
-                model.addConstr(inflow - outflow == 0)
-        # 5
-        for t in periods:
-            inflow = gp.quicksum(
-                data['B'] * (p_vt[w, t] + gamma_et[e, w, r_star, t])
-                for (e, w, v2, k, data) in directed_edges
-                if v2 == r_star
-            )
-            outflow = gp.quicksum(
-                data['B'] * (p_vt[r_star, t] + gamma_et[e, r_star, w, t])
-                for (e, v2, w, k, data) in directed_edges
-                if v2 == r_star
-            )
-            model.addConstr(r_t[t] + inflow - outflow == 0)
-        # 6
-        for (e, v, w, k, data) in directed_edges:
-            for t in periods:
-                model.addConstr(
-                    -gamma_et[e, v, w, t] + epsilon_up_et[e, v, w, t] + epsilon_down_et[e, v, w, t] == 0
-                )
+                model.addConstr(r_t[t] + inflow - outflow == 0)
+            for (e, v, w, k, data) in directed_edges:
+                for t in periods:
+                    model.addConstr(
+                        -gamma_et[e, v, w, t] + epsilon_up_et[e, v, w, t] + epsilon_down_et[e, v, w, t] == 0
+                    )
         # 7
         model.addConstrs(
             epsilon_up_btl[b, t, lb] + epsilon_down_btl[b, t, lb] - epsilon_bt[b, t]
@@ -389,22 +420,35 @@ class ELMP(PricingAlgorithm):
             total_glocs = round(model.getObjective().getValue(), 2)
             glocs_buyers = round(sum(lambda_b[b].X for b in buyers), 2)
             glocs_sellers = round(sum(lambda_s[s].X for s in sellers), 2)
-            glocs_network = round(
-                sum(lambda_et[e, v, w, t].X for (e, v, w, _, _) in directed_edges for t in periods), 2)
+            if use_fbmc_network:
+                glocs_network = round(sum(lambda_lt[line_id, t].X for line_id in fb_constraint_ids for t in periods), 2)
+            else:
+                glocs_network = round(
+                    sum(lambda_et[e, v, w, t].X for (e, v, w, _, _) in directed_edges for t in periods), 2)
             glocs_per_buyer = {b: round(lambda_b[b].X, 2) for b in buyers}
             glocs_per_seller = {s: round(lambda_s[s].X, 2) for s in sellers}
-            glocs_per_line = {}
-            for (e, v, w, _, _) in directed_edges:
-                glocs_per_line[(v, w, e)] = round(sum(lambda_et[e, v, w, t].X for t in periods), 2)
+            if use_fbmc_network:
+                glocs_per_line = {
+                    line_id: round(sum(lambda_lt[line_id, t].X for t in periods), 2)
+                    for line_id in fb_constraint_ids
+                }
+            else:
+                glocs_per_line = {}
+                for (e, v, w, _, _) in directed_edges:
+                    glocs_per_line[(v, w, e)] = round(sum(lambda_et[e, v, w, t].X for t in periods), 2)
 
             p_vt = {(v, t): p_vt[v, t].X for v in nodes for t in periods}
-            gamma_vwt = {}
-            gamma_vwkt = {}
-            for (e, v, w, k, _) in directed_edges:
-                for t in periods:
-                    gamma_val = gamma_et[e, v, w, t].X
-                    gamma_vwt[(v, w, t)] = gamma_vwt.get((v, w, t), 0) + gamma_val
-                    gamma_vwkt[(v, w, k, t)] = gamma_val
+            if use_fbmc_network:
+                gamma_vwt = {(line_id, t): gamma_lt[line_id, t].X for line_id in fb_constraint_ids for t in periods}
+                gamma_vwkt = {}
+            else:
+                gamma_vwt = {}
+                gamma_vwkt = {}
+                for (e, v, w, k, _) in directed_edges:
+                    for t in periods:
+                        gamma_val = gamma_et[e, v, w, t].X
+                        gamma_vwt[(v, w, t)] = gamma_vwt.get((v, w, t), 0) + gamma_val
+                        gamma_vwkt[(v, w, k, t)] = gamma_val
 
             pricing = Pricing(p_vt, gamma_vwt, str(self), runtime, num_vars, num_constrs,
                               glocs=GLOCS(total_glocs, glocs_buyers, glocs_sellers, glocs_network,
