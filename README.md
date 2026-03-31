@@ -6,7 +6,7 @@
 <details>
   <summary> After cloning the code, the following setup steps need to be performed once before running the code. </summary>
 
-  <br>**Note:** The setup instructions assume a Linux-based or Windows OS and require Python 3.10 (or higher). 
+  <br>**Note:** The setup instructions assume macOS, Linux, or Windows and require Python 3.10 (or higher). 
 
   ### 1. Virtual environment
   - Create a virtual environment (alternatively, you can use `virtualenv` or whatever you prefer) - you may choose any name (e.g., "apem-venv"):
@@ -18,11 +18,14 @@
 
   - Activate the virtual environment:
   ```bash
-  # Linux:
+  # macOS / Linux:
   source ./<venv-name>/bin/activate        # Example: source ./apem-venv/bin/activate
 
-  # Windows: 
-  source <venv-name>/Scripts/activate      # Example: source apem-venv/Scripts/activate
+  # Windows (PowerShell):
+  .\<venv-name>\Scripts\Activate.ps1       # Example: .\apem-venv\Scripts\Activate.ps1
+
+  # Windows (cmd.exe):
+  .\<venv-name>\Scripts\activate.bat       # Example: .\apem-venv\Scripts\activate.bat
   ```
 
   **Note:** The virtual environment can be deactivated using `deactivate`- however, for the next steps, we want the virtual environment to be active.
@@ -122,7 +125,8 @@ For unit-based-model-specific evaluation and comparison workflows, see the examp
 pricing algorithms, lost opportunity costs, redispatch costs, and cost-based
 comparisons across power-flow models.
 
-**Note:** If you ever run into the error "ModuleNotFoundError: No module named 'src'", this can likely be resolved by setting the PYTHONPATH inside your virtual environment. To do this, add the following line to <venv_name>/bin/activate: `export PYTHONPATH=/<path-to-APEM>`.
+**Note:** If you run into `ModuleNotFoundError: No module named 'apem'`, run commands from the repository root and install the package in editable mode once:
+`pip install -e .`
 
 ## Unit-Based-to-Order-Book Dataset Conversion
 
@@ -250,7 +254,7 @@ Note: Period indexing in APEM examples starts at 1. Keep it consistent.
 
 Place your files under:
 ```python 
-apem/unit_based_model/data/raw/<your_dataset_name>/
+apem/unit_based_model/data/raw_data/<your_dataset_name>/
 ```
 
 ### Minimal template:
@@ -382,4 +386,3 @@ For Euphemia internals and run-output details, see
 [`apem/order_book_based_model/euphemia/README.md`](./apem/order_book_based_model/euphemia/README.md).
 For order-book order-type semantics, see the
 [`Order Types Glossary`](./apem/order_book_based_model/euphemia/README.md#order-types-glossary).
-
