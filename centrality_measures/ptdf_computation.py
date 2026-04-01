@@ -1,3 +1,6 @@
+from collections.abc import Hashable
+from typing import Any
+
 import numpy as np
 import networkx as nx
 
@@ -5,7 +8,10 @@ import networkx as nx
 # -----------------------------
 # DC power flow / PTDF helpers
 # -----------------------------
-def build_B_matrix(G: nx.Graph, b_attr: str = "B"):
+def build_B_matrix(
+    G: nx.Graph,
+    b_attr: str = "B",
+) -> tuple[np.ndarray, list[Hashable], dict[Hashable, int]]:
     """
     Build nodal susceptance (Laplacian) matrix B for DC power flow.
 
@@ -46,7 +52,10 @@ def build_B_matrix(G: nx.Graph, b_attr: str = "B"):
     return B, nodes, node_index
 
 
-def invert_reduced_B(B: np.ndarray, slack_idx: int):
+def invert_reduced_B(
+    B: np.ndarray,
+    slack_idx: int,
+) -> tuple[np.ndarray, list[int], np.ndarray]:
     """
     Invert reduced B (drop slack row/column).
 
@@ -69,7 +78,12 @@ def invert_reduced_B(B: np.ndarray, slack_idx: int):
     return Binv, mask, full2red
 
 
-def compute_bus_angle_basis(Binv: np.ndarray, n: int, slack_idx: int, mask: list[int]):
+def compute_bus_angle_basis(
+    Binv: np.ndarray,
+    n: int,
+    slack_idx: int,
+    mask: list[int],
+) -> np.ndarray:
     """
     Compute voltage angle responses θ for **unit injections at each non-slack bus**
     with withdrawal at the slack (i.e., columns are injections).
@@ -90,7 +104,11 @@ def compute_bus_angle_basis(Binv: np.ndarray, n: int, slack_idx: int, mask: list
     return theta_full
 
 
-def compute_ptdf(G: nx.Graph, slack=None, b_attr: str = "B"):
+def compute_ptdf(
+    G: nx.Graph,
+    slack: Hashable | None = None,
+    b_attr: str = "B",
+) -> tuple[np.ndarray, list[tuple[Hashable, Hashable, dict[str, Any]]], list[Hashable], list[int], Hashable]:
     """
     Compute PTDF matrix (flows per 1 MW injection at each bus vs withdrawal at slack).
 

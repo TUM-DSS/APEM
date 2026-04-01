@@ -1,7 +1,9 @@
+from collections.abc import Hashable
+
 import networkx as nx
 
 
-def compute_node_degree_centrality(G):
+def compute_node_degree_centrality(G: nx.Graph) -> dict[Hashable, float]:
     """
     Compute (unweighted) degree centrality for all nodes.
 
@@ -11,7 +13,7 @@ def compute_node_degree_centrality(G):
     return deg_centrality
 
 
-def compute_node_betweenness_centrality(G):
+def compute_node_betweenness_centrality(G: nx.Graph) -> dict[Hashable, float]:
     """
     Compute betweenness centrality for all nodes in a graph.
 
@@ -26,7 +28,11 @@ def compute_node_betweenness_centrality(G):
     return bet_centrality
 
 
-def compute_edge_betweenness(G: nx.Graph, weight=None, normalized=True):
+def compute_edge_betweenness(
+    G: nx.Graph,
+    weight: str | None = None,
+    normalized: bool = True,
+) -> dict[tuple[Hashable, Hashable], float]:
     """
     Compute betweeness centrality for all lines in a graph.
     """

@@ -1,7 +1,14 @@
+from collections.abc import Hashable
+
 import numpy as np
 
 
-def congestion_rent_contribution_from_lambdas(ptdf, nodes, mask, lambda_lines):
+def congestion_rent_contribution_from_lambdas(
+    ptdf: np.ndarray,
+    nodes: list[Hashable],
+    mask: list[int],
+    lambda_lines: np.ndarray | list[float],
+) -> dict[Hashable, float]:
     """
     Compute I_k = sum_ell lambda_ell * PTDF[ell, k] for each non-slack node k.
     Slack node gets 0 (since its PTDF column is not in ptdf).

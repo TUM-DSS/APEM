@@ -1,13 +1,21 @@
+from collections.abc import Hashable
+from typing import Any
+
 import networkx as nx
 import numpy as np
 
-from apem.US_market_model.data.parsing.parse_pypsa_eur_large import ParsePyPSAEurLarge
 from centrality_measures.graph_metrics import compute_node_betweenness_centrality, compute_node_degree_centrality
-from centrality_measures.ptdf_computation import compute_ptdf
 
 
-def rank_nodes_by_ptdf(ptdf: np.ndarray, edges, nodes, mask, G: nx.Graph, method: str = "sum",
-                       fmax_attr: str = "F_max"):
+def rank_nodes_by_ptdf(
+    ptdf: np.ndarray,
+    edges: list[tuple[Hashable, Hashable, dict[str, Any]]],
+    nodes: list[Hashable],
+    mask: list[int],
+    G: nx.Graph,
+    method: str = "sum",
+    fmax_attr: str = "F_max",
+) -> list[tuple[Hashable, float]]:
     """
     Aggregate each column of PTDF (node impact) into a scalar score, then rank.
 
@@ -66,7 +74,7 @@ def rank_nodes_by_ptdf(ptdf: np.ndarray, edges, nodes, mask, G: nx.Graph, method
     return ranking
 
 
-def rank_nodes_by_degree(G: nx.Graph):
+def rank_nodes_by_degree(G: nx.Graph) -> list[tuple[Hashable, float]]:
     """
     Rank nodes by degree centrality.
     """
@@ -76,40 +84,10 @@ def rank_nodes_by_degree(G: nx.Graph):
     return ranking
 
 
-def rank_nodes_by_betweenness(G: nx.Graph):
+def rank_nodes_by_betweenness(G: nx.Graph) -> list[tuple[Hashable, float]]:
     """
     Rank nodes by betweenness centrality.
     """
     bet_centrality = compute_node_betweenness_centrality(G)
     ranking = sorted(bet_centrality.items(), key=lambda x: -x[1])
     return ranking
-
-
-if __name__ == "__main__":
-    # Load your graph (with edge attrs: 'B' and 'F_max')
-    PyPSAEurLarge = ParsePyPSAEurLarge()
-    G = PyPSAEurLarge.parse_data().network
-
-    # Compute PTDF matrix relative to a slack bus
-    ptdf, edges, nodes, mask, slack_node = compute_ptdf(G, slack=None, b_attr="B")
-
-    # Rank nodes using PTDF-based congestion-capacity weighting
-    ranking = rank_nodes_by_ptdf(ptdf, edges, nodes, mask, G,
-                                 method="weighted_sum", fmax_attr="F_max")
-
-    print(f"Slack bus: {slack_node}")
-    print("Top 10 important nodes (weighted_sum):")
-    for node, score in ranking[:10]:
-        print(node, score)
-
-    # Rank by degree centrality
-    deg_ranking = rank_nodes_by_degree(G)
-    print("\nTop 10 important nodes (degree centrality):")
-    for node, score in deg_ranking[:10]:
-        print(node, score)
-
-    # Rank by betweenness centrality
-    bet_ranking = rank_nodes_by_betweenness(G)
-    print("\nTop 10 important nodes (betweenness centrality):")
-    for node, score in bet_ranking[:10]:
-        print(node, score)

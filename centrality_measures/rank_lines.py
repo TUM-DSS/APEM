@@ -1,9 +1,11 @@
+from collections.abc import Hashable
+
 import networkx as nx
 
 from centrality_measures.graph_metrics import compute_edge_betweenness
 
 
-def rank_lines_edge_betweenness(G: nx.Graph):
+def rank_lines_edge_betweenness(G: nx.Graph) -> list[tuple[tuple[Hashable, Hashable], float]]:
     """
     Rank lines by edge betweenness centrality.
     """
