@@ -1,20 +1,19 @@
 """
-Example script for computing graph and PTDF-based centrality measures on PyPSAEurLarge.
+Example script for computing graph and PTDF-based node rankings.
 
 The script:
-1. parses the PyPSAEurLarge unit-based dataset from APEM,
+1. parses one unit-based dataset from APEM,
 2. computes the PTDF matrix for a chosen slack bus,
 3. ranks nodes by PTDF impact, degree centrality, and betweenness centrality,
-4. computes node congestion-rent contributions from line shadow prices,
-5. creates per-metric top-k node plots on the APEM Germany map,
-6. writes all outputs to a timestamped evaluation folder.
+4. creates per-metric top-k node plots on the APEM Germany map,
+5. writes all outputs to a timestamped evaluation folder.
 
 You can adapt the run by editing the constants near the top of the file:
+- `DATASET`: unit-based dataset used for parsing and ranking.
 - `SLACK_NODE`: node label used as PTDF slack bus (`None` means first node in graph order).
 - `PTDF_METHODS`: PTDF-based node ranking aggregations to compute.
 - `TOP_K_PRINT`: number of top-ranked items printed to stdout for quick inspection.
 - `TOP_K_PLOT`: number of top-ranked nodes highlighted in each metric plot.
-- `LAMBDA_MODE`: how synthetic line shadow prices are generated for contribution analysis.
 """
 
 from __future__ import annotations
@@ -44,25 +43,24 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from apem.unit_based_model.data.parsing.parse_pypsa_eur_large import ParsePyPSAEurLarge
+from apem.unit_based_model.enums import UnitBased_Datasets
 from apem.unit_based_model.utils.paths import RAW_DATA_DIR
-from centrality_measures.market_metrics import congestion_rent_contribution_from_lambdas
-from centrality_measures.ptdf_computation import compute_ptdf
-from centrality_measures.rank_nodes import (
+from node_ranking.market_metrics import compute_ptdf
+from node_ranking.rank_nodes import (
     rank_nodes_by_betweenness,
     rank_nodes_by_degree,
     rank_nodes_by_ptdf,
 )
 
+DATASET = UnitBased_Datasets.PyPSAEurLarge
 SLACK_NODE = None
 PTDF_METHODS = ("sum", "max", "weighted_sum")
 TOP_K_PRINT = 10
-TOP_K_PLOT = 20
-LAMBDA_MODE = "ones"
+TOP_K_PLOT = 10
 
 
 def _scenario_name() -> str:
-    return "PyPSAEurLarge"
+    return DATASET.name
 
 
 def _output_dir(scenario_name: str) -> Path:
@@ -73,7 +71,7 @@ def _output_dir(scenario_name: str) -> Path:
         / "unit_based_model"
         / f"{scenario_name}_results"
         / "evaluation"
-        / "centrality_measures"
+        / "node_ranking"
         / timestamp
     )
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -84,15 +82,6 @@ def _ranking_to_df(ranking: list[tuple[object, float]], key_name: str) -> pd.Dat
     return pd.DataFrame(
         [{key_name: key, "score": float(score)} for key, score in ranking]
     )
-
-
-def _build_lambda_lines(mode: str, edges, ptdf: np.ndarray) -> np.ndarray:
-    m = len(edges)
-    if mode == "ones":
-        return np.ones(m, dtype=float)
-    if mode == "ptdf_row_abs_sum":
-        return np.abs(ptdf).sum(axis=1)
-    raise ValueError(f"Unsupported LAMBDA_MODE: {mode}")
 
 
 def _safe_metric_name(metric_name: str) -> str:
@@ -288,8 +277,7 @@ def save_topk_node_highlight_plot(
 
 
 def main() -> None:
-    parser = ParsePyPSAEurLarge()
-    scenario = parser.parse_data()
+    scenario = DATASET.value.parse_data()
     graph = scenario.network
     scenario_name = str(scenario.name) if getattr(scenario, "name", None) else _scenario_name()
 
@@ -352,30 +340,6 @@ def main() -> None:
     plot_paths["degree"] = str(degree_plot)
     plot_paths["betweenness"] = str(betweenness_plot)
 
-    # Node congestion-rent contributions from synthetic line shadow prices
-    lambda_lines = _build_lambda_lines(LAMBDA_MODE, edges, ptdf)
-    contributions = congestion_rent_contribution_from_lambdas(
-        ptdf=ptdf,
-        nodes=nodes,
-        mask=mask,
-        lambda_lines=lambda_lines,
-    )
-    contrib_df = pd.DataFrame(
-        [{"node": node, "contribution": float(value)} for node, value in contributions.items()]
-    ).sort_values("contribution", ascending=False)
-    contrib_df.to_csv(output_dir / "node_congestion_rent_contribution.csv", index=False)
-    contribution_ranking = list(zip(contrib_df["node"].tolist(), contrib_df["contribution"].tolist()))
-    contribution_plot = output_dir / f"top_nodes_{_safe_metric_name('congestion_rent_contribution')}.png"
-    save_topk_node_highlight_plot(
-        graph=graph,
-        ranking=contribution_ranking,
-        metric_name="congestion_rent_contribution",
-        output_path=contribution_plot,
-        top_k=TOP_K_PLOT,
-        coord_map=coord_map,
-    )
-    plot_paths["congestion_rent_contribution"] = str(contribution_plot)
-
     metadata = {
         "scenario": scenario_name,
         "slack_node": slack_node,
@@ -384,7 +348,6 @@ def main() -> None:
         "ptdf_shape": list(ptdf.shape),
         "ptdf_methods": list(PTDF_METHODS),
         "top_k_plot": TOP_K_PLOT,
-        "lambda_mode": LAMBDA_MODE,
         "plots": plot_paths,
         "output_dir": str(output_dir),
     }

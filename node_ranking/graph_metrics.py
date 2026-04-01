@@ -7,9 +7,10 @@ import numpy as np
 
 def compute_node_degree_centrality(G: nx.Graph) -> dict[Hashable, float]:
     """
-    Compute (unweighted) degree centrality for all nodes.
+    Compute node degree centrality for all nodes.
 
-    Degree centrality of a node is its degree divided by the maximum possible degree (n-1), so scores lie in [0, 1].
+    Degree centrality is degree divided by the maximum possible degree
+    (`n - 1`), so values are in `[0, 1]`.
     """
     deg_centrality = nx.degree_centrality(G)
     return deg_centrality
@@ -17,14 +18,12 @@ def compute_node_degree_centrality(G: nx.Graph) -> dict[Hashable, float]:
 
 def compute_node_betweenness_centrality(G: nx.Graph) -> dict[Hashable, float]:
     """
-    Compute betweenness centrality for all nodes in a graph.
+    Compute node betweenness centrality for all nodes.
 
-    Betweenness centrality of a node is the fraction of all shortest paths
-    between any two nodes that pass through this node. It measures how much
-    a node acts as a "bridge" or bottleneck in the network.
+    Betweenness centrality is the fraction of shortest paths between node
+    pairs that pass through each node. This implementation is unweighted and
+    normalized.
     """
-    # - weight=None → shortest paths are unweighted (all edges count as length 1).
-    # - normalized=True → results are scaled to lie in [0,1].
     bet_centrality = nx.betweenness_centrality(G, weight=None, normalized=True)
 
     return bet_centrality
@@ -36,7 +35,10 @@ def compute_edge_betweenness(
     normalized: bool = True,
 ) -> dict[tuple[Hashable, Hashable], float]:
     """
-    Compute betweeness centrality for all lines in a graph.
+    Compute edge betweenness centrality for all edges.
+
+    Delegates to `networkx.edge_betweenness_centrality` with the provided
+    `weight` and `normalized` options.
     """
     bet_centrality = nx.edge_betweenness_centrality(G, k=None, normalized=normalized, weight=weight)
     return bet_centrality
@@ -52,7 +54,7 @@ def compute_node_ptdf_contribution_scores(
     fmax_attr: str = "F_max",
 ) -> dict[Hashable, float]:
     """
-    Compute PTDF-based contribution scores for all nodes.
+    Compute PTDF-based node contribution scores.
 
     Parameters
     ----------
@@ -76,7 +78,7 @@ def compute_node_ptdf_contribution_scores(
     Returns
     -------
     scores : dict[node_label, score]
-        PTDF contribution score for each node. Slack node has score 0.
+        Contribution score for each node. Slack node has score 0.
     """
     m, _ncols = ptdf.shape
 
