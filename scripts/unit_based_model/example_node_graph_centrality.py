@@ -5,14 +5,15 @@ The script:
 1. parses the PyPSAEurLarge unit-based dataset from APEM,
 2. computes the PTDF matrix for a chosen slack bus,
 3. ranks nodes by PTDF impact, degree centrality, and betweenness centrality,
-4. ranks lines by edge betweenness centrality,
-5. computes node congestion-rent contributions from line shadow prices,
+4. computes node congestion-rent contributions from line shadow prices,
+5. creates per-metric top-k node plots on the APEM Germany map,
 6. writes all outputs to a timestamped evaluation folder.
 
 You can adapt the run by editing the constants near the top of the file:
 - `SLACK_NODE`: node label used as PTDF slack bus (`None` means first node in graph order).
 - `PTDF_METHODS`: PTDF-based node ranking aggregations to compute.
 - `TOP_K_PRINT`: number of top-ranked items printed to stdout for quick inspection.
+- `TOP_K_PLOT`: number of top-ranked nodes highlighted in each metric plot.
 - `LAMBDA_MODE`: how synthetic line shadow prices are generated for contribution analysis.
 """
 
@@ -47,7 +48,6 @@ from apem.unit_based_model.data.parsing.parse_pypsa_eur_large import ParsePyPSAE
 from apem.unit_based_model.utils.paths import RAW_DATA_DIR
 from centrality_measures.market_metrics import congestion_rent_contribution_from_lambdas
 from centrality_measures.ptdf_computation import compute_ptdf
-from centrality_measures.rank_lines import rank_lines_edge_betweenness
 from centrality_measures.rank_nodes import (
     rank_nodes_by_betweenness,
     rank_nodes_by_degree,
@@ -83,15 +83,6 @@ def _output_dir(scenario_name: str) -> Path:
 def _ranking_to_df(ranking: list[tuple[object, float]], key_name: str) -> pd.DataFrame:
     return pd.DataFrame(
         [{key_name: key, "score": float(score)} for key, score in ranking]
-    )
-
-
-def _line_ranking_to_df(ranking: list[tuple[tuple[object, object], float]]) -> pd.DataFrame:
-    return pd.DataFrame(
-        [
-            {"from_node": u, "to_node": v, "score": float(score)}
-            for (u, v), score in ranking
-        ]
     )
 
 
@@ -361,13 +352,6 @@ def main() -> None:
     plot_paths["degree"] = str(degree_plot)
     plot_paths["betweenness"] = str(betweenness_plot)
 
-    # Graph-based line ranking
-    line_betweenness_ranking = rank_lines_edge_betweenness(graph)
-    _line_ranking_to_df(line_betweenness_ranking).to_csv(
-        output_dir / "line_ranking_edge_betweenness.csv",
-        index=False,
-    )
-
     # Node congestion-rent contributions from synthetic line shadow prices
     lambda_lines = _build_lambda_lines(LAMBDA_MODE, edges, ptdf)
     contributions = congestion_rent_contribution_from_lambdas(
@@ -423,11 +407,6 @@ def main() -> None:
     print(f"\nTop {TOP_K_PRINT} nodes by betweenness centrality:")
     for node, score in betweenness_ranking[:TOP_K_PRINT]:
         print(node, score)
-
-    print(f"\nTop {TOP_K_PRINT} lines by edge betweenness:")
-    for (u, v), score in line_betweenness_ranking[:TOP_K_PRINT]:
-        print((u, v), score)
-
 
 if __name__ == "__main__":
     main()
