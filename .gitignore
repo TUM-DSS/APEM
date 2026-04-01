@@ -1,10 +1,10 @@
 ### Custom ignored files ###
 *.png
 *.txt
+*.xml
 apem-venv/
 !requirements.txt
-US_results/
-EU_results/
+results/
 stats/
 launch.json
 

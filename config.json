@@ -1,45 +1,47 @@
-{
-    "_available_US_datasets": [
+﻿{
+    "_available_market_models": [
+        "unit_based_model",
+        "order_book_based_model"
+    ],
+    "_available_unit_based_datasets": [
         "IEEE_RTS",
         "PJM",
         "PyPSAEurSmall",
         "PyPSAEurLarge",
         "ARPA"
     ],
-    "_available_EU_datasets": [
-        "Generated Small",
-        "Generated Large",
+    "_available_order_book_datasets": [
+        "GENERATED_SMALL",
+        "GENERATED_LARGE",
         "OMIE",
         "GME",
+        "TEST_3NODE",
+        "TEST_3NODE_LOWCAP",
         "IEEE_RTS",
-        "ARPA",
-        "PyPSAEurSmall",
-        "PyPSAEurLarge",
-        "PJM"
-    ],
-    "_available_market_models": [
-        "US_model",
-        "EU_model"
+        "ARPA"
     ],
     "_available_power_flow_models": [
         "DCOPF",
-        "Zonal_NTC"
+        "Zonal_NTC_aggregated",
+        "Zonal_NTC_multiedge",
+        "Zonal_FBMC"
     ],
     "_available_pricing_algorithms": [
         "ELMP",
         "IP",
         "MinMWP",
-        "Join"
-    ],
-    "_available_cut_types": [
-        "price based",
-        "combinatorial benders",
-        "no good"
+        "Join",
+        "Markup"
     ],
     "_available_redispatch_algorithms": [
         "MinAbsCostRD",
         "MinAbsVolRD",
         "MinCostRD"
+    ],
+    "_available_cut_types": [
+        "price based",
+        "combinatorial benders",
+        "no good"
     ],
     "_available_zonal_configurations": [
         "national",
@@ -47,36 +49,73 @@
         "zonal_DE2-s",
         "zonal_DE3",
         "zonal_DE4",
-        "zonal_DE4-refined",
         "zonal_DE5"
     ],
-    "verbosity": true,
-    "scenario": {
-        "market_model": "US_model",
-        "US_dataset": "PyPSAEurSmall",
-        "EU_dataset": "GME",
+    "_available_base_cases": [
+        "BC1",
+        "BC2",
+        "BC3.1",
+        "BC3.2",
+        "BC4"
+    ],
+    "run": {
+        "market_model": "order_book_based_model",
+        "verbosity": true
+    },
+    "unit_based_model": {
+        "dataset": "PyPSAEurLarge",
         "power_flow_model": {
-            "type": "Zonal_NTC"
+            "type": "DCOPF"
         },
+        "pricing_algorithm": "ELMP",
+        "redispatch": {
+            "algorithm": "MinCostRD",
+            "constraint_units": false,
+            "threshold": 0.001,
+            "alpha": 0.01
+        },
+        "solver_configuration": {
+            "MIP_gap": 0,
+            "optimality_tol": 1e-6,
+            "time_limit": 3600,
+            "work_limit": 3600,
+            "threads": 0,
+            "presparsify": -1,
+            "strict_supply_demand_eq": true,
+            "relaxation": false,
+            "output_flag": 0,
+            "slack_penalty": 1e15
+        },
+        "zonal_configuration": {
+            "type": "zonal_DE2-s",
+            "factor": 0.8,
+            "base_case": "BC4"
+        }
+    },
+    "order_book_based_model": {
+        "dataset": "TEST_3NODE",
         "cut_type": "price based",
-        "pricing_algorithm": "IP",
-        "redispatch_algorithm": "MinCostRD",
-        "redispatch_constraint_units": false,
-        "redispatch_threshold": 0.001
-    },
-    "solver_configuration": {
-        "MIP_gap": 1e-4,
-        "optimality_tol": 1e-6,
-        "time_limit": 3600,
-        "work_limit": 3600,
-        "threads": 0,
-        "presparsify": -1,
-        "strict_supply_demand_eq": true,
-        "relaxation": false,
-        "output_flag": 0
-    },
-    "zonal_configuration": {
-        "type": "zonal_DE4-refined",
-        "factor": 0.8
+        "euphemia_configuration": {
+            "network_model": "FBMC",
+            "disable_reinsertion": true,
+            "calculate_corrected_welfare": true,
+            "price_lower_bound": -500,
+            "price_upper_bound": 4000,
+            "beta_MIC": 0.1,
+            "delta_load_gradient": 5000,
+            "delta_PAB": 50,
+            "epsilon": 1e-4,
+            "max_iterations": 50,
+            "reinsertion_max_iterations": 10,
+            "max_prb_reinsertion_attempts": 10,
+            "big_m": 1000000,
+            "lazy_constraints": 1,
+            "output_flag": 0,
+            "time_limit": 3600,
+            "mip_gap": 1e-4,
+            "threads": 0,
+            "seed": 0
+        }
     }
-} 
+}
+
