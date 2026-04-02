@@ -1,0 +1,20 @@
+# `order_book_based_model` Package
+
+```{toctree}
+:maxdepth: 1
+
+order_book_based_model/overview
+order_book_based_model/euphemia
+order_book_based_model/runner
+order_book_based_model/euphemia_config
+order_book_based_model/master_problem
+order_book_based_model/model
+order_book_based_model/pricing
+order_book_based_model/data
+order_book_based_model/data_parsing
+order_book_based_model/data_conversion
+order_book_based_model/cutting_strategies
+order_book_based_model/reinsertions
+order_book_based_model/enums
+order_book_based_model/utils
+```
