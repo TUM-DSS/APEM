@@ -26,11 +26,3 @@ source ./apem-venv/bin/activate  # macOS/Linux
 pip install -r requirements.txt
 pip install -e .
 ```
-
-## Docs build dependencies (optional)
-
-If you want to build the documentation locally:
-
-```bash
-pip install -r docs/requirements.txt
-```
