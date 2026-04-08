@@ -7,7 +7,6 @@ APEM is a research and experimentation framework for electricity-market clearing
 :caption: Getting Started
 :hidden:
 
-introduction
 installation
 configuration
 project_structure
