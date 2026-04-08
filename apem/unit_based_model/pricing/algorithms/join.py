@@ -27,15 +27,16 @@ class Join(PricingAlgorithm):
     def compute_prices(self, allocation: Allocation, scenario: Scenario, configuration: Configuration, file_prices: Optional[str] = None,
                        fixed_prices: Optional[Pricing] = None) -> Union[Pricing, Error]:
         """
-        Formulates and solves an IP problem similar to the one from https://arxiv.org/pdf/2209.07386.pdf
-           (Appendix F).
+        Formulates and solves a Join pricing problem similar to Appendix F in
+        Pricing Optimal Outcomes in Coupled and Non-Convex Markets: Theory and Applications to Electricity
+        Markets (https://arxiv.org/abs/2209.07386).
 
-          :param allocation: allocation for which supporting prices are computed
-          :param scenario: scenario for which prices are computed
-          :param configuration: configuration object containing the parameters for the pricing algorithm
-          :param file_prices: name of the file in which results are written
-          :param fixed_prices: Pricing object with fixed prices
-          :return: Pricing object if prices could be computed or Error object otherwise
+        :param allocation: allocation for which supporting prices are computed
+        :param scenario: scenario for which prices are computed
+        :param configuration: configuration object containing the parameters for the pricing algorithm
+        :param file_prices: name of the file in which results are written
+        :param fixed_prices: Pricing object with fixed prices
+        :return: Pricing object if prices could be computed or Error object otherwise
         """
         if allocation.status != 1:
             if file_prices:
@@ -412,4 +413,3 @@ class Join(PricingAlgorithm):
 
     def __str__(self):
         return 'Join'
-
