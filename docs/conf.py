@@ -46,6 +46,8 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 autoclass_content = "both"
 autodoc_typehints = "description"
+add_module_names = False
+python_maximum_signature_line_length = 88
 
 autodoc_default_options = {
     "members": True,
