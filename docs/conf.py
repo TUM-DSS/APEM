@@ -15,6 +15,7 @@ sys.path.insert(0, str(ROOT))
 
 project = "APEM"
 author = "APEM Contributors"
+copyright = "APEM Contributors"
 release = "0.1.0"
 
 if PROJECT_TOML.exists():
@@ -78,7 +79,8 @@ html_static_path = ["_static"]
 html_css_files = ["custom.css"]
 html_theme_options = {
     "show_toc_level": 2,
-    "use_repository_button": False,
+    "use_repository_button": True,
+    "repository_url": "https://github.com/teodora-dobos/APEM",
     "show_navbar_depth": 1,
     "max_navbar_depth": 6,
     "collapse_navbar": False,
