@@ -4,7 +4,7 @@ Flow-based market coupling zonal-clearing algorithms.
 
 ## Zonal FBMC
 
-Module: `apem.unit_based_model.allocation.algorithms.zonal_clearing.zonal_fbmc`
+API path: `apem.unit_based_model.allocation.algorithms.zonal_clearing.zonal_fbmc`
 
 ```{eval-rst}
 .. automodule:: apem.unit_based_model.allocation.algorithms.zonal_clearing.zonal_fbmc
@@ -14,7 +14,7 @@ Module: `apem.unit_based_model.allocation.algorithms.zonal_clearing.zonal_fbmc`
 
 ## Zonal FBMC Included
 
-Module: `apem.unit_based_model.allocation.algorithms.zonal_clearing.zonal_fbmc_included`
+API path: `apem.unit_based_model.allocation.algorithms.zonal_clearing.zonal_fbmc_included`
 
 ```{eval-rst}
 .. automodule:: apem.unit_based_model.allocation.algorithms.zonal_clearing.zonal_fbmc_included

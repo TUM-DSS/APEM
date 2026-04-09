@@ -45,7 +45,7 @@ Common extension points in the core layer:
 
 ## Config Loader
 
-Module: `apem.config_loader`
+API path: `apem.config_loader`
 
 ```{eval-rst}
 .. automodule:: apem.config_loader
@@ -55,7 +55,7 @@ Module: `apem.config_loader`
 
 ## Core
 
-Module: `apem.core`
+API path: `apem.core`
 
 ```{eval-rst}
 .. automodule:: apem.core
@@ -65,7 +65,7 @@ Module: `apem.core`
 
 ## Market Models
 
-Module: `apem.market_models`
+API path: `apem.market_models`
 
 ```{eval-rst}
 .. automodule:: apem.market_models
@@ -75,7 +75,7 @@ Module: `apem.market_models`
 
 ## Execution Chain
 
-Module: `apem.execution_chain`
+API path: `apem.execution_chain`
 
 Orchestrates end-to-end runs. It builds run directories,
 dispatches allocation/pricing/redispatch (or Euphemia), and triggers result

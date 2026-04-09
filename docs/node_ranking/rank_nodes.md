@@ -3,7 +3,7 @@
 High-level ranking helpers that wrap lower-level network and market scoring functions and
 return sorted node rankings.
 
-Module: `node_ranking.rank_nodes`
+API path: `node_ranking.rank_nodes`
 
 ```{eval-rst}
 .. automodule:: node_ranking.rank_nodes

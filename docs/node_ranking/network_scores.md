@@ -2,7 +2,7 @@
 
 Network-topology scoring functions used by node-ranking workflows.
 
-Module: `node_ranking.network_scores`
+API path: `node_ranking.network_scores`
 
 ```{eval-rst}
 .. automodule:: node_ranking.network_scores

@@ -4,7 +4,7 @@ Entrypoint for solving order-book Euphemia scenarios.
 
 ## Runner
 
-Module: `apem.order_book_based_model.euphemia.runner`
+API path: `apem.order_book_based_model.euphemia.runner`
 
 ```{eval-rst}
 .. automodule:: apem.order_book_based_model.euphemia.runner

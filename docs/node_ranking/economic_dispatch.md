@@ -3,7 +3,7 @@
 Baseline DC economic-dispatch model utilities used by market-based node-ranking
 methods.
 
-Module: `node_ranking.economic_dispatch`
+API path: `node_ranking.economic_dispatch`
 
 ```{eval-rst}
 .. automodule:: node_ranking.economic_dispatch

@@ -4,7 +4,7 @@ Core Euphemia optimization model formulation (variables, objective, constraints)
 
 ## Setup Model
 
-Module: `apem.order_book_based_model.euphemia.model.setup_model`
+API path: `apem.order_book_based_model.euphemia.model.setup_model`
 
 ```{eval-rst}
 .. automodule:: apem.order_book_based_model.euphemia.model.setup_model

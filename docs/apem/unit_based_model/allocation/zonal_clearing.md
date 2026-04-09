@@ -14,7 +14,7 @@ zonal_clearing/redispatch
 
 ## Zonal Clearing Package
 
-Module: `apem.unit_based_model.allocation.algorithms.zonal_clearing`
+API path: `apem.unit_based_model.allocation.algorithms.zonal_clearing`
 
 ```{eval-rst}
 .. automodule:: apem.unit_based_model.allocation.algorithms.zonal_clearing
@@ -24,7 +24,7 @@ Module: `apem.unit_based_model.allocation.algorithms.zonal_clearing`
 
 ## Zonal Configuration
 
-Module: `apem.unit_based_model.allocation.algorithms.zonal_clearing.zonal_configuration`
+API path: `apem.unit_based_model.allocation.algorithms.zonal_clearing.zonal_configuration`
 
 ```{eval-rst}
 .. automodule:: apem.unit_based_model.allocation.algorithms.zonal_clearing.zonal_configuration

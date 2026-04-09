@@ -2,7 +2,7 @@
 
 Markup pricing implementation.
 
-Module: `apem.unit_based_model.pricing.algorithms.markup`
+API path: `apem.unit_based_model.pricing.algorithms.markup`
 
 ```{eval-rst}
 .. automodule:: apem.unit_based_model.pricing.algorithms.markup

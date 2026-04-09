@@ -4,7 +4,7 @@ Shared utility helpers for calculations, extraction, and path handling.
 
 ## Calculations
 
-Module: `apem.order_book_based_model.euphemia.utils.calculations`
+API path: `apem.order_book_based_model.euphemia.utils.calculations`
 
 ```{eval-rst}
 .. automodule:: apem.order_book_based_model.euphemia.utils.calculations
@@ -14,7 +14,7 @@ Module: `apem.order_book_based_model.euphemia.utils.calculations`
 
 ## Extraction
 
-Module: `apem.order_book_based_model.euphemia.utils.extraction`
+API path: `apem.order_book_based_model.euphemia.utils.extraction`
 
 ```{eval-rst}
 .. automodule:: apem.order_book_based_model.euphemia.utils.extraction
@@ -24,7 +24,7 @@ Module: `apem.order_book_based_model.euphemia.utils.extraction`
 
 ## Paths
 
-Module: `apem.order_book_based_model.euphemia.utils.paths`
+API path: `apem.order_book_based_model.euphemia.utils.paths`
 
 ```{eval-rst}
 .. automodule:: apem.order_book_based_model.euphemia.utils.paths

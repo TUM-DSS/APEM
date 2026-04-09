@@ -19,7 +19,7 @@ APIs for data loading, parsing, and analysis helpers in the unit-based workflow.
 
 Scenario data structures and helpers used by unit-based data parsing.
 
-Module: `apem.unit_based_model.data.parsing.scenario`
+API path: `apem.unit_based_model.data.parsing.scenario`
 
 ```{eval-rst}
 .. automodule:: apem.unit_based_model.data.parsing.scenario

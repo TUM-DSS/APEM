@@ -48,7 +48,7 @@ unit_based_model/evaluation
 
 ### Solver Configuration
 
-Module: `apem.unit_based_model.solver_configuration`
+API path: `apem.unit_based_model.solver_configuration`
 
 ```{eval-rst}
 .. automodule:: apem.unit_based_model.solver_configuration
@@ -58,7 +58,7 @@ Module: `apem.unit_based_model.solver_configuration`
 
 ### Enums
 
-Module: `apem.unit_based_model.enums`
+API path: `apem.unit_based_model.enums`
 
 ```{eval-rst}
 .. automodule:: apem.unit_based_model.enums
@@ -68,7 +68,7 @@ Module: `apem.unit_based_model.enums`
 
 ### Utilities
 
-Module: `apem.unit_based_model.utils`
+API path: `apem.unit_based_model.utils`
 
 ```{eval-rst}
 .. automodule:: apem.unit_based_model.utils
@@ -78,7 +78,7 @@ Module: `apem.unit_based_model.utils`
 
 ### Error
 
-Module: `apem.unit_based_model.error`
+API path: `apem.unit_based_model.error`
 
 ```{eval-rst}
 .. autoclass:: apem.unit_based_model.error.Error

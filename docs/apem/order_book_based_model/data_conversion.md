@@ -4,7 +4,7 @@ Utilities to convert external/raw order-book inputs into Euphemia dataset format
 
 ## Data Conversion
 
-Module: `apem.order_book_based_model.euphemia.data.conversion.data_conversion`
+API path: `apem.order_book_based_model.euphemia.data.conversion.data_conversion`
 
 ```{eval-rst}
 .. automodule:: apem.order_book_based_model.euphemia.data.conversion.data_conversion
@@ -15,7 +15,7 @@ Module: `apem.order_book_based_model.euphemia.data.conversion.data_conversion`
 
 ## Run US-EU Conversion
 
-Module: `apem.order_book_based_model.euphemia.data.conversion.run_us_eu_conversion`
+API path: `apem.order_book_based_model.euphemia.data.conversion.run_us_eu_conversion`
 
 ```{eval-rst}
 .. automodule:: apem.order_book_based_model.euphemia.data.conversion.run_us_eu_conversion

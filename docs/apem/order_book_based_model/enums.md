@@ -4,7 +4,7 @@ Enum definitions used in Euphemia configuration and solver flow.
 
 ## Cut Types
 
-Module: `apem.order_book_based_model.euphemia.enums.cut_types`
+API path: `apem.order_book_based_model.euphemia.enums.cut_types`
 
 ```{eval-rst}
 .. automodule:: apem.order_book_based_model.euphemia.enums.cut_types
@@ -14,7 +14,7 @@ Module: `apem.order_book_based_model.euphemia.enums.cut_types`
 
 ## Datasets
 
-Module: `apem.order_book_based_model.euphemia.enums.datasets`
+API path: `apem.order_book_based_model.euphemia.enums.datasets`
 
 ```{eval-rst}
 .. automodule:: apem.order_book_based_model.euphemia.enums.datasets
@@ -24,7 +24,7 @@ Module: `apem.order_book_based_model.euphemia.enums.datasets`
 
 ## Order Types
 
-Module: `apem.order_book_based_model.euphemia.enums.order_types`
+API path: `apem.order_book_based_model.euphemia.enums.order_types`
 
 ```{eval-rst}
 .. automodule:: apem.order_book_based_model.euphemia.enums.order_types

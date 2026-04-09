@@ -4,7 +4,7 @@ Cut-generation implementations for the Euphemia decomposition loop.
 
 ## Combinatorial Benders
 
-Module: `apem.order_book_based_model.euphemia.cutting_strategies.combinatorial_benders`
+API path: `apem.order_book_based_model.euphemia.cutting_strategies.combinatorial_benders`
 
 ```{eval-rst}
 .. automodule:: apem.order_book_based_model.euphemia.cutting_strategies.combinatorial_benders
@@ -14,7 +14,7 @@ Module: `apem.order_book_based_model.euphemia.cutting_strategies.combinatorial_b
 
 ## No-Good
 
-Module: `apem.order_book_based_model.euphemia.cutting_strategies.no_good`
+API path: `apem.order_book_based_model.euphemia.cutting_strategies.no_good`
 
 ```{eval-rst}
 .. automodule:: apem.order_book_based_model.euphemia.cutting_strategies.no_good
@@ -24,7 +24,7 @@ Module: `apem.order_book_based_model.euphemia.cutting_strategies.no_good`
 
 ## Price-Based
 
-Module: `apem.order_book_based_model.euphemia.cutting_strategies.price_based`
+API path: `apem.order_book_based_model.euphemia.cutting_strategies.price_based`
 
 ```{eval-rst}
 .. automodule:: apem.order_book_based_model.euphemia.cutting_strategies.price_based

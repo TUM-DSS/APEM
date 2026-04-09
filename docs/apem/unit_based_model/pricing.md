@@ -4,7 +4,7 @@ APIs for pricing algorithms and utilities in unit-based runs.
 
 ## Pricing Algorithms
 
-Module: `apem.unit_based_model.pricing.algorithms.pricing_algorithm`
+API path: `apem.unit_based_model.pricing.algorithms.pricing_algorithm`
 
 ```{eval-rst}
 .. automodule:: apem.unit_based_model.pricing.algorithms.pricing_algorithm
@@ -14,7 +14,7 @@ Module: `apem.unit_based_model.pricing.algorithms.pricing_algorithm`
 
 ## Pricing Results
 
-Module: `apem.unit_based_model.pricing.analysis.pricing`
+API path: `apem.unit_based_model.pricing.analysis.pricing`
 
 ```{eval-rst}
 .. autoclass:: apem.unit_based_model.pricing.analysis.pricing.Pricing

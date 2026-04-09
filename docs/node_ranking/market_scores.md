@@ -76,7 +76,7 @@ The main market-based scores are summarized below.
      - Captures how strongly a node's installed capacity is exposed to tight transmission constraints.
 ```
 
-Module: `node_ranking.market_scores`
+API path: `node_ranking.market_scores`
 
 ```{eval-rst}
 .. automodule:: node_ranking.market_scores
