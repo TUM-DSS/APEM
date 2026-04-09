@@ -2,8 +2,6 @@
 
 Master-problem orchestration for Euphemia optimization, iterations, and outputs.
 
-## Master Problem
-
 API path: `apem.order_book_based_model.euphemia.master_problem.master_problem`
 
 ```{eval-rst}
