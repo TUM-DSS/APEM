@@ -16,6 +16,8 @@ This page is the API entry point for `apem.unit_based_model`.
   `Join`, `Markup`, `Min-MWP`).
 - **Evaluation**: post-run analysis of prices, welfare, redispatch, and lost
   opportunity costs.
+- **Solver Configuration**: shared optimizer settings used by allocation and
+  pricing routines.
 
 ## Typical Execution Flow
 
@@ -40,4 +42,5 @@ unit_based_model/data
 unit_based_model/allocation
 unit_based_model/pricing
 unit_based_model/evaluation
+unit_based_model/solver_configuration
 ```

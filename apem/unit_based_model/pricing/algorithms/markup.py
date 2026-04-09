@@ -6,7 +6,7 @@ import pandas as pd
 
 from apem.unit_based_model.allocation.algorithms.nodal_clearing.dcopf import DCOPF
 from apem.unit_based_model.allocation.allocation import Allocation
-from apem.unit_based_model.allocation.configuration import Configuration
+from apem.unit_based_model.solver_configuration import SolverConfiguration
 from apem.unit_based_model.allocation.error import Error
 from apem.unit_based_model.data.parsing.scenario import Scenario
 from apem.unit_based_model.pricing.algorithms.pricing_algorithm import PricingAlgorithm
@@ -18,7 +18,7 @@ class Markup(PricingAlgorithm):
     Implementation of Markup Pricing.
     """
 
-    def compute_prices(self, scenario: Scenario, configuration: Configuration, file_prices: Optional[str] = None,
+    def compute_prices(self, scenario: Scenario, configuration: SolverConfiguration, file_prices: Optional[str] = None,
                        alpha: Optional[float] = 0) -> Union[Tuple[Allocation, Pricing], Error]:
         """
         Compute prices and a feasible allocation using a two-stage markup procedure.

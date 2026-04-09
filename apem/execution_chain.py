@@ -13,7 +13,7 @@ from apem.unit_based_model.allocation.algorithms.zonal_clearing.zonal_fbmc_inclu
 from apem.unit_based_model.allocation.algorithms.zonal_clearing.zonal_ntc_aggregated import Zonal_NTC_aggregated
 from apem.unit_based_model.allocation.algorithms.zonal_clearing.zonal_ntc_multiedge import Zonal_NTC_multiedge
 from apem.unit_based_model.allocation.allocation import SellersAllocation, Allocation
-from apem.unit_based_model.allocation.configuration import Configuration
+from apem.unit_based_model.solver_configuration import SolverConfiguration
 from apem.unit_based_model.allocation.error import Error
 from apem.unit_based_model.data.parsing.scenario import Scenario
 from apem.unit_based_model.pricing.analysis.price_analysis import PriceAnalysis
@@ -45,10 +45,10 @@ def _retrieve_data(dataset: UnitBased_Datasets) -> Scenario:
     return dataset.value.parse_data()
 
 
-def _create_configuration() -> Configuration:
-    """Create a Configuration instance using the current configuration."""
+def _create_configuration() -> SolverConfiguration:
+    """Create a SolverConfiguration instance using the current configuration."""
     config = ConfigLoader().get_unit_based_solver_congiruation()
-    return Configuration(
+    return SolverConfiguration(
         MIP_gap=config.get("MIP_gap", 1e-4),
         optimality_tol=config.get("optimality_tol", 1e-6),
         time_limit=config.get("time_limit", 3600),
@@ -105,7 +105,7 @@ def _write_run_metadata(dataset: UnitBased_Datasets, scenario: Scenario, power_f
 def _solve_unit_based_allocation_problem(
     scenario: Scenario,
     power_flow_model: PowerFlowModel,
-    configuration: Configuration,
+    configuration: SolverConfiguration,
     run_root: str,
     u_fixed: Optional[dict] = None,
 ):
@@ -137,7 +137,7 @@ def _solve_unit_based_redispatch_problem(
     redispatch_algorithm: RedispatchAlgorithms,
     nodal_scenario: Scenario,
     zonal_allocation: SellersAllocation,
-    configuration: Configuration,
+    configuration: SolverConfiguration,
     redispatch_constraint_units: bool,
     redispatch_threshold: float,
     run_root: str,
@@ -166,7 +166,7 @@ def _solve_unit_based_pricing_problem(
     allocation: Allocation,
     pricing_algorithm: PricingAlgorithms,
     power_flow_model: PowerFlowModel,
-    configuration: Configuration,
+    configuration: SolverConfiguration,
     run_root: str,
     prices=None,
 ) -> Pricing:
@@ -193,7 +193,7 @@ def analyse_results(
     scenario: Scenario,
     allocation: Allocation,
     pricing: Pricing,
-    configuration: Configuration,
+    configuration: SolverConfiguration,
     pf_model_value,
     base_scenario: Optional[Scenario] = None,
     results_root: Optional[str] = None,

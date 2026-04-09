@@ -9,7 +9,7 @@ import gurobipy as gp
 from gurobipy import GRB
 import logging
 
-from apem.unit_based_model.allocation.configuration import Configuration
+from apem.unit_based_model.solver_configuration import SolverConfiguration
 
 # High penalty for non-served energy, consistent with the paper's approach
 C_NSE = 10000
@@ -250,7 +250,7 @@ class BaseCaseGenerator:
 class ZonalDispatchModel:
     def solve(self, network: pypsa.Network, nodal_ptdf: pd.DataFrame,
               p_bus_expected: pd.DataFrame, node_zone_mapper: callable,
-              zonal_configuration: str, verbose: bool = True, configuration: Configuration = None):
+              zonal_configuration: str, verbose: bool = True, configuration: SolverConfiguration = None):
         """
         Formulate and solve the zonal FBMC dispatch model.
 

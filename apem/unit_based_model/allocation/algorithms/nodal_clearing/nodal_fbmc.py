@@ -5,7 +5,7 @@ from gurobipy import GRB
 import re
 import numpy as np
 
-from apem.unit_based_model.allocation.configuration import Configuration
+from apem.unit_based_model.solver_configuration import SolverConfiguration
 
 # A large number to represent the cost of non-served energy (C^nse)
 C_NSE = 10000  
@@ -19,7 +19,8 @@ class NodalDispatchModel:
     Includes verification and logging logic.
     """
 
-    def solve(self, network: pypsa.Network, ptdf: pd.DataFrame, verbose: bool = True, configuration:Configuration=None):
+    def solve(self, network: pypsa.Network, ptdf: pd.DataFrame, verbose: bool = True,
+              configuration: SolverConfiguration = None):
         """
         Formulates and solves the nodal dispatch problem.
 

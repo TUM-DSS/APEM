@@ -10,7 +10,7 @@ from gurobipy import GRB
 
 from apem.unit_based_model.allocation.allocation import Allocation, SellersAllocation
 from apem.unit_based_model.allocation.analysis.stats import compute_stats
-from apem.unit_based_model.allocation.configuration import Configuration
+from apem.unit_based_model.solver_configuration import SolverConfiguration
 from apem.unit_based_model.allocation.error import Error
 from apem.unit_based_model.allocation.power_flow_model import PowerFlowModel
 from apem.unit_based_model.data.parsing.scenario import Scenario
@@ -36,7 +36,7 @@ class DCOPF(PowerFlowModel):
     The class is also used for computing redispatch.
     """
 
-    def solve(self, scenario: Scenario, configuration: Configuration, results_file: Optional[str] = None,
+    def solve(self, scenario: Scenario, configuration: SolverConfiguration, results_file: Optional[str] = None,
               stats_file: Optional[str] = None, u_fixed: Optional[dict] = None,
               redispatch_type: Optional["RedispatchAlgorithms"] = None, zonal_allocation: Optional[SellersAllocation] = None,
               redispatch_constraint_units: bool = False, redispatch_threshold: float = 0.001,

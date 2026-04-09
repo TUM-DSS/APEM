@@ -9,7 +9,7 @@ from itertools import combinations
 
 from apem.unit_based_model.allocation.power_flow_model import PowerFlowModel
 from apem.unit_based_model.data.parsing.scenario import Scenario
-from apem.unit_based_model.allocation.configuration import Configuration
+from apem.unit_based_model.solver_configuration import SolverConfiguration
 from apem.unit_based_model.allocation.allocation import Allocation
 from apem.unit_based_model.allocation.error import Error
 from apem.unit_based_model.allocation.analysis.stats import compute_stats
@@ -158,7 +158,7 @@ class Zonal_FBMC(PowerFlowModel):
             r_star=r_star
         )
 
-    def solve(self, scenario: Scenario, configuration: Configuration, results_file: Optional[str] = None,
+    def solve(self, scenario: Scenario, configuration: SolverConfiguration, results_file: Optional[str] = None,
               stats_file: Optional[str] = None, u_fixed: Optional[dict] = None, redispatch: Optional[bool] = False,
               min_cost: Optional[bool] = False, min_vol: Optional[bool] = False,
               zonal_allocation: Optional[Allocation] = None) -> Union[Allocation, Error]:

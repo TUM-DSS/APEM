@@ -5,7 +5,7 @@ import gurobipy as gp
 from gurobipy import GRB
 
 from apem.unit_based_model.allocation.allocation import Allocation
-from apem.unit_based_model.allocation.configuration import Configuration
+from apem.unit_based_model.solver_configuration import SolverConfiguration
 from apem.unit_based_model.allocation.error import Error
 from apem.unit_based_model.data.parsing.scenario import Scenario
 from apem.unit_based_model.pricing.algorithms.fbmc_support import (
@@ -24,7 +24,8 @@ class IP(PricingAlgorithm):
     Implementation of Integer Programming Pricing.
     """
 
-    def compute_prices(self, allocation: Allocation, scenario: Scenario, configuration: Configuration, file_prices: Optional[str] = None,
+    def compute_prices(self, allocation: Allocation, scenario: Scenario, configuration: SolverConfiguration,
+                       file_prices: Optional[str] = None,
                        fixed_prices: Optional[Pricing] = None) -> Union[Pricing, Error]:
         """
         Formulates and solves an IP problem similar to the one from
