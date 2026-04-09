@@ -43,9 +43,7 @@ order_book_based_model/data_parsing
 order_book_based_model/solver_core
 order_book_based_model/pricing
 order_book_based_model/cutting_strategies
-order_book_based_model/data_conversion
 order_book_based_model/reinsertions
-order_book_based_model/utilities
 ```
 
 ## Support APIs
