@@ -2,8 +2,6 @@
 
 Utilities for loading and validating welfare tables and welfare metrics.
 
-## Welfare Analysis
-
 Module: `apem.unit_based_model.evaluation.welfare_analysis`
 
 ```{eval-rst}

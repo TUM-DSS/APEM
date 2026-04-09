@@ -1,6 +1,6 @@
 # Markup
 
-Markup-based pricing implementation.
+Markup pricing implementation.
 
 Module: `apem.unit_based_model.pricing.algorithms.markup`
 

@@ -15,21 +15,12 @@ allocation/zonal_clearing
 ```{eval-rst}
 .. automodule:: apem.unit_based_model.allocation
    :members:
+   :exclude-members: Error
    :show-inheritance:
 ```
 
 ```{eval-rst}
 .. automodule:: apem.unit_based_model.allocation.allocation
-   :members:
-   :show-inheritance:
-```
-
-## Error
-
-Module: `apem.unit_based_model.error`
-
-```{eval-rst}
-.. autoclass:: apem.unit_based_model.error.Error
    :members:
    :show-inheritance:
 ```

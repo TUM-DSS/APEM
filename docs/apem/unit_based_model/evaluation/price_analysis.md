@@ -2,8 +2,6 @@
 
 Utilities for validating, summarizing, and comparing market-price outputs.
 
-## Price Analysis
-
 Module: `apem.unit_based_model.evaluation.price_analysis`
 
 ```{eval-rst}

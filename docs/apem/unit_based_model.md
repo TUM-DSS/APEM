@@ -42,7 +42,46 @@ unit_based_model/data
 unit_based_model/allocation
 unit_based_model/pricing
 unit_based_model/evaluation
-unit_based_model/solver_configuration
-unit_based_model/enums
-unit_based_model/utilities
+```
+
+## Support APIs
+
+### Solver Configuration
+
+Module: `apem.unit_based_model.solver_configuration`
+
+```{eval-rst}
+.. automodule:: apem.unit_based_model.solver_configuration
+   :members:
+   :show-inheritance:
+```
+
+### Enums
+
+Module: `apem.unit_based_model.enums`
+
+```{eval-rst}
+.. automodule:: apem.unit_based_model.enums
+   :members:
+   :show-inheritance:
+```
+
+### Utilities
+
+Module: `apem.unit_based_model.utils`
+
+```{eval-rst}
+.. automodule:: apem.unit_based_model.utils
+   :members:
+   :show-inheritance:
+```
+
+### Error
+
+Module: `apem.unit_based_model.error`
+
+```{eval-rst}
+.. autoclass:: apem.unit_based_model.error.Error
+   :members:
+   :show-inheritance:
 ```

@@ -2,8 +2,6 @@
 
 Utilities for loading and validating redispatch cost and volume metrics.
 
-## Redispatch Analysis
-
 Module: `apem.unit_based_model.evaluation.redispatch_analysis`
 
 ```{eval-rst}
