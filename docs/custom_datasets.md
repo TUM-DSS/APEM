@@ -508,7 +508,7 @@ Add your dataset to [`apem/order_book_based_model/euphemia/enums/datasets.py`](h
 ```python
 from enum import Enum
 
-from apem.order_book_based_model.euphemia.data.parsing.parse_eu import ParseOrderBook
+from apem.order_book_based_model.euphemia.data.parsing.parse_order_book import ParseOrderBook
 from apem.order_book_based_model.euphemia.utils.paths import DATA_DIR
 
 

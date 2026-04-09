@@ -1,26 +1,6 @@
-# Data Parsing
+# Data
 
-Parsers and scenario models for order-book datasets.
-
-## Parse Data
-
-API path: `apem.order_book_based_model.euphemia.data.parsing.parse_data`
-
-```{eval-rst}
-.. automodule:: apem.order_book_based_model.euphemia.data.parsing.parse_data
-   :members:
-   :show-inheritance:
-```
-
-## Parse EU
-
-API path: `apem.order_book_based_model.euphemia.data.parsing.parse_eu`
-
-```{eval-rst}
-.. automodule:: apem.order_book_based_model.euphemia.data.parsing.parse_eu
-   :members:
-   :show-inheritance:
-```
+Parser and scenario models for order-book datasets.
 
 ## Zonal Scenario
 
@@ -28,6 +8,16 @@ API path: `apem.order_book_based_model.euphemia.data.parsing.zonal_scenario`
 
 ```{eval-rst}
 .. automodule:: apem.order_book_based_model.euphemia.data.parsing.zonal_scenario
+   :members:
+   :show-inheritance:
+```
+
+## Parse Order Book
+
+API path: `apem.order_book_based_model.euphemia.data.parsing.parse_order_book`
+
+```{eval-rst}
+.. automodule:: apem.order_book_based_model.euphemia.data.parsing.parse_order_book
    :members:
    :show-inheritance:
 ```

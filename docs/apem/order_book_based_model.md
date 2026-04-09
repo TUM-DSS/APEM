@@ -1,32 +1,19 @@
 # Order-Book-Based Model
 
 The order-book-based model represents the market through submitted buy and sell
-orders rather than explicit generator-unit identities. It is designed for
-Euphemia-style day-ahead clearing studies where accepted order sets, price
+orders rather than explicit generator-unit identities. In APEM, this workflow is
+implemented by the `apem.order_book_based_model.euphemia` package and is designed
+for Euphemia-style day-ahead clearing studies where accepted order sets, price
 feasibility, and decomposition behavior are central outputs.
 
-This page is the documentation entry point for the order-book-based workflow.
+This page is the documentation entry point for the order-book-based Euphemia
+workflow, including its public solver entrypoint and the main supporting
+components.
 
-```{toctree}
-:maxdepth: 1
-:hidden:
-
-order_book_based_model/runner
-order_book_based_model/euphemia_config
-order_book_based_model/cutting_strategies
-order_book_based_model/data_parsing
-order_book_based_model/data_conversion
-order_book_based_model/enums
-order_book_based_model/master_problem
-order_book_based_model/model
-order_book_based_model/pricing
-order_book_based_model/reinsertions
-order_book_based_model/utilities
-```
-
-## Scope
+## What This Module Covers
 
 - Euphemia-style order-book clearing workflow.
+- Public runner entrypoint for executing Euphemia scenarios.
 - Master problem and supporting model-building components.
 - Cut strategy, pricing, and reinsertion routines.
 - Dataset parsing and conversion for order-book inputs.
@@ -43,5 +30,44 @@ order_book_based_model/utilities
 
 - Main APEM framework overview and conceptual description of this workflow:
   [APEM: Allocation and Pricing in Electricity Markets](../index.md)
+- Module-level implementation overview:
+  `apem.order_book_based_model.euphemia`
 - Direct section reference:
   {ref}`Two Main Modeling Workflows -> Order-Book-Based Model <main-order-book-based-model>`
+
+```{toctree}
+:maxdepth: 1
+:hidden:
+
+order_book_based_model/cutting_strategies
+order_book_based_model/data_parsing
+order_book_based_model/data_conversion
+order_book_based_model/enums
+order_book_based_model/master_problem
+order_book_based_model/model
+order_book_based_model/pricing
+order_book_based_model/reinsertions
+order_book_based_model/utilities
+```
+
+## Support APIs
+
+### Euphemia Configuration
+
+API path: `apem.order_book_based_model.euphemia.euphemia_config`
+
+```{eval-rst}
+.. automodule:: apem.order_book_based_model.euphemia.euphemia_config
+   :members:
+   :show-inheritance:
+```
+
+### Runner
+
+API path: `apem.order_book_based_model.euphemia.runner`
+
+```{eval-rst}
+.. automodule:: apem.order_book_based_model.euphemia.runner
+   :members:
+   :show-inheritance:
+```
