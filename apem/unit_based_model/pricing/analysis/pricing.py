@@ -36,9 +36,9 @@ class GLOCS(Objective):
 
     For participant ``l`` with optimal allocation ``z*`` and prices ``p``:
 
-    :math:`\mathrm{GLOC}_l(p \mid z^*) = \hat{u}_l(p) - u_l(z^* \mid p)`.
+    :math:`\\mathrm{GLOC}_l(p \\mid z^*) = \\hat{u}_l(p) - u_l(z^* \\mid p)`.
 
-    Here, :math:`\hat{u}_l(p)` is the maximum profit/utility participant
+    Here, :math:`\\hat{u}_l(p)` is the maximum profit/utility participant
     ``l`` can obtain over all feasible deviations at prices ``p``. Therefore,
     GLOCs capture incentives to deviate from the welfare-maximizing allocation
     to any feasible alternative.
@@ -99,9 +99,9 @@ class LLOCS(Objective):
 
     For participant ``l`` with optimal allocation ``z*`` and prices ``p``:
 
-    :math:`\mathrm{LLOC}_l(p \mid z^*) = \hat{u}'_l(p) - u_l(z^* \mid p)`.
+    :math:`\\mathrm{LLOC}_l(p \\mid z^*) = \\hat{u}'_l(p) - u_l(z^* \\mid p)`.
 
-    :math:`\hat{u}'_l(p)` maximizes utility only over allocations in the domain
+    :math:`\\hat{u}'_l(p)` maximizes utility only over allocations in the domain
     of the active cost/valuation function at ``z*`` (fixed
     commitment/operating regime). Therefore, LLOCs capture incentives for local
     deviations, such as volume changes, while not allowing commitment
@@ -163,7 +163,7 @@ class MWPS(Objective):
 
     For participant ``l`` with optimal allocation ``z*`` and prices ``p``:
 
-    :math:`\mathrm{MWP}_l(p \mid z^*) = \max(-u_l(z^* \mid p), 0)`.
+    :math:`\\mathrm{MWP}_l(p \\mid z^*) = \\max(-u_l(z^* \\mid p), 0)`.
 
     MWPs are the compensation required to prevent losses under the realized
     dispatch and prices (individual rationality). They are equivalent to LOCs

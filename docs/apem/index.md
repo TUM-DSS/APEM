@@ -1,9 +1,17 @@
 # APEM Core
 
-The APEM Core layer coordinates configuration, model selection, and execution flow.
+The APEM Core layer coordinates configuration, model selection, and execution
+flow across the project. It serves as the integration layer that connects
+configuration loading, model dispatch, and run orchestration into a consistent
+workflow.
+
+```{note}
+For a high-level introduction to the full project, see {doc}`APEM: Allocation and Pricing in Electricity Markets <../index>`.
+```
 
 ```{toctree}
 :maxdepth: 1
+:hidden:
 
 unit_based_model
 order_book_based_model
@@ -68,6 +76,10 @@ Module: `apem.market_models`
 ## Execution Chain
 
 Module: `apem.execution_chain`
+
+Orchestrates end-to-end runs. It builds run directories,
+dispatches allocation/pricing/redispatch (or Euphemia), and triggers result
+analysis and output generation.
 
 ```{eval-rst}
 .. automodule:: apem.execution_chain

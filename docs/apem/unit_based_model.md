@@ -43,4 +43,6 @@ unit_based_model/allocation
 unit_based_model/pricing
 unit_based_model/evaluation
 unit_based_model/solver_configuration
+unit_based_model/enums
+unit_based_model/utilities
 ```

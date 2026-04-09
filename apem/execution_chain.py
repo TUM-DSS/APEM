@@ -42,6 +42,7 @@ def _new_run_id() -> str:
 
 
 def _retrieve_data(dataset: UnitBased_Datasets) -> Scenario:
+    """Load and parse a unit-based dataset into a Scenario object."""
     return dataset.value.parse_data()
 
 
@@ -198,7 +199,12 @@ def analyse_results(
     base_scenario: Optional[Scenario] = None,
     results_root: Optional[str] = None,
 ) -> PriceAnalysis:
-    """Performs several analyses."""
+    """Run post-pricing analysis and write stats/plot data to the run folder.
+
+    This validates that pricing succeeded, builds a ``PriceAnalysis`` object,
+    computes all configured analysis outputs, and returns the populated
+    analysis instance.
+    """
     if isinstance(pricing, Error) or getattr(pricing, "status", 0) != 1:
         raise RuntimeError(
             f"Cannot analyse results because pricing failed with status {getattr(pricing, 'status', 'unknown')}."
@@ -329,7 +335,7 @@ def solve_unit_based_scenario(
     redispatch_constraint_units: bool = False,
     redispatch_threshold: float = 0,
 ) -> PriceAnalysis:
-    """Computes allocation and pricing for some scenario."""
+    """Run allocation and pricing for one unit-based scenario."""
     scenario = _retrieve_data(dataset)
     configuration = _create_configuration()
     run_id = _new_run_id()
@@ -424,7 +430,12 @@ def solve_and_analyse_scenario(
     redispatch_threshold: float = 0,
     alpha: float = 0,
 ):
-    """Computes allocation and pricing for some scenario and performs several analyses."""
+    """Run the selected market-model workflow and produce analysis outputs.
+
+    For ``order_book_based_model``, this executes the Euphemia pipeline.
+    For ``unit_based_model``, this runs allocation/pricing (and redispatch when
+    applicable) and then computes analysis artifacts.
+    """
     if market_model == MarketModels.order_book_based_model:
         euphemia_config = ConfigLoader().get_euphemia_configuration()
         results_root = solve_euphemia(order_book_based_dataset, cut_type, euphemia_config)
