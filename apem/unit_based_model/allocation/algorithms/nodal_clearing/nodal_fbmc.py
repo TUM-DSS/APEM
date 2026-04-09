@@ -14,7 +14,7 @@ class NodalDispatchModel:
     """
     Implements the Nodal Dispatch model (BC1) from the paper:
     "Modeling flow-based market coupling: Base case, redispatch, and unit commitment matter"
-    by C. Byers and G. Hug.
+    (https://ieeexplore.ieee.org/document/9221922).
 
     Includes verification and logging logic.
     """

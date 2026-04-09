@@ -1,6 +1,6 @@
 # Nodal Clearing
 
-Nodal-clearing allocation algorithms.
+Nodal-clearing allocation algorithms and utilities.
 
 ## API: `apem.unit_based_model.allocation.algorithms.nodal_clearing.dcopf`
 

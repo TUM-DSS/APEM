@@ -9,9 +9,9 @@ This page is the API entry point for `apem.unit_based_model`.
 
 ## What This Module Covers
 
+- **Data**: scenario loading/parsing and model-ready data structures.
 - **Allocation**: market-clearing formulations (nodal and zonal), including
   redispatch extensions.
-- **Data**: scenario loading/parsing and model-ready data structures.
 - **Pricing**: post-allocation pricing algorithms (for example `ELMP`, `IP`,
   `Join`, `Markup`, `Min-MWP`).
 - **Evaluation**: post-run analysis of prices, welfare, redispatch, and lost
@@ -36,8 +36,8 @@ This page is the API entry point for `apem.unit_based_model`.
 :maxdepth: 1
 :hidden:
 
-unit_based_model/allocation
 unit_based_model/data
-unit_based_model/evaluation
+unit_based_model/allocation
 unit_based_model/pricing
+unit_based_model/evaluation
 ```

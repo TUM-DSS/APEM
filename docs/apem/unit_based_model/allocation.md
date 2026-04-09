@@ -4,15 +4,20 @@ APIs for market allocation and power-flow-model solving in the unit-based workfl
 
 ```{toctree}
 :maxdepth: 1
+:hidden:
 
 allocation/nodal_clearing
 allocation/zonal_clearing
 ```
 
-## API: `apem.unit_based_model.allocation`
-
 ```{eval-rst}
 .. automodule:: apem.unit_based_model.allocation
+   :members:
+   :show-inheritance:
+```
+
+```{eval-rst}
+.. automodule:: apem.unit_based_model.allocation.allocation
    :members:
    :show-inheritance:
 ```
