@@ -2,7 +2,9 @@
 
 Nodal-clearing allocation algorithms and utilities.
 
-## API: `apem.unit_based_model.allocation.algorithms.nodal_clearing.dcopf`
+## DCOPF
+
+Module: `apem.unit_based_model.allocation.algorithms.nodal_clearing.dcopf`
 
 ```{eval-rst}
 .. automodule:: apem.unit_based_model.allocation.algorithms.nodal_clearing.dcopf
@@ -10,7 +12,9 @@ Nodal-clearing allocation algorithms and utilities.
    :show-inheritance:
 ```
 
-## API: `apem.unit_based_model.allocation.algorithms.nodal_clearing.nodal_fbmc`
+## Nodal FBMC
+
+Module: `apem.unit_based_model.allocation.algorithms.nodal_clearing.nodal_fbmc`
 
 ```{eval-rst}
 .. automodule:: apem.unit_based_model.allocation.algorithms.nodal_clearing.nodal_fbmc
@@ -18,7 +22,9 @@ Nodal-clearing allocation algorithms and utilities.
    :show-inheritance:
 ```
 
-## API: `apem.unit_based_model.allocation.algorithms.nodal_clearing.nodal_fbmc_included`
+## Nodal FBMC Included
+
+Module: `apem.unit_based_model.allocation.algorithms.nodal_clearing.nodal_fbmc_included`
 
 ```{eval-rst}
 .. automodule:: apem.unit_based_model.allocation.algorithms.nodal_clearing.nodal_fbmc_included

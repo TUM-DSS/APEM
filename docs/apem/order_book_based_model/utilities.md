@@ -2,7 +2,9 @@
 
 Shared utility helpers for calculations, extraction, and path handling.
 
-## API: `apem.order_book_based_model.euphemia.utils.calculations`
+## Calculations
+
+Module: `apem.order_book_based_model.euphemia.utils.calculations`
 
 ```{eval-rst}
 .. automodule:: apem.order_book_based_model.euphemia.utils.calculations
@@ -10,7 +12,9 @@ Shared utility helpers for calculations, extraction, and path handling.
    :show-inheritance:
 ```
 
-## API: `apem.order_book_based_model.euphemia.utils.extraction`
+## Extraction
+
+Module: `apem.order_book_based_model.euphemia.utils.extraction`
 
 ```{eval-rst}
 .. automodule:: apem.order_book_based_model.euphemia.utils.extraction
@@ -18,7 +22,9 @@ Shared utility helpers for calculations, extraction, and path handling.
    :show-inheritance:
 ```
 
-## API: `apem.order_book_based_model.euphemia.utils.paths`
+## Paths
+
+Module: `apem.order_book_based_model.euphemia.utils.paths`
 
 ```{eval-rst}
 .. automodule:: apem.order_book_based_model.euphemia.utils.paths

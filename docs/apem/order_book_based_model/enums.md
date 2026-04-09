@@ -2,7 +2,9 @@
 
 Enum definitions used in Euphemia configuration and solver flow.
 
-## API: `apem.order_book_based_model.euphemia.enums.cut_types`
+## Cut Types
+
+Module: `apem.order_book_based_model.euphemia.enums.cut_types`
 
 ```{eval-rst}
 .. automodule:: apem.order_book_based_model.euphemia.enums.cut_types
@@ -10,7 +12,9 @@ Enum definitions used in Euphemia configuration and solver flow.
    :show-inheritance:
 ```
 
-## API: `apem.order_book_based_model.euphemia.enums.datasets`
+## Datasets
+
+Module: `apem.order_book_based_model.euphemia.enums.datasets`
 
 ```{eval-rst}
 .. automodule:: apem.order_book_based_model.euphemia.enums.datasets
@@ -18,7 +22,9 @@ Enum definitions used in Euphemia configuration and solver flow.
    :show-inheritance:
 ```
 
-## API: `apem.order_book_based_model.euphemia.enums.order_types`
+## Order Types
+
+Module: `apem.order_book_based_model.euphemia.enums.order_types`
 
 ```{eval-rst}
 .. automodule:: apem.order_book_based_model.euphemia.enums.order_types

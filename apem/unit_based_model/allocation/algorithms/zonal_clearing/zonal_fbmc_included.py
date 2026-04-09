@@ -40,9 +40,10 @@ class Zonal_FBMC(PowerFlowModel):
 
     def __init__(self, zonal_configuration: str, base_case_type: str = 'BC2'):
         """
-        Initializes the Zonal_FBMC model.
-        :param zonal_configuration: The name of the zonal configuration to use (e.g., 'zonal_DE4').
-        :param base_case_type: The type of base case to generate (e.g., 'BC1', 'BC4').
+        Initialize the zonal FBMC model.
+
+        :param zonal_configuration: Name of the zonal configuration to use, for example ``zonal_DE4``.
+        :param base_case_type: Type of base case to generate, for example ``BC1`` or ``BC4``.
             Base-case definitions are documented in ``BaseCaseGenerator.generate`` in ``zonal_fbmc.py``.
         """
         self.zonal_configuration = zonal_configuration
@@ -53,15 +54,13 @@ class Zonal_FBMC(PowerFlowModel):
     def create_zonal_scenario_FBMC(self, base_scenario: Scenario, results_root: Optional[str] = None) -> Scenario:
         """
         Create a zonal scenario from the base nodal scenario.
-        
+
         This creates a simplified zonal representation that can be used for DCOPF
         and integrates with the existing redispatch framework.
-        
-        Args:
-            base_scenario: The original nodal scenario
-            
-        Returns:
-            Scenario: A zonal scenario suitable for DCOPF solving
+
+        :param base_scenario: Original nodal scenario.
+        :param results_root: Optional output directory used by downstream workflow steps.
+        :return: Zonal scenario suitable for DCOPF solving.
         """
 
         # Convert to PyPSA network to get zone mappings

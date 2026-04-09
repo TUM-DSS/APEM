@@ -2,7 +2,7 @@
 
 Integer Programming pricing implementation.
 
-## API: `apem.unit_based_model.pricing.algorithms.ip`
+Module: `apem.unit_based_model.pricing.algorithms.ip`
 
 ```{eval-rst}
 .. automodule:: apem.unit_based_model.pricing.algorithms.ip

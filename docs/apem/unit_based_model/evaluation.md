@@ -12,7 +12,9 @@ evaluation/redispatch_analysis
 evaluation/welfare_analysis
 ```
 
-## API: `apem.unit_based_model.evaluation`
+## Evaluation Package
+
+Module: `apem.unit_based_model.evaluation`
 
 ```{eval-rst}
 .. automodule:: apem.unit_based_model.evaluation

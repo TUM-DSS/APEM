@@ -35,7 +35,9 @@ Common extension points in the core layer:
 - Add/adjust core model registry in `apem.core` / `apem.market_models`.
 - Extend execution orchestration in `apem.execution_chain`.
 
-## API: `apem.config_loader`
+## Config Loader
+
+Module: `apem.config_loader`
 
 ```{eval-rst}
 .. automodule:: apem.config_loader
@@ -43,7 +45,9 @@ Common extension points in the core layer:
    :show-inheritance:
 ```
 
-## API: `apem.core`
+## Core
+
+Module: `apem.core`
 
 ```{eval-rst}
 .. automodule:: apem.core
@@ -51,7 +55,9 @@ Common extension points in the core layer:
    :show-inheritance:
 ```
 
-## API: `apem.market_models`
+## Market Models
+
+Module: `apem.market_models`
 
 ```{eval-rst}
 .. automodule:: apem.market_models
@@ -59,7 +65,9 @@ Common extension points in the core layer:
    :show-inheritance:
 ```
 
-## API: `apem.execution_chain`
+## Execution Chain
+
+Module: `apem.execution_chain`
 
 ```{eval-rst}
 .. automodule:: apem.execution_chain

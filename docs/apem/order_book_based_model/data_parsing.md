@@ -2,7 +2,9 @@
 
 Parsers and scenario models for order-book datasets.
 
-## API: `apem.order_book_based_model.euphemia.data.parsing.parse_data`
+## Parse Data
+
+Module: `apem.order_book_based_model.euphemia.data.parsing.parse_data`
 
 ```{eval-rst}
 .. automodule:: apem.order_book_based_model.euphemia.data.parsing.parse_data
@@ -10,7 +12,9 @@ Parsers and scenario models for order-book datasets.
    :show-inheritance:
 ```
 
-## API: `apem.order_book_based_model.euphemia.data.parsing.parse_eu`
+## Parse EU
+
+Module: `apem.order_book_based_model.euphemia.data.parsing.parse_eu`
 
 ```{eval-rst}
 .. automodule:: apem.order_book_based_model.euphemia.data.parsing.parse_eu
@@ -18,7 +22,9 @@ Parsers and scenario models for order-book datasets.
    :show-inheritance:
 ```
 
-## API: `apem.order_book_based_model.euphemia.data.parsing.zonal_scenario`
+## Zonal Scenario
+
+Module: `apem.order_book_based_model.euphemia.data.parsing.zonal_scenario`
 
 ```{eval-rst}
 .. automodule:: apem.order_book_based_model.euphemia.data.parsing.zonal_scenario
