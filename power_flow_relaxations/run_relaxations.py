@@ -19,7 +19,7 @@ except ImportError:  # Fallback: no process stats available
     process = None
 
 from power_flow_relaxations.models import DCOPF, Shor, ChordalShor, Jabr, QC
-from apem.US_market_model.data.parsing.parse_arpa import ParseARPA
+from apem.unit_based_model.data.parsing.parse_arpa import ParseARPA
 from apem.execution_chain import Error, _create_configuration
 from power_flow_relaxations.utils.network import random_connected_subgraph
 
@@ -238,12 +238,12 @@ if __name__ == "__main__":
                     scenario_results = list(tqdm(executor.map(run_model, arg_list), total=len(arg_list), desc=f"Running {tag} on subscenario of sizes {32 * (scenario_index + 1)}..."))
             except PermissionError:
                 # Fallback in restricted environments: run sequentially
-                scenario_results = [run_model(args) for args in tqdm(arg_list, total=len(arg_list), desc=f"Running {tag} on subscenario of sizes {32 * (scenario_index + 1)}...")]
+                scenario_results = [run_model(run_args) for run_args in tqdm(arg_list, total=len(arg_list), desc=f"Running {tag} on subscenario of sizes {32 * (scenario_index + 1)}...")]
 
-                with open(f"relaxation_results/{tag}_{32 * (scenario_index + 1)}_results.csv", "w", newline="") as csvfile:
-                    writer = csv.writer(csvfile)
-                    for i, stats in enumerate(scenario_results):
-                        welfare, elapsed_time, solve_time, peak_memory, violations = stats
-                        if csvfile.tell() == 0:
-                            writer.writerow(["batch_index", "welfare", "elapsed_time", "solve_time", "peak_memory_usage"] + list(violations.keys()))
-                        writer.writerow([i, welfare, elapsed_time, solve_time, peak_memory] + list(violations.values()))
+            with open(f"relaxation_results/{tag}_{32 * (scenario_index + 1)}_results.csv", "w", newline="") as csvfile:
+                writer = csv.writer(csvfile)
+                for i, stats in enumerate(scenario_results):
+                    welfare, elapsed_time, solve_time, peak_memory, violations = stats
+                    if csvfile.tell() == 0:
+                        writer.writerow(["batch_index", "welfare", "elapsed_time", "solve_time", "peak_memory_usage"] + list(violations.keys()))
+                    writer.writerow([i, welfare, elapsed_time, solve_time, peak_memory] + list(violations.values()))

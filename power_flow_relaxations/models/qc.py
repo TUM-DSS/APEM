@@ -3,7 +3,7 @@ from mosek.fusion import Domain, Expr
 import numpy as np
 import gc
 from scipy.stats import qmc
-from apem.US_market_model.allocation.error import Error
+from apem.unit_based_model.error import Error
 from power_flow_relaxations.models import Jabr
 from power_flow_relaxations.utils.network import partition_graph
 

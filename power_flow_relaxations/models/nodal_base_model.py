@@ -8,13 +8,13 @@ from mosek.fusion import Matrix, Model, Domain, ObjectiveSense, Expr, SolutionEr
 import mosek.fusion.pythonic # Don't remove this import, it is needed for the Mosek Fusion API to work properly
 from types import SimpleNamespace
 
-from apem.US_market_model.allocation.error import Error
-from apem.US_market_model.allocation.allocation import SellersAllocation, Allocation
-from apem.US_market_model.allocation.configuration import Configuration
-from apem.US_market_model.allocation.power_flow_model import PowerFlowModel
-from apem.US_market_model.allocation.analysis.stats import compute_stats
-from apem.US_market_model.data.parsing.scenario import Scenario
-from apem.US_market_model.utils.extraction import preprocess_as_dict
+from apem.unit_based_model.error import Error
+from apem.unit_based_model.allocation.allocation import SellersAllocation, Allocation
+from apem.unit_based_model.solver_configuration import SolverConfiguration as Configuration
+from apem.unit_based_model.allocation.power_flow_model import PowerFlowModel
+from apem.unit_based_model.allocation.analysis.stats import compute_stats
+from apem.unit_based_model.data.parsing.scenario import Scenario
+from apem.unit_based_model.utils.extraction import preprocess_as_dict
 
 
 class NodalBaseModel(PowerFlowModel):
