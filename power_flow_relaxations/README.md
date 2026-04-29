@@ -18,7 +18,7 @@ Runner for DCOPF/ACOPF relaxations (DCOPF, Shor, ChordalShor, Jabr, QC variants)
 - Convenience: install the extras via `pip install -r power_flow_relaxations/requirements.txt`.
 
 ## CLI flags
-- `--batch-size` (default 10): subscenarios per size.
+- `--batch-size` (default 1): subscenarios per size.
 - `--model` (default all): comma-separated tags (`DCOPF,Shor,QC6`, etc.).
 - `--model-start-index/--model-end-index`: slice the model list.
-- `--scenario-start-index/--scenario-end-index`: slice the subscenario sizes (each step adds 32 nodes; sizes above the network are skipped).
+- `--scenario-start-index/--scenario-end-index`: slice the default subscenario-size list (`32`, `160`), skipping sizes above the network size.
