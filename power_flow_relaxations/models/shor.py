@@ -5,10 +5,31 @@ from power_flow_relaxations.models.nodal_base_model import NodalBaseModel
 
 class Shor(NodalBaseModel):
     """
-    Implementation of the Shor SDP relaxation for ACOPF using MOSEK using only real valued variables.
+    Dense Shor SDP relaxation of ACOPF using a real-valued lifted matrix.
+
+    The model uses a single PSD matrix per period to represent quadratic voltage
+    products, then links active/reactive branch flows to linear expressions in that
+    matrix. This is the non-chordal baseline SDP formulation.
     """
 
     def __init__(self, scenario, configuration, **kwargs):
+        """
+        Initialize the dense SDP relaxation and create lifted PSD variables.
+
+        Parameters
+        ----------
+        scenario:
+            Unit-based scenario with network/bids.
+        configuration:
+            Solver configuration; relaxation mode is forced to `True`.
+        **kwargs:
+            Forwarded to :class:`NodalBaseModel`.
+
+        Notes
+        -----
+        Creates one PSD matrix `W[t]` of size `(2N x 2N)` for each period, where
+        `N` is the number of buses.
+        """
         if configuration is not None:
             configuration.relaxation = True
         super().__init__(scenario, configuration, **kwargs)
@@ -16,6 +37,16 @@ class Shor(NodalBaseModel):
         self.W = [self.model.variable(f"W[{t}]", Domain.inPSDCone(2 * len(self.nodes))) for t, _ in self.periods]
 
     def power_constraints(self):
+        """
+        Add lifted AC power-flow constraints from the Shor SDP formulation.
+
+        For each period:
+        - constructs real/imag surrogate matrices from `W[t]`,
+        - enforces symmetry of `W[t]`,
+        - imposes linearized active/reactive flow equations with tolerances,
+        - bounds nodal squared voltage magnitudes via diagonal terms,
+        - applies branch current-rating constraints.
+        """
         n = len(self.nodes)
         for t, _ in self.periods:
             W_t = self.W[t]
@@ -64,6 +95,13 @@ class Shor(NodalBaseModel):
         self.current_rating_constraints()
 
     def reference_constraints(self):
+        """
+        Anchor reference-bus voltage angle and magnitude in lifted coordinates.
+
+        Enforces:
+        - zero imaginary component at the reference bus,
+        - unit real component magnitude at the reference bus.
+        """
         for t, _ in self.periods:
             self.model.constraint(self.W[t][self.reference_bus[0] + 1, :] == 0)
             self.model.constraint(self.W[t][:, self.reference_bus[0] + 1] == 0)
@@ -71,11 +109,23 @@ class Shor(NodalBaseModel):
             self.model.constraint(self.W[t][self.reference_bus[0], self.reference_bus[0]] == 1)
 
     def __str__(self):  # type: ignore
+        """Return model identifier used in logs/results."""
         return "Shor"
 
     def get_V_vt_values(self) -> dict:
         """
-        Returns the approximate voltage magnitudes V_d for each node and period.
+        Recover approximate complex voltages from the solved lifted matrix.
+
+        Returns
+        -------
+        dict
+            Mapping `(node, period) -> (V_d, V_q)`.
+
+        Method
+        ------
+        Symmetrizes each solved `W[t]`, takes its dominant eigenpair as a rank-1
+        approximation, reconstructs complex bus voltages, and rotates phase so the
+        reference-bus angle is zero.
         """
 
         voltages = []

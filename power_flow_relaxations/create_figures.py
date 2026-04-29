@@ -60,7 +60,7 @@ def load_results():
 
 # Configuration
 RESULTS_DIR = "relaxation_results"
-OUTPUT_DIR = "paper_figures"
+OUTPUT_DIR = Path(RESULTS_DIR) / "plots"
 NODE_COUNTS = [32 * n for n in range(1, 21)]  # 32, 64, 96, ..., 640 (but 640 is actually 617)
 # For plotting: show 617 instead of 640 in tick labels, but keep tick at 640 position
 XTICK_POSITIONS = NODE_COUNTS
@@ -129,11 +129,8 @@ def create_figure1a(results, output_dir):
 
     plt.suptitle('Comparison of Relaxations: Solve Time & Overhead', fontsize=16, fontweight='bold', y=0.995)
     plt.tight_layout()
-    output_path_pdf = Path(output_dir) / 'figure1a.pdf'
-    output_path_png = Path(output_dir) / 'figure1a.png'
-    plt.savefig(output_path_pdf, dpi=300, bbox_inches='tight')
+    output_path_png = Path(output_dir) / 'solve_time_overhead.png'
     plt.savefig(output_path_png, dpi=300, bbox_inches='tight')
-    print(f"  Saved: {output_path_pdf}")
     print(f"  Saved: {output_path_png}")
     plt.close()
 
@@ -189,11 +186,8 @@ def create_figure1b(results, output_dir):
 
     plt.suptitle('Comparison of Relaxations: Memory & Welfare', fontsize=16, fontweight='bold', y=0.995)
     plt.tight_layout()
-    output_path_pdf = Path(output_dir) / 'figure1b.pdf'
-    output_path_png = Path(output_dir) / 'figure1b.png'
-    plt.savefig(output_path_pdf, dpi=300, bbox_inches='tight')
+    output_path_png = Path(output_dir) / 'memory_welfare.png'
     plt.savefig(output_path_png, dpi=300, bbox_inches='tight')
-    print(f"  Saved: {output_path_pdf}")
     print(f"  Saved: {output_path_png}")
     plt.close()
 
@@ -248,11 +242,8 @@ def create_figure1c(results, output_dir):
 
     plt.suptitle('Comparison of Relaxations: Current Phasor Errors & Thermal Limit Violations', fontsize=16, fontweight='bold', y=0.995)
     plt.tight_layout()
-    output_path_pdf = Path(output_dir) / 'figure1c.pdf'
-    output_path_png = Path(output_dir) / 'figure1c.png'
-    plt.savefig(output_path_pdf, dpi=300, bbox_inches='tight')
+    output_path_png = Path(output_dir) / 'current_phasor_thermal_limit_violations.png'
     plt.savefig(output_path_png, dpi=300, bbox_inches='tight')
-    print(f"  Saved: {output_path_pdf}")
     print(f"  Saved: {output_path_png}")
     plt.close()
 
@@ -320,11 +311,8 @@ def create_figure2_qc_sensitivity(results, output_dir):
     plt.suptitle('Comparison of QC Relaxations with Local QMC Sampling', fontsize=17, fontweight='bold', y=0.995)
     plt.tight_layout()
     
-    output_path_pdf = Path(output_dir) / 'figure2.pdf'
-    output_path_png = Path(output_dir) / 'figure2.png'
-    plt.savefig(output_path_pdf, dpi=300, bbox_inches='tight')
+    output_path_png = Path(output_dir) / 'local_qmc_sampling.png'
     plt.savefig(output_path_png, dpi=300, bbox_inches='tight')
-    print(f"  Saved: {output_path_pdf}")
     print(f"  Saved: {output_path_png}")
     plt.close()
 

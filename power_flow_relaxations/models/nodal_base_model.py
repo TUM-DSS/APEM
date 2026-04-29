@@ -18,7 +18,37 @@ from apem.unit_based_model.utils.extraction import preprocess_as_dict
 
 
 class NodalBaseModel(PowerFlowModel):
+    """
+    Shared optimization scaffold for nodal power-flow relaxations.
+
+    This base class handles:
+    - scenario normalization/parsing into indexed sets and tensors,
+    - variable creation and common market/network constraints,
+    - objective assembly for welfare or zonal-tracking modes,
+    - solving, optional integrality forcing, and allocation extraction.
+
+    Subclasses provide relaxation-specific network equations by implementing
+    `power_constraints`, `reference_constraints`, and `get_V_vt_values`.
+    """
+
     def read_scenario(self, scenario):
+        """
+        Normalize and ingest scenario data into model-ready structures.
+
+        Parameters
+        ----------
+        scenario:
+            Parsed scenario containing buyers, sellers, network, and period/block
+            metadata.
+
+        Notes
+        -----
+        This method:
+        - harmonizes expected column names for real/reactive bounds,
+        - builds index maps for buyers/sellers/nodes/periods/blocks,
+        - prepares node-agent membership and neighbor lists,
+        - precomputes dictionary lookups for bids, capacities, and costs.
+        """
         # Normalize required columns for this model
         if "max_real_dem" not in scenario.df_buyers.columns and "max_dem" in scenario.df_buyers.columns:
             scenario.df_buyers = scenario.df_buyers.copy()
@@ -124,6 +154,13 @@ class NodalBaseModel(PowerFlowModel):
             )
 
     def initialize_parameters(self):
+        """
+        Convert dictionary-based inputs into dense NumPy tensors.
+
+        Produces tensor/matrix representations for buyer values/sizes, seller
+        costs/sizes, no-load costs, and real/reactive demand/supply bounds, all
+        aligned with internal `(entity, period, block)` indexing.
+        """
         self.buyer_val_tensor = np.zeros((len(self.buyers), len(self.periods), len(self.blocks_buyers)))
         for lb, block in self.blocks_buyers:
             for b, buyer in self.buyers:
@@ -210,6 +247,18 @@ class NodalBaseModel(PowerFlowModel):
                 ]
 
     def initialize_model(self, configuration):
+        """
+        Create MOSEK model and declare common decision variables.
+
+        Parameters
+        ----------
+        configuration:
+            Solver configuration. Determines whether commitment variables are
+            relaxed (`u_st in [0,1]`) or binary.
+
+        Variables include buyer/seller dispatch blocks, unit commitment/start-up,
+        branch active/reactive flows, nodal imbalances, and current-limit slack.
+        """
         self.model = Model()
 
         self.problem_status = None
@@ -239,6 +288,18 @@ class NodalBaseModel(PowerFlowModel):
         self.I_viol = self.model.variable("I_viol", [len(self.nodes), len(self.nodes), len(self.periods)], Domain.greaterThan(0.0))
 
     def initialize_network_arrays(self, enforce_sparse=False):
+        """
+        Build electrical parameter arrays from the scenario network.
+
+        Parameters
+        ----------
+        enforce_sparse:
+            If `True`, store matrices as MOSEK sparse `Matrix`; otherwise NumPy
+            arrays are used.
+
+        Generates `V_min`, `V_max`, conductance `G`, susceptance `B`, branch
+        ratings `F_max`, and derived apparent limits `S_max`.
+        """
         self.V_min = np.array([self.network.nodes[v].get("V_min", 1.) for _, v in self.nodes])
         self.V_max = np.array([self.network.nodes[v].get("V_max", 1.) for _, v in self.nodes])
 
@@ -264,6 +325,12 @@ class NodalBaseModel(PowerFlowModel):
             self.S_max = S_max
 
     def set_tolerances(self, p_vwt_line_tol=5e-4, q_vwt_line_tol=5e-4, I_viol_weight=3e-1, p_imb_weight=3e-1, q_imb_weight=3e-1):
+        """
+        Configure tolerance and penalty coefficients used across constraints.
+
+        Parameters control line-equation residual bands and scaling of slack
+        variables for current-limit and nodal-balance violations.
+        """
         self.p_vwt_line_tol = p_vwt_line_tol
         self.q_vwt_line_tol = q_vwt_line_tol
         self.I_viol_weight = I_viol_weight
@@ -276,6 +343,22 @@ class NodalBaseModel(PowerFlowModel):
         configuration: Configuration,
         tolerances: Optional[dict[str, float]] = None,
     ):
+        """
+        Construct a nodal relaxation model from a scenario.
+
+        Parameters
+        ----------
+        scenario:
+            Input market/network scenario.
+        configuration:
+            Solver configuration used for variable domains and runtime settings.
+        tolerances:
+            Optional overrides for line/balance tolerance and penalty weights.
+
+        Initialization order is:
+        scenario parsing -> parameter tensors -> variable creation ->
+        network arrays -> tolerance setup.
+        """
         # PowerFlowModel has no __init__; avoid passing args to object.__init__
         super().__init__()
         # Keep references for downstream use
@@ -289,10 +372,22 @@ class NodalBaseModel(PowerFlowModel):
         self.set_tolerances(**(tolerances or {}))
 
     def get_thermal_limit_objective(self, welfare_scale = 1):
+        """
+        Return normalized penalty term for current-limit violations.
+
+        The term is scaled by `welfare_scale` and averaged over the size of
+        `I_viol` to keep magnitudes comparable across instances.
+        """
         violation = welfare_scale / (np.prod(self.I_viol.shape)) * Expr.sum(self.I_viol)
         return violation
 
     def get_imbalance_objective(self, welfare_scale = 1):
+        """
+        Return normalized penalty term for nodal real/reactive imbalance slack.
+
+        Uses aggregated `p_imb` and `q_imb` variables with scaling by
+        `welfare_scale` and tensor sizes.
+        """
         imbalance = welfare_scale / (np.prod(self.p_imb.shape)) * Expr.sum(self.p_imb) + welfare_scale / (np.prod(self.q_imb.shape)) * Expr.sum(self.q_imb)
         return imbalance
 
@@ -302,13 +397,27 @@ class NodalBaseModel(PowerFlowModel):
         min_vol: Optional[bool] = False,
     ) -> tuple:
         """
-        Get the objective function for the base model.
-        If zonal_allocation is provided, it will be used to compute the difference in power variables.
-        If min_vol is True, the objective will minimize the difference in power variables.
-        Otherwise, it will maximize the difference between buyer valuations and seller costs.
-        :param zonal_allocation: Optional SellersAllocation object to use for zonal allocation
-        :param min_vol: Optional boolean to indicate if the objective should minimize volumes
-        :return: cvxpy objective function
+        Build the optimization objective for welfare or tracking formulations.
+
+        Parameters
+        ----------
+        zonal_allocation:
+            Optional target allocation used for redispatch-style tracking.
+        min_vol:
+            When tracking a zonal allocation, minimize dispatch-volume deviation
+            (`True`) or cost-weighted deviation plus commitment mismatch (`False`).
+
+        Returns
+        -------
+        tuple
+            `(ObjectiveSense, expression)` compatible with `Model.objective(...)`.
+
+        Modes
+        -----
+        - `zonal_allocation is None`: maximize market welfare minus imbalance and
+          thermal penalties.
+        - `zonal_allocation provided`: minimize deviation from zonal dispatch, with
+          optional minimum-volume or cost-weighted formulation.
         """
 
         if isinstance(zonal_allocation, SellersAllocation):
@@ -403,9 +512,16 @@ class NodalBaseModel(PowerFlowModel):
 
     def bid_constraints(self, u_fixed: Optional[dict] = None):
         """
-        Add bid constraints to the model. These constraints typically represent the bids of sellers and buyers in the market.
-        :param u_fixed: Optional dictionary with fixed u_st values for the sellers.
-        :return: set of bid constraints
+        Add buyer/seller bid, capacity, and unit-commitment constraints.
+
+        Parameters
+        ----------
+        u_fixed:
+            Optional `(seller, period) -> {0,1}` map used to fix commitment
+            variables, typically during integrality-forcing re-solves.
+
+        Enforces block limits, aggregate dispatch identities, real/reactive bounds,
+        minimum uptime relations, and `u_st in [0,1]`.
         """
 
         if isinstance(u_fixed, dict):
@@ -452,6 +568,12 @@ class NodalBaseModel(PowerFlowModel):
         self.model.constraint(self.u_st == Domain.inRange(0, 1))
 
     def current_rating_constraints(self):
+        """
+        Impose conic apparent-power/current rating limits on each branch.
+
+        For each directed edge and period, constrains `(p, q)` flow magnitudes via
+        a quadratic cone, with multiplicative slack through `I_viol`.
+        """
         for t, _ in self.periods:
             for i_v, v in self.nodes:
                 for i_w, w in self.neighbours[v]:
@@ -478,9 +600,10 @@ class NodalBaseModel(PowerFlowModel):
 
     def bus_constraints(self):
         """
-        Add bus constraints to the model. These constraints ensure that the power flow at each node is balanced.
+        Add nodal real/reactive balance constraints with imbalance slack.
 
-        :return: list of bus constraints
+        For each node and period, enforces supply - demand - outgoing flow = 0
+        within weighted slack variables `p_imb` and `q_imb`.
         """
         for t, _ in self.periods:
             for i_v, v in self.nodes:
@@ -669,6 +792,16 @@ class NodalBaseModel(PowerFlowModel):
         )
 
     def collect_constraints(self, u_fixed: Optional[dict] = None, verbose=False):
+        """
+        Assemble the full model constraint set in canonical order.
+
+        Parameters
+        ----------
+        u_fixed:
+            Optional commitment fixes passed to :meth:`bid_constraints`.
+        verbose:
+            If `True`, prints progress while adding constraint groups.
+        """
         if verbose:
             print("Collecting power constraints...")
         self.power_constraints()
@@ -693,6 +826,34 @@ class NodalBaseModel(PowerFlowModel):
         force_integrality: bool = True,
         **kwargs
     ) -> Allocation | Error:
+        """
+        Solve the relaxation and return an allocation-like result object.
+
+        Parameters
+        ----------
+        results_file:
+            Optional CSV path for raw variable dumps (or failure status).
+        stats_file:
+            Optional path for computed run statistics.
+        u_fixed:
+            Optional fixed commitments to enforce during solve.
+        min_vol:
+            Objective mode flag for zonal-tracking formulations.
+        zonal_allocation:
+            Optional target allocation for redispatch-style tracking objective.
+        verbose:
+            Enable MOSEK solver logs and build-step prints.
+        force_integrality:
+            If relaxed commitments produce fractional values, rerun once with
+            rounded binary commitments fixed.
+        **kwargs:
+            Reserved for compatibility.
+
+        Returns
+        -------
+        Allocation | Error
+            Allocation-like object on success; lightweight error object otherwise.
+        """
 
         self.collect_constraints(u_fixed, verbose)
 
@@ -782,6 +943,23 @@ class NodalBaseModel(PowerFlowModel):
             return Error(str(self.problem_status))
 
     def get_allocation(self):
+        """
+        Materialize a lightweight allocation wrapper from solved model values.
+
+        Returns
+        -------
+        object
+            `RelaxAllocation` instance exposing:
+            - `BuyersAllocation`, `SellersAllocation`, `TransmissionNetworkAllocation`
+            - `stats` with welfare/runtime/MIP gap
+            - `compute_welfare()` and `compute_feasibility_violations(...)`
+            - reconstructed voltage components `V_vt`.
+
+        Raises
+        ------
+        ValueError
+            If solve status is missing or not feasible/optimal.
+        """
         if self.model is not None and self.problem_status is not None and self.solution_status is not None:
             if self.solution_status not in [SolutionStatus.Feasible, SolutionStatus.Optimal]:
                 raise ValueError(
@@ -812,25 +990,61 @@ class NodalBaseModel(PowerFlowModel):
                     self.df_sellers = df_sellers
 
             class SimpleTransmissionNetworkAllocation:
-                def __init__(self, f_vwt, network, periods):
+                def __init__(self, f_vwt, q_vwt, network, periods):
                     self.f_vwt = f_vwt
+                    self.q_vwt = q_vwt
                     self.network = network
                     # periods may be a list of ints or list of (idx, value)
                     self.periods = [t if not isinstance(t, tuple) else t[1] for t in periods]
 
             class RelaxAllocation:
-                def __init__(self, buyers_alloc, sellers_alloc, network_alloc, stats, scenario):
+                def __init__(self, buyers_alloc, sellers_alloc, network_alloc, stats, scenario, V_vt):
                     self.BuyersAllocation = buyers_alloc
                     self.SellersAllocation = sellers_alloc
                     self.TransmissionNetworkAllocation = network_alloc
                     self.stats = stats
                     self.scenario = scenario
+                    self.V_vt = V_vt
 
                 def compute_welfare(self):
                     return self.stats["welfare"]
 
-                def compute_feasibility_violations(self, print_summary=False):
-                    return {}
+                def compute_feasibility_violations(self, violations=None, print_summary=False):
+                    requested = set(violations or ["line", "line_current_limit"])
+                    flow_mismatch = []
+                    thermal_excess = []
+
+                    for (v, w, period), p_vw in self.TransmissionNetworkAllocation.f_vwt.items():
+                        q_vw = self.TransmissionNetworkAllocation.q_vwt.get((v, w, period), 0.0)
+
+                        # Thermal limit check based on per-branch apparent flow magnitude.
+                        line_mag = float(np.hypot(p_vw, q_vw))
+                        v_min = self.scenario.network.nodes[v].get("V_min", 1.0)
+                        f_max = self.scenario.network[v][w].get("F_max", 0.0)
+                        thermal_limit = abs(v_min * f_max)
+                        thermal_excess.append(max(0.0, line_mag - thermal_limit))
+
+                        # Flow equation mismatch using recovered complex voltages.
+                        if (v, period) in self.V_vt and (w, period) in self.V_vt:
+                            Vd_v, Vq_v = self.V_vt[(v, period)]
+                            Vd_w, Vq_w = self.V_vt[(w, period)]
+                            g_vw = self.scenario.network[v][w].get("G", 0.0)
+                            b_vw = self.scenario.network[v][w].get("B", 0.0)
+
+                            vv_sq = Vd_v ** 2 + Vq_v ** 2
+                            re_vvw = Vd_v * Vd_w + Vq_v * Vq_w
+                            im_vvw = Vq_v * Vd_w - Vd_v * Vq_w
+
+                            p_calc = g_vw * (vv_sq - re_vvw) + b_vw * im_vvw
+                            q_calc = -b_vw * (vv_sq - re_vvw) + g_vw * im_vvw
+                            flow_mismatch.append(float(np.hypot(p_vw - p_calc, q_vw - q_calc)))
+
+                    result = {}
+                    if "line" in requested:
+                        result["line (A)"] = float(np.mean(flow_mismatch)) if flow_mismatch else np.nan
+                    if "line_current_limit" in requested or not violations:
+                        result["line_current_limit (A)"] = float(np.mean(thermal_excess)) if thermal_excess else np.nan
+                    return result
 
             p_bt = self.get_p_bt_values()
             p_st = self.get_p_st_values()
@@ -846,9 +1060,9 @@ class NodalBaseModel(PowerFlowModel):
 
             buyers_alloc = SimpleBuyersAllocation(p_bt, p_btl, self.scenario.df_buyers, self.scenario.blocks_buyers)
             sellers_alloc = SimpleSellersAllocation(p_st, p_stl, u_st, phi_st, self.scenario.df_sellers)
-            network_alloc = SimpleTransmissionNetworkAllocation(p_vwt, self.scenario.network, self.scenario.periods)
+            network_alloc = SimpleTransmissionNetworkAllocation(p_vwt, self.get_q_vwt_values(), self.scenario.network, self.scenario.periods)
 
-            return RelaxAllocation(buyers_alloc, sellers_alloc, network_alloc, stats, self.scenario)
+            return RelaxAllocation(buyers_alloc, sellers_alloc, network_alloc, stats, self.scenario, V_vt)
         else:
             raise ValueError(
                 "No allocation has been computed yet. Please call the solve() method first."

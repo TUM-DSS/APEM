@@ -44,8 +44,8 @@ MODELS = [("DCOPF", DCOPF),
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Run relaxation experiments')
-    parser.add_argument('--batch-size', type=int, default=10, 
-                       help='Number of scenarios per batch (default: 10)')
+    parser.add_argument('--batch-size', type=int, default=1, 
+                       help='Number of scenarios per batch (default: 1)')
     parser.add_argument('--model-start-index', type=int, default=0,
                        help='Starting index for models to run (default: 0)')
     parser.add_argument('--model-end-index', type=int, default=-1,

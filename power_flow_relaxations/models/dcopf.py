@@ -4,15 +4,46 @@ import numpy as np
 
 class DCOPF(NodalBaseModel):
     """
-    Implementation of the Direct Current Optimal Power Flow Model using MOSEK.
+    Linearized DC optimal power flow (DCOPF) relaxation on the nodal model scaffold.
+
+    This model keeps only active-power network physics with voltage-angle variables
+    and branch susceptances. Reactive-power AC relations are omitted, yielding a
+    fast linear approximation commonly used as a baseline.
     """
 
     def __init__(self, scenario, configuration, **kwargs) -> None:
+        """
+        Initialize the DCOPF model and create bus-angle decision variables.
+
+        Parameters
+        ----------
+        scenario:
+            Unit-based scenario containing bids and transmission network.
+        configuration:
+            Solver configuration passed to the base nodal model.
+        **kwargs:
+            Optional arguments forwarded to :class:`NodalBaseModel`.
+
+        Notes
+        -----
+        Creates `theta_vt` with shape `[n_nodes, n_periods]`, representing voltage
+        phase angles used in linearized flow equations.
+        """
         super().__init__(scenario, configuration, **kwargs)
 
         self.theta_vt = self.model.variable("theta_vt", [len(self.network), len(self.periods)])
 
     def power_constraints(self):
+        """
+        Add DC branch-flow and thermal-limit constraints.
+
+        For each directed branch `(v, w)` and period `t`, the model enforces:
+        - symmetric active-power flow bounds with optional slack via `I_viol`,
+        - linear DC flow relation:
+          `p_vwt ~= B_vw * (theta_v - theta_w)` within tolerance `p_vwt_line_tol`.
+
+        This defines the network transport part of the DCOPF approximation.
+        """
         for t, _ in self.periods:
             for i_v, v in self.nodes: 
                 for i_w, _ in self.neighbours[v]:
@@ -32,9 +63,24 @@ class DCOPF(NodalBaseModel):
 
 
     def reference_constraints(self):
+        """
+        Fix the slack/reference bus angle to zero across all periods.
+
+        This removes the rotational invariance of voltage angles and makes the
+        linear system identifiable.
+        """
         self.model.constraint(self.theta_vt[self.reference_bus[0], :] == 0)
 
     def get_V_vt_values(self) -> dict[tuple[int, int], tuple[float, float]]:
+        """
+        Reconstruct unit-magnitude complex voltage components from bus angles.
+
+        Returns
+        -------
+        dict[tuple[int, int], tuple[float, float]]
+            Mapping `(node, period) -> (V_d, V_q)` where
+            `V_d = cos(theta)` and `V_q = sin(theta)`.
+        """
         value = self.theta_vt.level().reshape([len(self.network), len(self.periods)])
         return {
             (v, period): (np.cos(value[i_v, t]), np.sin(value[i_v, t]))  # type: ignore
@@ -44,4 +90,5 @@ class DCOPF(NodalBaseModel):
         }
 
     def __str__(self):
+        """Return the model tag used in logs/results."""
         return "DCOPF_CVXPY"

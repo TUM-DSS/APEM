@@ -8,16 +8,50 @@ from collections import deque
 
 class Jabr(NodalBaseModel):
     """
-    Implementation of Jabr's SOCP relaxation for ACOPF using MOSEK.
+    Jabr-style SOCP relaxation of ACOPF on the nodal market model.
+
+    The model introduces auxiliary voltage-product variables:
+    - `c_vw` for cosine-like real products,
+    - `s_vw` for sine-like imaginary products,
+    and enforces second-order cone envelopes that relax nonconvex AC equalities.
     """
 
     def __init__(self, scenario, configuration, **kwargs):
+        """
+        Initialize Jabr relaxation variables on top of the base nodal model.
+
+        Parameters
+        ----------
+        scenario:
+            Unit-based scenario (network, bids, periods).
+        configuration:
+            Solver configuration object.
+        **kwargs:
+            Extra options forwarded to :class:`NodalBaseModel`.
+
+        Notes
+        -----
+        Creates per-period dense matrices `c_vwt` and `s_vwt` of shape
+        `[n_nodes, n_nodes]` used in relaxed AC flow equations.
+        """
         super().__init__(scenario, configuration, **kwargs)
 
         self.c_vwt = [self.model.variable(f"c_vw[{t}]", [len(self.nodes), len(self.nodes)]) for t, _ in self.periods]
         self.s_vwt = [self.model.variable(f"s_vw[{t}]", [len(self.nodes), len(self.nodes)]) for t, _ in self.periods]
 
     def power_constraints(self):
+        """
+        Add Jabr SOCP power-flow constraints for every period and branch.
+
+        Includes:
+        - active/reactive flow consistency with `(c_vw, s_vw)` terms,
+        - cone constraints coupling diagonal and off-diagonal voltage products,
+        - symmetry/skew-symmetry structure (`c = c^T`, `s = -s^T`),
+        - voltage magnitude bounds on diagonal entries of `c`.
+
+        Finally delegates thermal current limits to
+        :meth:`NodalBaseModel.current_rating_constraints`.
+        """
         for t, _ in self.periods:
             c_vw = self.c_vwt[t]
             s_vw = self.s_vwt[t]
@@ -57,17 +91,34 @@ class Jabr(NodalBaseModel):
         self.current_rating_constraints()
 
     def reference_constraints(self):
+        """
+        Set reference-bus voltage magnitude in lifted coordinates.
+
+        For each period, constrains the reference-bus diagonal `c_rr` entry to 1,
+        corresponding to unit voltage magnitude at the slack bus.
+        """
         for t, _ in self.periods:
             self.model.constraint(
                 self.c_vwt[t][self.reference_bus[0], self.reference_bus[0]] == 1
             )
 
     def __str__(self):  # type: ignore
+        """Return model identifier used in logs/results."""
         return "Jabr"
 
     def get_V_vt_values(self) -> dict:
         """
-        Returns the approximate voltage magnitudes V_d for each node and period.
+        Recover approximate complex voltages from `(c_vw, s_vw)` solutions.
+
+        Returns
+        -------
+        dict
+            Mapping `(node, period) -> (V_d, V_q)`.
+
+        Method
+        ------
+        Starting from the reference bus `(1, 0)`, performs a graph traversal and
+        reconstructs neighboring voltages using solved `c_vw`/`s_vw` relations.
         """
         c_vwt_values = [self.c_vwt[t].level().reshape((len(self.nodes), len(self.nodes))) for t, _ in self.periods]
         s_vwt_values = [self.s_vwt[t].level().reshape((len(self.nodes), len(self.nodes))) for t, _ in self.periods]

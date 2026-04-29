@@ -303,8 +303,12 @@ class QC(Jabr):
 
         jabr_violations = self.jabr_allocation.compute_feasibility_violations(violations=["line"], print_summary=False)
         actual_violations = allocation.compute_feasibility_violations(violations=["line"], print_summary=False)
+        jabr_line = jabr_violations.get("line (A)")
+        actual_line = actual_violations.get("line (A)")
+        if jabr_line is None or actual_line is None:
+            return allocation
 
-        if actual_violations["line (A)"] > jabr_violations["line (A)"]:
+        if actual_line > jabr_line:
             print(f"[QC] Warning: QC solution has higher line violations ({actual_violations['line (A)']:.4f} A) than Jabr ({jabr_violations['line (A)']:.4f} A). Reverting to Jabr solution.")
             return self.jabr_allocation
         else:
