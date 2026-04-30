@@ -36,16 +36,16 @@ The counts below are computed from the parsed `Scenario` objects. Branches are t
 
 Use these values under `order_book_based_model.dataset`.
 
-| Dataset key | Description | Notes |
-|---|---|---|
-| `GENERATED_SMALL` | Generated Euphemia-style order-book instance. | Useful for small order-book experiments. |
-| `GENERATED_LARGE` | Larger generated Euphemia-style order-book instance. | Useful for larger generated order-book experiments. |
-| `OMIE` | OMIE day-ahead-market file-format-based dataset. | See the dataset README under `apem/order_book_based_model/euphemia/data/datasets/omie/`. |
-| `GME` | GME order-book dataset. | Loaded from the bundled Euphemia-style CSV folder. |
-| `TEST_3NODE` | Small 3-zone test instance. | Includes ATC and FBMC inputs; useful for validating network constraints. |
-| `TEST_3NODE_LOWCAP` | Low-capacity variant of `TEST_3NODE`. | Same structure as `TEST_3NODE`, with lower capacities. |
-| `IEEE_RTS` | Order-book version of `IEEE_RTS`. | Obtained through the unit-based-to-order-book conversion workflow. |
-| `ARPA` | Order-book version of `ARPA`. | Obtained through the unit-based-to-order-book conversion workflow. |
+| Dataset key | Scope | Order content | Notes |
+|---|---|---|---|
+| `GENERATED_SMALL` | 24 periods; 1 zone. | Step, block, complex, scalable-complex, and piecewise-linear orders. | Synthetic Euphemia-style instance for small order-book experiments. |
+| `GENERATED_LARGE` | 24 periods; 1 zone. | Same order families as `GENERATED_SMALL`, with more block, complex, and scalable-complex orders. | Synthetic larger instance for stress-testing order-book formulations. |
+| `OMIE` | 24 periods; 1 zone. | Step orders and complex orders. | Based on [OMIE](https://www.omie.es/en) day-ahead-market `cab` and `det` file formats; see the dataset README under `apem/order_book_based_model/euphemia/data/datasets/omie/`. |
+| `GME` | 24 periods; 1 zone. | Step orders and block orders. | Bundled Euphemia-style CSV instance derived from [GME](https://www.mercatoelettrico.org/en-us/Home)-style order-book data. |
+| `TEST_3NODE` | 1 period; 3 zones. | Step orders and one block order. | Small validation case with ATC and FBMC inputs. |
+| `TEST_3NODE_LOWCAP` | 1 period; 3 zones. | Step orders and one block order. | Low-capacity variant of `TEST_3NODE` for network-constraint validation. |
+| `IEEE_RTS` | 24 periods; 1 zone. | Step, block, and scalable-complex orders. | Converted from the unit-based `IEEE_RTS` scenario. |
+| `ARPA` | 1 period; 1 zone. | Step, block, and scalable-complex orders. | Converted from the unit-based `ARPA` scenario. |
 
 Order-book datasets are stored as Euphemia-style CSV folders under:
 
@@ -67,6 +67,8 @@ For implementation details, see [](apem/order_book_based_model/data_parsing).
 
 ## References
 
+- OMIE. [Iberian Electricity Market Operator](https://www.omie.es/en).
+- GME (Gestore dei Mercati Energetici). [Mercato Elettrico](https://www.mercatoelettrico.org/en-us/Home).
 - Grigg C, Wong P, Albrecht P, Allan R, Bhavaraju M, Billinton R, Chen Q, Fong C, Haddad S, Kuruganty S, Li W, Mukerji R, Patton D, Rau N, Reppen D, Schneider A, Shahidehpour M, Singh C (1999). [The IEEE reliability test system 1996](https://doi.org/10.1109/59.780914). *IEEE Transactions on Power Systems*, 14(3):1010-1020.
 - Garcia-Bertrand R, Conejo AJ, Gabriel S (2006). [Electricity market near-equilibrium under locational marginal pricing and minimum profit conditions](http://dx.doi.org/10.1016/j.ejor.2005.03.037). *European Journal of Operational Research*, 174(1):457-479.
 - Zoltowska I (2016). [Demand shifting bids in energy auction with non-convexities and transmission constraints](http://dx.doi.org/10.1016/j.eneco.2015.05.016). *Energy Economics*, 53:17-27.
