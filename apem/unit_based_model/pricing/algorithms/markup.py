@@ -16,6 +16,9 @@ from apem.unit_based_model.pricing.analysis.pricing import Pricing
 class Markup(PricingAlgorithm):
     """
     Implementation of Markup Pricing.
+
+    This pricing method is currently supported only for the unit-based
+    `IEEE_RTS`, `PJM`, and `ARPA` datasets, since only these have buyers' valuations.
     """
 
     def compute_prices(self, scenario: Scenario, configuration: SolverConfiguration, file_prices: Optional[str] = None,
@@ -70,8 +73,6 @@ class Markup(PricingAlgorithm):
         seller_prices = pd.read_csv(seller_prices_file)
         p_vt = dict(zip(zip(seller_prices["node"], seller_prices["period"]), seller_prices["price"]))
 
-        pricing = Pricing(node_prices=p_vt, used_algorithm='Markup')
-
         # second stage -> find feasible allocation
         # try out multiple thresholds
         threshold_values = np.arange(0.8, -0.01, -0.1).round(1).tolist()
@@ -114,6 +115,17 @@ class Markup(PricingAlgorithm):
                 results_file=final_results,
                 stats_file=final_stats,
                 u_fixed=u_fixed
+            )
+
+            if type(final_allocation) != Allocation:
+                return final_allocation
+
+            pricing = Pricing(
+                node_prices=p_vt,
+                used_algorithm='Markup',
+                runtime=initial_allocation.runtime + final_allocation.runtime,
+                num_vars=initial_allocation.num_vars + final_allocation.num_vars,
+                num_constrs=initial_allocation.num_constrs + final_allocation.num_constrs,
             )
 
             print('-' * 50)

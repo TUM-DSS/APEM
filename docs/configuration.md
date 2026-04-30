@@ -145,6 +145,8 @@ Redispatch is only used for zonal unit-based models (`Zonal_NTC_aggregated`, `Zo
 ```
 Use this for zonal unit-based runs with redispatch.
 
+For `Zonal_FBMC`, `zonal_configuration.base_case` selects the FBMC base-case construction. See [](apem/unit_based_model/allocation/zonal_clearing/fbmc) for the available base cases.
+
 For nodal runs, switch `power_flow_model.type` to `DCOPF` and usually omit `redispatch` and `zonal_configuration`.
 :::
 
