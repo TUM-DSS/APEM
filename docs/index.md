@@ -9,6 +9,7 @@ APEM is a framework for electricity-market clearing, pricing, and analysis. It b
 
 installation
 configuration
+datasets
 custom_datasets
 ```
 
