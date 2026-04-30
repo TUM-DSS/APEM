@@ -82,13 +82,6 @@ make html
 
 Open `docs/_build/html/index.html`.
 
-Useful entry points:
-
-- Core docs: [docs/apem/index.md](docs/apem/index.md)
-- Node ranking docs: [docs/node_ranking/index.md](docs/node_ranking/index.md)
-- PF relaxation docs: [docs/pf_relaxations/index.md](docs/pf_relaxations/index.md)
-- Custom datasets: [docs/custom_datasets.md](docs/custom_datasets.md)
-- Order-book internals: [apem/order_book_based_model/euphemia/README.md](apem/order_book_based_model/euphemia/README.md)
 
 ## Troubleshooting
 
