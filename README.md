@@ -79,15 +79,17 @@ PF relaxation details: [docs/pf_relaxations/index.md](docs/pf_relaxations/index.
 
 ## Documentation
 
-Build the Sphinx docs locally:
+Online documentation: https://teodora-dobos.github.io/APEM/
+
+<!-- Build the Sphinx docs locally:
 
 ```bash
 python -m pip install -r docs/requirements.txt
 cd docs
 make html
-```
+``` -->
 
-Open `docs/_build/html/index.html`.
+<!-- Open `docs/_build/html/index.html`. -->
 
 
 ## Troubleshooting
