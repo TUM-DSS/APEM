@@ -79,6 +79,8 @@ PF relaxation details: [docs/pf_relaxations/index.md](docs/pf_relaxations/index.
 
 ## Documentation
 
+Online documentation: https://teodora-dobos.github.io/APEM/
+
 Build the Sphinx docs locally:
 
 ```bash
