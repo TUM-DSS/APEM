@@ -20,7 +20,6 @@ Each execution writes a new timestamped evaluation folder under:
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
 import json
 import os
 import sys
@@ -41,6 +40,7 @@ from apem.execution_chain import _retrieve_data
 from apem.unit_based_model.enums import PowerFlowModels, PricingAlgorithms, UnitBased_Datasets
 from apem.unit_based_model.evaluation import (
     compare_price_algorithms,
+    create_timestamped_output_dir,
     ensure_run_for_configuration,
     load_prices_from_run,
     plot_average_prices_by_node,
@@ -81,11 +81,11 @@ def create_evaluation_output_dir(
     pricing_algorithms: tuple[PricingAlgorithms, ...],
 ) -> Path:
     """Create a timestamped output folder so evaluation results are not overwritten."""
-    timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    algorithm_part = "_".join(algorithm.name for algorithm in pricing_algorithms)
-    output_dir = evaluation_root(scenario_name) / f"{timestamp}_{power_flow_model}_{algorithm_part}"
-    output_dir.mkdir(parents=True, exist_ok=True)
-    return output_dir
+    return create_timestamped_output_dir(
+        evaluation_root(scenario_name),
+        power_flow_model,
+        *(algorithm.name for algorithm in pricing_algorithms),
+    )
 
 
 def build_power_flow_model():

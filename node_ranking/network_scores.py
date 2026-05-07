@@ -128,7 +128,12 @@ def compute_node_ptdf_contribution_scores(
         Contribution score for each node in the full node set. Slack node has
         score 0.
     """
-    m, _ncols = ptdf.shape
+    m, ncols = ptdf.shape
+    if len(mask) != ncols:
+        raise ValueError(
+            "PTDF column count must match mask length. "
+            f"Got {ncols} columns and mask length {len(mask)}."
+        )
 
     # Build weights per line if requested (otherwise set to 1)
     if method == "weighted_sum":
@@ -139,7 +144,9 @@ def compute_node_ptdf_contribution_scores(
     # Absolute PTDF values (flow sensitivities can be positive/negative by convention)
     abs_ptdf = np.abs(ptdf)  # shape = (m, n-1)
 
-    if method in ("sum", "weighted_sum"):
+    if ncols == 0 or m == 0:
+        scores_non_slack = np.zeros(ncols, dtype=float)
+    elif method in ("sum", "weighted_sum"):
         # Sum over all lines, optionally weighted by line capacity
         scores_non_slack = (abs_ptdf * weights[:, None]).sum(axis=0)
     elif method == "max":
@@ -148,8 +155,11 @@ def compute_node_ptdf_contribution_scores(
     else:
         raise ValueError(f"Unknown method '{method}'.")
 
-    # Place scores back into full node order (slack bus gets score 0)
+    # Place scores back into full node order (slack bus gets score 0).
+    # NumPy infers float dtype for empty lists, which is invalid for indexing.
+    mask_idx = np.asarray(mask, dtype=int)
     scores_full = np.zeros(len(nodes), dtype=float)
-    scores_full[np.array(mask)] = scores_non_slack
+    if mask_idx.size:
+        scores_full[mask_idx] = scores_non_slack
 
     return {node: float(score) for node, score in zip(nodes, scores_full)}

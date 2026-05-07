@@ -29,7 +29,6 @@ Each execution writes a new timestamped evaluation folder under:
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
 import json
 import os
 from pathlib import Path
@@ -51,6 +50,7 @@ from apem.unit_based_model.enums import (
     UnitBased_Datasets,
 )
 from apem.unit_based_model.evaluation import (
+    create_timestamped_output_dir,
     ensure_redispatch_run_for_configuration,
     ensure_welfare_run_for_configuration,
     load_redispatch_metrics_from_run,
@@ -86,11 +86,11 @@ def create_evaluation_output_dir(
     redispatch_algorithm: RedispatchAlgorithms,
     power_flow_models: tuple[PowerFlowModels, ...],
 ) -> Path:
-    timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    model_part = "_".join(model.name for model in power_flow_models)
-    output_dir = evaluation_root(scenario_name) / f"{timestamp}_{redispatch_algorithm.name}_{model_part}"
-    output_dir.mkdir(parents=True, exist_ok=True)
-    return output_dir
+    return create_timestamped_output_dir(
+        evaluation_root(scenario_name),
+        redispatch_algorithm.name,
+        *(model.name for model in power_flow_models),
+    )
 
 
 def run_cost_plus_redispatch_cost_comparison(

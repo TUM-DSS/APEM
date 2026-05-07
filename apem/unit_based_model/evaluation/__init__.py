@@ -48,9 +48,11 @@ from apem.unit_based_model.evaluation.run_lookup import (
     normalize_run_dir,
     parse_run_config,
 )
+from apem.unit_based_model.evaluation.output_dir import create_timestamped_output_dir
 
 __all__ = [
     "compare_price_algorithms",
+    "create_timestamped_output_dir",
     "ensure_lost_opp_cost_run_for_configuration",
     "ensure_redispatch_run_for_configuration",
     "ensure_run_for_configuration",
