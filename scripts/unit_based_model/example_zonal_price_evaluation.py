@@ -21,7 +21,6 @@ Each execution writes a new timestamped evaluation folder under:
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
 import json
 import os
 import sys
@@ -45,6 +44,7 @@ from apem.unit_based_model.allocation.algorithms.zonal_clearing.zonal_ntc_aggreg
 from apem.unit_based_model.allocation.algorithms.zonal_clearing.zonal_ntc_multiedge import Zonal_NTC_multiedge
 from apem.unit_based_model.evaluation import (
     compare_price_algorithms,
+    create_timestamped_output_dir,
     normalize_run_dir,
     parse_run_config,
     round_numeric_columns,
@@ -84,10 +84,11 @@ def create_evaluation_output_dir(
     pricing_algorithm: PricingAlgorithms,
     zonal_configuration: str,
 ) -> Path:
-    timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    output_dir = evaluation_root(scenario_name) / f"{timestamp}_{zonal_configuration}_{pricing_algorithm.name}"
-    output_dir.mkdir(parents=True, exist_ok=True)
-    return output_dir
+    return create_timestamped_output_dir(
+        evaluation_root(scenario_name),
+        zonal_configuration,
+        pricing_algorithm.name,
+    )
 
 
 def zonal_path_for_model(power_flow_model) -> str:

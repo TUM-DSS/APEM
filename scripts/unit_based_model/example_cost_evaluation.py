@@ -26,7 +26,6 @@ Each execution writes a new timestamped evaluation folder under:
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
 import json
 import os
 from pathlib import Path
@@ -48,6 +47,7 @@ from apem.unit_based_model.allocation.algorithms.zonal_clearing.zonal_ntc_aggreg
 from apem.unit_based_model.allocation.algorithms.zonal_clearing.zonal_ntc_multiedge import Zonal_NTC_multiedge
 from apem.unit_based_model.enums import FBMCBaseCases, UnitBased_Datasets
 from apem.unit_based_model.evaluation import (
+    create_timestamped_output_dir,
     ensure_welfare_run_for_configuration,
     load_welfare_from_run,
     plot_value_by_period_and_power_flow_model,
@@ -85,11 +85,10 @@ def create_evaluation_output_dir(
     scenario_name: str,
     power_flow_models: tuple,
 ) -> Path:
-    timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    model_part = "_".join(power_flow_model_name(model) for model in power_flow_models)
-    output_dir = evaluation_root(scenario_name) / f"{timestamp}_{model_part}"
-    output_dir.mkdir(parents=True, exist_ok=True)
-    return output_dir
+    return create_timestamped_output_dir(
+        evaluation_root(scenario_name),
+        *(power_flow_model_name(model) for model in power_flow_models),
+    )
 
 
 def run_cost_comparison(
