@@ -353,15 +353,21 @@ class ConfigLoader:
     def get_alpha(self) -> float:
         return self.config["scenario"]["alpha"]
 
-    def get_unit_based_solver_congiruation(self) -> Dict[str, Any]:
+    def get_unit_based_solver_configuration(self) -> Dict[str, Any]:
         """Return the normalized unit-based solver configuration object."""
         if "unit_based_solver_configuration" in self.config:
             return self.config["unit_based_solver_configuration"]
 
         raise ValueError("Missing unit-based solver configuration.")
 
+    def get_unit_based_solver_congiruation(self) -> Dict[str, Any]:
+        """Return the normalized unit-based solver configuration object.
+
+        Deprecated: use get_unit_based_solver_configuration().
+        """
+        return self.get_unit_based_solver_configuration()
+
     def get_euphemia_configuration(self) -> Dict[str, Any]:
         """Return Euphemia-specific options for order-book runs."""
         return self.config.get("euphemia_configuration", {})
-
 

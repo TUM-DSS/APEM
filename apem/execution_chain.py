@@ -48,7 +48,7 @@ def _retrieve_data(dataset: UnitBased_Datasets) -> Scenario:
 
 def _create_configuration() -> SolverConfiguration:
     """Create a SolverConfiguration instance using the current configuration."""
-    config = ConfigLoader().get_unit_based_solver_congiruation()
+    config = ConfigLoader().get_unit_based_solver_configuration()
     return SolverConfiguration(
         MIP_gap=config.get("MIP_gap", 1e-4),
         optimality_tol=config.get("optimality_tol", 1e-6),
