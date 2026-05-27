@@ -36,18 +36,29 @@ MOSEK licenses can be placed at `~/.mosek/mosek.lic` or configured with `MOSEKLM
 git clone https://github.com/teodora-dobos/APEM.git
 cd APEM
 
+# macOS / Linux
 python -m venv .venv
 source .venv/bin/activate
 
-pip install -r requirements.txt
-pip install -e .
-```
-
-The commands above are for macOS/Linux shells. On Windows PowerShell, activate the environment with:
-
-```powershell
+# Windows PowerShell (explicitly use Python 3.11)
+py -3.11 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
+
+Verify the interpreter before installing dependencies:
+
+```bash
+python -V
+```
+
+The version must be Python 3.10, 3.11, or 3.12 (3.11 recommended).
+
+```bash
+python -m pip install -r requirements.txt
+python -m pip install -e .
+```
+
+Using `python -m pip` ensures `pip` and `python` use the same interpreter.
 
 For PF relaxation experiments, also install:
 
