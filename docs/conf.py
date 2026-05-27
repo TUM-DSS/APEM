@@ -88,7 +88,7 @@ html_css_files = ["custom.css"]
 html_theme_options = {
     "show_toc_level": 2,
     "use_repository_button": True,
-    "repository_url": "https://github.com/teodora-dobos/APEM",
+    "repository_url": "https://github.com/TUM-DSS/APEM",
     "show_navbar_depth": 1,
     "max_navbar_depth": 6,
     "collapse_navbar": False,

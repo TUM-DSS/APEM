@@ -32,7 +32,7 @@ alternative bidding-zone layouts discussed in the European
 ACER describes the role of bidding-zone reviews and alternative bidding-zone
 configurations on its [Bidding Zone Review](https://www.acer.europa.eu/electricity/market-rules/capacity-allocation-and-congestion-management/bidding-zone-review)
 page. The mapping logic is implemented in
-[`zonal_configuration.py`](https://github.com/teodora-dobos/APEM/blob/main/apem/unit_based_model/allocation/algorithms/zonal_clearing/zonal_configuration.py).
+[`zonal_configuration.py`](https://github.com/TUM-DSS/APEM/blob/main/apem/unit_based_model/allocation/algorithms/zonal_clearing/zonal_configuration.py).
 
 ```{note}
 The built-in zonal configurations are currently supported only for the

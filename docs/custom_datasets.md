@@ -6,7 +6,7 @@ The usual workflow is:
 
 1. Put your dataset into the expected folder structure.
 2. Register it in the relevant dataset enum.
-3. Select that dataset name in [`config.json`](https://github.com/teodora-dobos/APEM/blob/main/config.json).
+3. Select that dataset name in [`config.json`](https://github.com/TUM-DSS/APEM/blob/main/config.json).
 
 ## Two Ways To Add Data
 
@@ -179,12 +179,12 @@ Before registering the dataset, verify:
 
 Useful references in the repo:
 
-- [`apem/unit_based_model/data/parsing/parse_pjm.py`](https://github.com/teodora-dobos/APEM/blob/main/apem/unit_based_model/data/parsing/parse_pjm.py)
-- [`apem/unit_based_model/data/parsing/parse_arpa.py`](https://github.com/teodora-dobos/APEM/blob/main/apem/unit_based_model/data/parsing/parse_arpa.py)
+- [`apem/unit_based_model/data/parsing/parse_pjm.py`](https://github.com/TUM-DSS/APEM/blob/main/apem/unit_based_model/data/parsing/parse_pjm.py)
+- [`apem/unit_based_model/data/parsing/parse_arpa.py`](https://github.com/TUM-DSS/APEM/blob/main/apem/unit_based_model/data/parsing/parse_arpa.py)
 
 ### Step 3: Register the dataset
 
-Add your parser to [`apem/unit_based_model/enums/datasets.py`](https://github.com/teodora-dobos/APEM/blob/main/apem/unit_based_model/enums/datasets.py), following the existing pattern:
+Add your parser to [`apem/unit_based_model/enums/datasets.py`](https://github.com/TUM-DSS/APEM/blob/main/apem/unit_based_model/enums/datasets.py), following the existing pattern:
 
 ```python
 class UnitBased_Datasets(Enum):
@@ -498,12 +498,12 @@ NP_Z1,1,Z2,0.0
 
 #### Quick Start
 
-- Copy [`apem/order_book_based_model/euphemia/data/datasets/test_3node/`](https://github.com/teodora-dobos/APEM/tree/main/apem/order_book_based_model/euphemia/data/datasets/test_3node).
+- Copy [`apem/order_book_based_model/euphemia/data/datasets/test_3node/`](https://github.com/TUM-DSS/APEM/tree/main/apem/order_book_based_model/euphemia/data/datasets/test_3node).
 - Replace CSV contents while keeping filenames and headers.
 
 ### Step 2: Register the dataset
 
-Add your dataset to [`apem/order_book_based_model/euphemia/enums/datasets.py`](https://github.com/teodora-dobos/APEM/blob/main/apem/order_book_based_model/euphemia/enums/datasets.py):
+Add your dataset to [`apem/order_book_based_model/euphemia/enums/datasets.py`](https://github.com/TUM-DSS/APEM/blob/main/apem/order_book_based_model/euphemia/enums/datasets.py):
 
 ```python
 from enum import Enum

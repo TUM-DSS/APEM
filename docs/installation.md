@@ -14,7 +14,7 @@ You will need:
 ## 1. Clone The Repository
 
 ```bash
-git clone https://github.com/teodora-dobos/APEM.git
+git clone https://github.com/TUM-DSS/APEM.git
 cd APEM
 ```
 

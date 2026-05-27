@@ -6,8 +6,8 @@ Rank nodes using graph-topology metrics and market-metric signals.
 
 ## Scripts
 
-- [`scripts/unit_based_model/example_graph_node_rankings.py`](https://github.com/teodora-dobos/APEM/blob/main/scripts/unit_based_model/example_graph_node_rankings.py)
-- [`scripts/unit_based_model/example_market_node_rankings.py`](https://github.com/teodora-dobos/APEM/blob/main/scripts/unit_based_model/example_market_node_rankings.py)
+- [`scripts/unit_based_model/example_graph_node_rankings.py`](https://github.com/TUM-DSS/APEM/blob/main/scripts/unit_based_model/example_graph_node_rankings.py)
+- [`scripts/unit_based_model/example_market_node_rankings.py`](https://github.com/TUM-DSS/APEM/blob/main/scripts/unit_based_model/example_market_node_rankings.py)
 
 ## Key Inputs
 

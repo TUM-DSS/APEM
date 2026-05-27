@@ -1,9 +1,9 @@
 # APEM: Allocation and Pricing in Electricity Markets
 
-[![Tests](https://github.com/teodora-dobos/APEM/actions/workflows/tests.yml/badge.svg)](https://github.com/teodora-dobos/APEM/actions/workflows/tests.yml)
-[![Validate](https://github.com/teodora-dobos/APEM/actions/workflows/validate.yaml/badge.svg)](https://github.com/teodora-dobos/APEM/actions/workflows/validate.yaml)
-[![Docs CI](https://github.com/teodora-dobos/APEM/actions/workflows/docs-pages.yml/badge.svg)](https://github.com/teodora-dobos/APEM/actions/workflows/docs-pages.yml)
-[![Docs](https://img.shields.io/website?url=https%3A%2F%2Fteodora-dobos.github.io%2FAPEM%2F&label=docs)](https://teodora-dobos.github.io/APEM/)
+[![Tests](https://github.com/TUM-DSS/APEM/actions/workflows/tests.yml/badge.svg)](https://github.com/TUM-DSS/APEM/actions/workflows/tests.yml)
+[![Validate](https://github.com/TUM-DSS/APEM/actions/workflows/validate.yaml/badge.svg)](https://github.com/TUM-DSS/APEM/actions/workflows/validate.yaml)
+[![Docs CI](https://github.com/TUM-DSS/APEM/actions/workflows/docs-pages.yml/badge.svg)](https://github.com/TUM-DSS/APEM/actions/workflows/docs-pages.yml)
+[![Docs](https://img.shields.io/website?url=https%3A%2F%2Ftum-dss.github.io%2FAPEM%2F&label=docs)](https://tum-dss.github.io/APEM/)
 
 APEM is a framework for electricity-market clearing, pricing, and analysis. It brings together optimization-based market models, pricing methods, network-aware post-processing, and supporting evaluation tools in a single codebase.
 
@@ -35,7 +35,7 @@ MOSEK licenses can be placed at `~/.mosek/mosek.lic` or configured with `MOSEKLM
 Clone the repository:
 
 ```bash
-git clone https://github.com/teodora-dobos/APEM.git
+git clone https://github.com/TUM-DSS/APEM.git
 cd APEM
 ```
 
@@ -71,7 +71,7 @@ Core outputs are written under:
 - `results/unit_based_model/...`
 - `results/order_book_based_model/...`
 
-Configuration details: [Online Configuration Guide](https://teodora-dobos.github.io/APEM/configuration.html)
+Configuration details: [Online Configuration Guide](https://tum-dss.github.io/APEM/configuration.html)
 
 ## Run PF Relaxations
 
@@ -83,21 +83,21 @@ PYTHONPATH=. MPLCONFIGDIR=/tmp/mplcache ./.venv/bin/python -m power_flow_relaxat
 
 Results are written under `relaxation_results/...`.
 
-PF relaxation details: [Online PF Relaxations Guide](https://teodora-dobos.github.io/APEM/pf_relaxations/index.html)
+PF relaxation details: [Online PF Relaxations Guide](https://tum-dss.github.io/APEM/pf_relaxations/index.html)
 
 ## Documentation
 
-Online documentation: https://teodora-dobos.github.io/APEM/
+Online documentation: https://tum-dss.github.io/APEM/
 
-<!-- Build the Sphinx docs locally:
+Build the Sphinx docs locally:
 
 ```bash
 python -m pip install -r docs/requirements.txt
 cd docs
 make html
-``` -->
+```
 
-<!-- Open `docs/_build/html/index.html`. -->
+Open `docs/_build/html/index.html`.
 
 
 ## Troubleshooting

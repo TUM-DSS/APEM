@@ -6,8 +6,8 @@ Analyze and compare market prices for unit-based runs.
 
 ## Scripts
 
-- [`scripts/unit_based_model/example_price_evaluation.py`](https://github.com/teodora-dobos/APEM/blob/main/scripts/unit_based_model/example_price_evaluation.py)
-- [`scripts/unit_based_model/example_zonal_price_evaluation.py`](https://github.com/teodora-dobos/APEM/blob/main/scripts/unit_based_model/example_zonal_price_evaluation.py)
+- [`scripts/unit_based_model/example_price_evaluation.py`](https://github.com/TUM-DSS/APEM/blob/main/scripts/unit_based_model/example_price_evaluation.py)
+- [`scripts/unit_based_model/example_zonal_price_evaluation.py`](https://github.com/TUM-DSS/APEM/blob/main/scripts/unit_based_model/example_zonal_price_evaluation.py)
 
 ## Key Inputs
 
