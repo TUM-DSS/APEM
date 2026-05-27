@@ -1,6 +1,6 @@
 # Configuration
 
-APEM is configured through a single file at the repository root: [`config.json`](https://github.com/teodora-dobos/APEM/blob/main/config.json).
+APEM is configured through a single file at the repository root: [`config.json`](https://github.com/TUM-DSS/APEM/blob/main/config.json).
 
 If you are new to the project, the most important thing to understand is this:
 
@@ -13,7 +13,7 @@ If you are new to the project, the most important thing to understand is this:
 
 `config.json` is the runtime input for `main.py`.
 
-1. Open [`config.json`](https://github.com/teodora-dobos/APEM/blob/main/config.json).
+1. Open [`config.json`](https://github.com/TUM-DSS/APEM/blob/main/config.json).
 2. Set `run.market_model`.
 3. Edit the corresponding model section.
 4. Run:

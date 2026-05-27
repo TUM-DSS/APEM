@@ -6,9 +6,9 @@ Compare welfare-derived costs and related cost metrics across models/algorithms.
 
 ## Scripts
 
-- [`scripts/unit_based_model/example_cost_evaluation.py`](https://github.com/teodora-dobos/APEM/blob/main/scripts/unit_based_model/example_cost_evaluation.py)
-- [`scripts/unit_based_model/example_cost_plus_redispatch_cost_evaluation.py`](https://github.com/teodora-dobos/APEM/blob/main/scripts/unit_based_model/example_cost_plus_redispatch_cost_evaluation.py)
-- [`scripts/unit_based_model/example_lost_opp_cost_evaluation.py`](https://github.com/teodora-dobos/APEM/blob/main/scripts/unit_based_model/example_lost_opp_cost_evaluation.py)
+- [`scripts/unit_based_model/example_cost_evaluation.py`](https://github.com/TUM-DSS/APEM/blob/main/scripts/unit_based_model/example_cost_evaluation.py)
+- [`scripts/unit_based_model/example_cost_plus_redispatch_cost_evaluation.py`](https://github.com/TUM-DSS/APEM/blob/main/scripts/unit_based_model/example_cost_plus_redispatch_cost_evaluation.py)
+- [`scripts/unit_based_model/example_lost_opp_cost_evaluation.py`](https://github.com/TUM-DSS/APEM/blob/main/scripts/unit_based_model/example_lost_opp_cost_evaluation.py)
 
 ## Key Inputs
 

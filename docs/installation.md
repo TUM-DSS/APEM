@@ -14,7 +14,7 @@ You will need:
 ## 1. Clone The Repository
 
 ```bash
-git clone https://github.com/teodora-dobos/APEM.git
+git clone https://github.com/TUM-DSS/APEM.git
 cd APEM
 ```
 
@@ -22,11 +22,7 @@ cd APEM
 
 ```bash
 python -m venv .venv
-```
 
-Activate it:
-
-```bash
 # macOS / Linux
 source .venv/bin/activate
 

@@ -1,6 +1,6 @@
 # Supported Datasets
 
-APEM includes built-in datasets for the unit-based and order-book-based workflows. Select them through [`config.json`](https://github.com/teodora-dobos/APEM/blob/main/config.json).
+APEM includes built-in datasets for the unit-based and order-book-based workflows. Select them through [`config.json`](https://github.com/TUM-DSS/APEM/blob/main/config.json).
 
 For configuration syntax, see [](configuration). For adding your own data, see [](custom_datasets).
 
@@ -58,7 +58,7 @@ apem/order_book_based_model/euphemia/data/datasets/
 APEM can convert selected unit-based scenarios into order-book CSV inputs. This is used for the order-book versions of `IEEE_RTS` and `ARPA`.
 
 For implementation details, see
-[`apem/order_book_based_model/euphemia/data/conversion/data_conversion.py`](https://github.com/teodora-dobos/APEM/blob/main/apem/order_book_based_model/euphemia/data/conversion/data_conversion.py).
+[`apem/order_book_based_model/euphemia/data/conversion/data_conversion.py`](https://github.com/TUM-DSS/APEM/blob/main/apem/order_book_based_model/euphemia/data/conversion/data_conversion.py).
 
 
 ## References

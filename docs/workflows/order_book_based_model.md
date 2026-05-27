@@ -8,7 +8,7 @@ Compare Euphemia outcomes across cut types for one dataset and network setup.
 
 ## Scripts
 
-- [`scripts/order_book_based_model/example_cut_type_comparison.py`](https://github.com/teodora-dobos/APEM/blob/main/scripts/order_book_based_model/example_cut_type_comparison.py)
+- [`scripts/order_book_based_model/example_cut_type_comparison.py`](https://github.com/TUM-DSS/APEM/blob/main/scripts/order_book_based_model/example_cut_type_comparison.py)
 
 ## Key Inputs
 
