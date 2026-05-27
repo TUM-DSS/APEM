@@ -21,16 +21,8 @@ cd APEM
 ## 2. Create A Virtual Environment
 
 ```bash
-# macOS / Linux
 python -m venv .venv
 
-# Windows PowerShell (explicitly use Python 3.11)
-py -3.11 -m venv .venv
-```
-
-Activate it:
-
-```bash
 # macOS / Linux
 source .venv/bin/activate
 
@@ -38,25 +30,16 @@ source .venv/bin/activate
 .\.venv\Scripts\Activate.ps1
 ```
 
-Verify the interpreter:
-
-```bash
-python -V
-```
-
-The version must be Python 3.10, 3.11, or 3.12 (3.11 recommended).
-
 ## 3. Install Dependencies
 
 Install the runtime dependencies and the package itself:
 
 ```bash
-python -m pip install -r requirements.txt
-python -m pip install -e .
+pip install -r requirements.txt
+pip install -e .
 ```
 
 The editable install makes sure local source-code changes are picked up immediately.
-Using `python -m pip` ensures `pip` and `python` use the same interpreter.
 
 ## 4. Configure Gurobi
 
